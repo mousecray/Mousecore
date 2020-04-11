@@ -1,0 +1,107 @@
+apply plugin: 'idea'
+
+idea {
+    module {
+        inheritOutputDirs = false
+    }
+}
+
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "https://files.minecraftforge.net/maven" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+
+apply plugin: 'java'
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+//Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+
+ext.config = parseConfig(file('config/build.properties'))
+ext.priv = parseConfig(file('config/private.properties'))
+
+
+sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
+
+version = config.mod_version
+group = config.group
+archivesBaseName = "${config.mod_name}[${config.mc_version}]"
+
+minecraft {
+    version = "1.12.2-14.23.5.2847"
+    runDir = "run"
+	replace "@mod_version@", project.version
+    replace "@internal_mc_version@", config.internal_mc_version
+    replace "@api_version@", config.api_version
+	replace "@internal_version@", config.internal_version
+	replace "@mc_version@", config.mc_version
+	replace "@mod_name@", config.mod_name
+    // the mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   snapshot are built nightly.
+    // stable_#            stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not always work.
+    // simply re-run your setup task after changing the mappings to update your workspace.
+    mappings = "snapshot_20171003"
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+}
+
+dependencies {
+    // you may put jars on which you depend on in ./libs
+    // or you may define them like so..
+    //compile "some.group:artifact:version:classifier"
+    //compile "some.group:artifact:version"
+      
+    // real examples
+    //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
+    //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+
+    // the 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
+    //provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // the deobf configurations:  'deobfCompile' and 'deobfProvided' are the same as the normal compile and provided,
+    // except that these dependencies get remapped to your current MCP mappings
+    //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+    //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // for more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+}
+
+task signJar(type: SignJar, dependsOn: reobfJar) {
+    inputFile = jar.archivePath
+    outputFile = jar.archivePath
+    keyStore = priv.keyStore
+    alias = priv.alias
+    storePass = priv.storePass
+    keyPass = priv.keyPass
+}
+
+build.dependsOn signJar
+
+jar {
+    manifest {
+        attributes 'Maven-Artifact': "${project.group}:${archivesBaseName}:${project.version}"
+	    attributes 'FMLCorePlugin': config.fml_core
+    }
+}
+
+def parseConfig(File conf) {
+    if (conf.exists()) {
+        conf.withReader {
+            def prop = new Properties()
+            prop.load(it)
+            return (new ConfigSlurper().parse(prop))
+        }
+    } else {
+        return null
+    }
+}
