@@ -12,8 +12,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-@IFMLLoadingPlugin.Name("@mod_name@")
-@IFMLLoadingPlugin.MCVersion("@mc_version@")
+@IFMLLoadingPlugin.Name("Mousecore")
+@IFMLLoadingPlugin.MCVersion("1.12.2")
 @IFMLLoadingPlugin.TransformerExclusions({"ru.mousecray.mousecore.core"})
 @IFMLLoadingPlugin.SortingIndex(1001)
 public class Mousecore implements IFMLLoadingPlugin {
