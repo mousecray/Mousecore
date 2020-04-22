@@ -4,7 +4,6 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ru.mousecray.mousecore.MousecoreContainer;
 
 import javax.annotation.Nullable;
 import javax.annotation.Tainted;
@@ -47,12 +46,12 @@ public class Mousecore implements IFMLLoadingPlugin {
 
     @Override
     public String[] getASMTransformerClass() {
-        return new String[]{MousecoreTransformer.class.getCanonicalName()};
+        return new String[]{"ru.mousecray.mousecore.core.MousecoreTransformer"};
     }
 
     @Override
     public String getModContainerClass() {
-        return MousecoreContainer.class.getCanonicalName();
+        return "ru.mousecray.mousecore.MousecoreContainer";
     }
 
     @Nullable

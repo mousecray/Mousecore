@@ -14,4 +14,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface MousecoreHook {}
+public @interface MousecoreHook {
+    String[] value() default {};
+}

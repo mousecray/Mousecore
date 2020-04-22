@@ -2,32 +2,33 @@ package ru.mousecray.mousecore.api.asm.transformers;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.util.Collection;
 
 public abstract class AddInterfaceMousecoreTransformer extends AbstractMousecoreTransformer {
 
-    public abstract Collection<? extends Class<?>> getInterfaces();
+    public abstract Collection<? extends String> getInterfaces();
 
     @Override
     public final byte[] transform(String name, String transformedName, byte[] basicClass) {
-        if (!getTransformClass().getCanonicalName().equals(transformedName) || getInterfaces().isEmpty()) return basicClass;
+        if (!getTransformClass().equals(name) || getInterfaces().isEmpty()) return basicClass;
+
+//        if (!name.endsWith("BlockCrops")) return basicClass;
 
         ClassNode clazz = new ClassNode();
         ClassReader reader = new ClassReader(basicClass);
-        reader.accept(clazz, 0);
+        reader.accept(clazz, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
 
-        getInterfaces()
-                .stream()
-                .filter(Class::isInterface)
-                .forEach(interfaze -> {
-                    String interfaceName = Type.getInternalName(interfaze);
-                    if (!clazz.interfaces.contains(interfaceName)) clazz.interfaces.add(interfaceName);
-                });
+//        clazz.interfaces.forEach(System.out::println);
+        getInterfaces().forEach(interfaze -> {
+            String internalInterface = interfaze.replace(".", "/");
+            System.out.println(internalInterface);
+            if (!clazz.interfaces.contains(internalInterface)) clazz.interfaces.add(internalInterface);
 
-        ClassWriter writer = new ClassWriter(3);
+        });
+
+        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         clazz.accept(writer);
         return writer.toByteArray();
     }

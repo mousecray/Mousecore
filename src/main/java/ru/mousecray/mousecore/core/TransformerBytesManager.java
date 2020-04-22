@@ -1,22 +1,22 @@
 package ru.mousecray.mousecore.core;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.Level;
-import ru.mousecray.mousecore.api.asm.MousecoreHook;
-import ru.mousecray.mousecore.core.classvisitors.AnnotationClassVisitor;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 class TransformerBytesManager {
     private Map<String, byte[]> transformerBytes = new HashMap<>();
 
-    public TransformerBytesManager() throws IOException {
+    public TransformerBytesManager(Consumer<Triple<byte[], String, Map<String, byte[]>>> consumer) throws IOException {
         File mcModsDir = new File("./mods/");
         File[] mods = mcModsDir.listFiles(filter -> {
             String name = filter.getName();
@@ -34,13 +34,8 @@ class TransformerBytesManager {
                 ZipEntry entry = modFiles.nextElement();
                 String name = entry.getName();
 
-                if (!entry.isDirectory() && name.endsWith(".class")) {
-                    byte[] bytes = IOUtils.toByteArray(selectedMod.getInputStream(entry));
-
-                    if (new AnnotationClassVisitor(MousecoreHook.class).getResult(bytes))
-                        transformerBytes.put(
-                                name.substring(0, name.length() - 6).replace('/', '.'), bytes);
-                }
+                if (!entry.isDirectory() && name.endsWith(".class"))
+                    consumer.accept(Triple.of(IOUtils.toByteArray(selectedMod.getInputStream(entry)), name, transformerBytes));
             }
         }
     }

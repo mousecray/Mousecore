@@ -8,6 +8,8 @@ import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.versioning.VersionParser;
 import net.minecraftforge.fml.common.versioning.VersionRange;
 
+import java.util.Arrays;
+
 public class MousecoreContainer extends DummyModContainer {
     public static final String VERSION = "@mod_version@";
     public static final String ID = "mousecore";
@@ -22,7 +24,7 @@ public class MousecoreContainer extends DummyModContainer {
         meta.version = VERSION;
         meta.description = "Coremod for mousecray mods";
         meta.logoFile = "/assets/mousecore/textures/mod_logo.png";
-        meta.authorList.add("mousecray");
+        meta.authorList.addAll(Arrays.asList("@authors@"));
     }
 
     @Override

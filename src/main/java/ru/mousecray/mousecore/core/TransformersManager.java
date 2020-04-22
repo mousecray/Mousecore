@@ -3,13 +3,14 @@ package ru.mousecray.mousecore.core;
 import org.apache.logging.log4j.Level;
 import ru.mousecray.mousecore.api.asm.MousecoreHook;
 import ru.mousecray.mousecore.api.asm.transformers.AbstractMousecoreTransformer;
+import ru.mousecray.mousecore.core.loaders.ByteClassLoader;
+import ru.mousecray.mousecore.core.visitors.CheckHookClassVisitor;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -21,20 +22,63 @@ public class TransformersManager {
     private boolean closed = false;
 
     public TransformersManager() {
+        //Load transformers
+        List<String> dependentClassCandidates = loadTransformers();
+        //Load transformers dependents
+        if (!dependentClassCandidates.isEmpty()) loadTransformersDependent(dependentClassCandidates);
+
+        resolveCandidates();
+        resolveTransformersWithPriority();
+    }
+
+    private void loadTransformersDependent(List<String> dependentClassCandidates) {
+        TransformerBytesManager dependentBytesManager = null;
+        try {
+            dependentBytesManager = new TransformerBytesManager(byteStringMapTriple -> {
+                if (!dependentClassCandidates.isEmpty()) {
+                    String name = byteStringMapTriple.getMiddle()
+                            .substring(0, byteStringMapTriple.getMiddle().length() - 6)
+                            .replace('/', '.');
+                    if (dependentClassCandidates.remove(name))
+                        byteStringMapTriple
+                                .getRight()
+                                .put(name, byteStringMapTriple.getLeft());
+                }
+            });
+        } catch (IOException e) { e.printStackTrace(); }
+        if (dependentBytesManager != null) {
+            Map<String, byte[]> bytes = dependentBytesManager.getTransformerBytes();
+            ByteClassLoader loader = new ByteClassLoader(getClass().getClassLoader());
+            bytes.forEach(loader::defineClass);
+        }
+    }
+
+    /**
+     * Read, check and load transformers
+     */
+    private List<String> loadTransformers() {
         TransformerBytesManager bytesManager = null;
-        try { bytesManager = new TransformerBytesManager(); } catch (IOException e) {e.printStackTrace(); }
+        List<String> dependentClassCandidates = new ArrayList<>();
+        try {
+            bytesManager = new TransformerBytesManager(byteStringMapTriple -> {
+                List<String> value = new CheckHookClassVisitor().getResult(byteStringMapTriple.getLeft());
+                if (value != null) {
+                    String name = byteStringMapTriple.getMiddle()
+                            .substring(0, byteStringMapTriple.getMiddle().length() - 6)
+                            .replace('/', '.');
+                    byteStringMapTriple
+                            .getRight()
+                            .put(name, byteStringMapTriple.getLeft());
+                    dependentClassCandidates.addAll(value);
+                }
+            });
+        } catch (IOException e) { e.printStackTrace(); }
         if (bytesManager != null) {
             Map<String, byte[]> bytes = bytesManager.getTransformerBytes();
-            ByteClassLoader loader = new ByteClassLoader(getClass().getClassLoader(), bytes);
-            bytes.keySet().forEach(str -> {
-                Class<?> clazz = loader.findClass(str);
-                if (clazz != null) transformerCandidates.add(clazz);
-            });
-
-            resolveCandidates();
-            removeSelfHookAndOtherHookingHook();
+            ByteClassLoader loader = new ByteClassLoader(getClass().getClassLoader());
+            bytes.forEach((name, currBytes) -> transformerCandidates.add(loader.defineClass(name, currBytes)));
         }
-
+        return dependentClassCandidates;
     }
 
     public boolean isClosed() {
@@ -52,6 +96,7 @@ public class TransformersManager {
 
         if (transformerCandidates.isEmpty()) {
             LOGGER.log(Level.WARN, "List of candidates of " + getClass() + " is empty!");
+            closed = true;
             return Collections.emptyList();
         }
 
@@ -77,12 +122,9 @@ public class TransformersManager {
         return removingClasses;
     }
 
-    private void removeSelfHookAndOtherHookingHook() {
-        for (AbstractMousecoreTransformer transformer : transformers)
-            if (AbstractMousecoreTransformer.class.isAssignableFrom(transformer.getTransformClass())) {
-                LOGGER.log(Level.ERROR, "Removing invalid transformer " + transformer.getClass().getCanonicalName());
-                transformers.remove(transformer);
-            }
+    public final void resolveTransformersWithPriority() {
+        if (!closed) LOGGER.log(Level.ERROR, "Resolve candidates of " + getClass().getCanonicalName() + " before resolvePriority!");
+        transformers.sort(Comparator.comparing(AbstractMousecoreTransformer::getHookPriority));
     }
 
     public List<AbstractMousecoreTransformer> getTransformers() {
@@ -96,31 +138,11 @@ public class TransformersManager {
 
     public byte[] apply(String name, String transformedName, byte[] basicClass) {
         if (!closed) {
-            LOGGER.log(Level.FATAL, "Candidates is Unresolved! Resolve candidates before call this method! Return default value.");
+            LOGGER.log(Level.FATAL, "Candidates is Unresolved! Resolve candidates before call \"apply\" method! Return default value.");
             return basicClass;
         }
         byte[] clazz = basicClass;
         for (AbstractMousecoreTransformer transformer : transformers) clazz = transformer.transform(name, transformedName, basicClass);
         return clazz;
-    }
-
-    static class ByteClassLoader extends ClassLoader {
-        private final Map<String, byte[]> extraClassDefs;
-
-        public ByteClassLoader(ClassLoader parent, Map<String, byte[]> extraClassDefs) {
-            super(parent);
-            this.extraClassDefs = new HashMap<>(extraClassDefs);
-        }
-
-        @Nullable
-        @Override
-        protected Class<?> findClass(String name) {
-            byte[] classBytes = extraClassDefs.remove(name);
-            if (classBytes == null) {
-                LOGGER.log(Level.FATAL, "Class " + name + " is not found!");
-                return null;
-            }
-            return defineClass(name, classBytes, 0, classBytes.length);
-        }
     }
 }

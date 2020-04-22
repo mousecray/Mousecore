@@ -37,12 +37,12 @@ archivesBaseName = "${config.mod_name}[${config.mc_version}]"
 minecraft {
     version = "1.12.2-14.23.5.2847"
     runDir = "run"
-	replace "@mod_version@", project.version
+    replace "@mod_version@", project.version
     replace "@internal_mc_version@", config.internal_mc_version
     replace "@api_version@", config.api_version
-	replace "@internal_version@", config.internal_version
-	replace "@mc_version@", config.mc_version
-	replace "@mod_name@", config.mod_name
+    replace "@internal_version@", config.internal_version
+    replace "\"@authors@\"", config.authors
+    replace "@mod_name@", config.mod_name
     // the mappings can be changed at any time, and must be in the following format.
     // snapshot_YYYYMMDD   snapshot are built nightly.
     // stable_#            stables are built at the discretion of the MCP team.

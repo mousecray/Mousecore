@@ -5,5 +5,12 @@ import net.minecraft.launchwrapper.IClassTransformer;
 public abstract class AbstractMousecoreTransformer implements IClassTransformer {
     AbstractMousecoreTransformer() {}
 
-    public abstract Class<?> getTransformClass();
+    /**
+     * @return must be {@link org.objectweb.asm.Type#getInternalName Type#getInternalName()}
+     */
+    public abstract String getTransformClass();
+
+    public int getHookPriority() {
+        return 0;
+    }
 }
