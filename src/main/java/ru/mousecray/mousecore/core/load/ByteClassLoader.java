@@ -1,4 +1,4 @@
-package ru.mousecray.mousecore.core.loaders;
+package ru.mousecray.mousecore.core.load;
 
 public class ByteClassLoader extends ClassLoader {
 

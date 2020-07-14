@@ -1,4 +1,4 @@
-package ru.mousecray.mousecore;
+package ru.mousecray.mousecore.core;
 
 import com.google.common.eventbus.EventBus;
 import net.minecraftforge.fml.common.DummyModContainer;

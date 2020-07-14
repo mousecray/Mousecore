@@ -39,7 +39,7 @@ minecraft {
     runDir = "run"
     replace "@mod_version@", project.version
     replace "@internal_mc_version@", config.internal_mc_version
-    replace "@api_version@", config.api_version
+    replace "api_version", config.api_version
     replace "@internal_version@", config.internal_version
     replace "\"@authors@\"", config.authors
     replace "@mod_name@", config.mod_name
