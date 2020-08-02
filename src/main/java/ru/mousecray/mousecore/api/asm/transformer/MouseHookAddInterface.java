@@ -24,11 +24,11 @@ public class MouseHookAddInterface<T> extends MouseHookParent implements Opcodes
     @Override
     protected byte[] transformClass(String name, String transformedName, byte[] basicClass) {
         if (interfaze == null) {
-            error("Interface can't be null! It will be skipped");
+            error("The interface cannot be null! It will be skipped");
             return basicClass;
         }
         else if (!interfaze.isInterface()) {
-            error("Target class isn't interface! It will be skipped");
+            error("The target class is not an interface! It will be skipped");
             return basicClass;
         }
         List<Method> methods = Arrays.stream(interfaze.getMethods())

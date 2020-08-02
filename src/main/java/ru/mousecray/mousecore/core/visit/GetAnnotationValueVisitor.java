@@ -7,16 +7,16 @@ import java.util.function.Consumer;
 
 public class GetAnnotationValueVisitor extends AnnotationVisitor {
 
-    private final Consumer<String> modid;
+    private final Consumer<String> hookid;
 
-    public GetAnnotationValueVisitor(Consumer<String> modid) {
+    public GetAnnotationValueVisitor(Consumer<String> hookid) {
         super(Opcodes.ASM5);
-        this.modid = modid;
+        this.hookid = hookid;
     }
 
     @Override
     public void visit(String name, Object value) {
-        if (name.equals("modid")) modid.accept((String) value);
+        if (name.equals("hookid")) hookid.accept((String) value);
         super.visit(name, value);
     }
 }

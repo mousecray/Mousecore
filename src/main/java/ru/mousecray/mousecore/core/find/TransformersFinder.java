@@ -60,6 +60,40 @@ public class TransformersFinder {
         return hookContainers;
     }
 
+    public Map<String, String> testFind() {
+        Path developPath = Paths.get("../build/classes/main/");
+        if (developPath.toFile().exists()) {
+            try (Stream<Path> walk = Files.walk(developPath)) {
+                List<File> files = walk
+                        .filter((((((Files::isRegularFile))))))
+                        .map(Path::toFile)
+                        .filter(f -> f.getName().endsWith(".class"))
+                        .collect(Collectors.toList());
+                for (File file : files) {
+                    try (FileInputStream inputStream = new FileInputStream(file)) {
+                        String candidatePath = file.getPath();
+                        checkMouseClass(candidatePath
+                                .substring(22, candidatePath.length() - 6)
+                                .replace("\\", "."), IOUtils.toByteArray(inputStream));
+                    } catch (IOException e) {
+                        LOGGER.log(Level.FATAL, "Error while loading \"" + file.getName() + "\"! It will be skipped.");
+                        e.printStackTrace();
+                    }
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.FATAL, "Error while loading develop files directory! It will be skipped.");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void testCkeck(String name, byte[] bytes) {
+        String hookid = new CheckMouseVisitor().getResult(bytes);
+        if (hookid != null) {
+            mouseContainers.put(hookid, loader.defineClass(name, bytes));
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private void putClassesToFML() {
         LaunchClassLoader launchCL;
@@ -88,7 +122,7 @@ public class TransformersFinder {
             String name = filter.getName();
             return filter.isFile() && name.endsWith(".jar");
         });
-        if (mods == null) throw new IllegalStateException("Minecraft mods package is have problems. Mousecore can't loaded!");
+        if (mods == null) throw new IllegalStateException("Minecraft mods package is have problems. Mousecore cannot loaded!");
         for (File mod : mods)
             try (ZipFile selectedMod = new ZipFile(mod)) {
                 Enumeration<? extends ZipEntry> modFiles = selectedMod.entries();
@@ -113,7 +147,7 @@ public class TransformersFinder {
             }
 
         Path developPath = Paths.get("../build/classes/main/");
-        if (developPath.toFile().exists())
+        if (developPath.toFile().exists()) {
             try (Stream<Path> walk = Files.walk(developPath)) {
                 List<File> files = walk
                         .filter(Files::isRegularFile)
@@ -135,6 +169,7 @@ public class TransformersFinder {
                 LOGGER.log(Level.FATAL, "Error while loading develop files directory! It will be skipped.");
                 e.printStackTrace();
             }
+        }
     }
 
     private void checkMouseClass(String name, byte[] bytes) {

@@ -28,6 +28,30 @@ public class Mousecore implements IFMLLoadingPlugin {
 
     public Mousecore() {
         LOGGER.log(Level.INFO, "Coremod initialized");
+
+        TransformersFinder finder = new TransformersFinder();
+
+        Map<String, Object> map = finder.findHookContainers();
+        if (map.isEmpty()) LOGGER.log(Level.WARN, "List of hooks is empty!");
+        else {
+            map.forEach((id, obj) -> {
+                Method[] methods = obj.getClass().getMethods();
+                for (Method method : methods) {
+                    if (method.isAccessible() && method.isAnnotationPresent(Mod.EventHandler.class)) {
+                        MouseLoadEvent event = new MouseLoadEvent(id);
+                        try { method.invoke(obj); } catch (IllegalAccessException | InvocationTargetException e) {
+                            LOGGER.log(Level.ERROR, "Method annotated as " +
+                                    Mod.EventHandler.class.getSimpleName() + " in " +
+                                    MouseContainer.class.getSimpleName() + " \"" + id +
+                                    "\" can't be invoked! This container will be skipped!");
+                            e.printStackTrace();
+                            event = null;
+                        }
+                        if (event != null && !event.isEmpty()) events.add(event);
+                    }
+                }
+            });
+        }
     }
 
     public static boolean isDeobf() {
@@ -53,30 +77,6 @@ public class Mousecore implements IFMLLoadingPlugin {
     @Override
     public void injectData(@Nonnull Map<String, Object> data) {
         deobfEnvironment = !((Boolean) data.get("runtimeDeobfuscationEnabled"));
-
-        TransformersFinder finder = new TransformersFinder();
-
-        Map<String, Object> map = finder.findHookContainers();
-        if (map.isEmpty()) LOGGER.log(Level.WARN, "List of hooks is empty!");
-        else {
-            map.forEach((id, obj) -> {
-                Method[] methods = obj.getClass().getMethods();
-                for (Method method : methods) {
-                    if (method.isAccessible() && method.isAnnotationPresent(Mod.EventHandler.class)) {
-                        MouseLoadEvent event = new MouseLoadEvent(id);
-                        try { method.invoke(obj); } catch (IllegalAccessException | InvocationTargetException e) {
-                            LOGGER.log(Level.ERROR, "Method annotated as " +
-                                    Mod.EventHandler.class.getSimpleName() + " in " +
-                                    MouseContainer.class.getSimpleName() + " \"" + id +
-                                    "\" can't be invoked! This container will be skipped!");
-                            e.printStackTrace();
-                            event = null;
-                        }
-                        if (event != null && !event.isEmpty()) events.add(event);
-                    }
-                }
-            });
-        }
     }
 
     @Override

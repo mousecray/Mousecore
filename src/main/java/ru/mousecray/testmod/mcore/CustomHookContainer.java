@@ -8,7 +8,7 @@ import ru.mousecray.mousecore.api.asm.transformer.MouseHookParent;
 
 import javax.annotation.Nonnull;
 
-@MouseContainer(id = CustomHookContainer.HOOKID)
+@MouseContainer(hookid = CustomHookContainer.HOOKID)
 public class CustomHookContainer {
 
     public static final String HOOKID = "testmodhook";
