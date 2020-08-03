@@ -17,7 +17,7 @@ public class MousecoreInnerTransformer implements IClassTransformer {
 
             for (MouseLoadEvent event : Mousecore.events) {
                 for (MouseHookParent hook : event.getHooks()) {
-                    returnClass = hook.transform(name, transformedName, basicClass);
+                    returnClass = hook.transform(name, transformedName, returnClass);
                 }
             }
             return returnClass;

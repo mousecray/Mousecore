@@ -10,6 +10,4 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface MouseContainer {
-    String hookid();
-}
+public @interface MouseContainer {}

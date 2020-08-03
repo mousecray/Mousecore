@@ -10,15 +10,13 @@ public abstract class MouseHookParent implements IClassTransformer {
      * targetClass must be {@link org.objectweb.asm.Type#getInternalName Type#getInternalName()}
      */
     private final String targetClass;
-    private final String hookid;
     private Logger logger;
-    public MouseHookParent(String hookid, String targetClass) {
-        this.targetClass = targetClass;
-        this.hookid = hookid;
-    }
 
-    public String getHookid() {
-        return hookid;
+    /**
+     * @param targetClass - must be {@link org.objectweb.asm.Type#getInternalName Type#getInternalName()}
+     */
+    public MouseHookParent(String targetClass) {
+        this.targetClass = targetClass;
     }
 
     @Override
@@ -34,7 +32,7 @@ public abstract class MouseHookParent implements IClassTransformer {
     }
 
     protected void error(String message) {
-        (logger == null ? (logger = LogManager.getLogger("mousecore=>" + hookid)) : logger).log(Level.ERROR,
+        (logger == null ? (logger = LogManager.getLogger("mousecore=>" + getClass().getSimpleName())) : logger).log(Level.ERROR,
                 "Error while loading " + getClass().getSimpleName() + " transformer: " + message);
     }
 }

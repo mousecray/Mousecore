@@ -2,10 +2,8 @@ package ru.mousecray.testmod.core.proxy;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -15,9 +13,6 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import ru.mousecray.testmod.TestMod;
 import ru.mousecray.testmod.TestUtils;
 import ru.mousecray.testmod.core.ClassFieldSource;
@@ -50,10 +45,7 @@ public class CommonProxy {
     }
 
     public void postInit(FMLPostInitializationEvent event) {
-        Logger logger = LogManager.getLogger("tbmine");
-        Block block = Blocks.AIR;
-        if (Blocks.AIR instanceof IClassTransformer) logger.log(Level.FATAL, "YEEEEEESSS!!!!!");
-        else logger.log(Level.FATAL, "NOOOOOOOOO!!!!!");
+
     }
 
     private void registerBlock(Block block) {
