@@ -1,11 +1,13 @@
-package ru.mousecray.mousecore.core.find;
+package ru.mousecray.mousecore.core.transformer;
 
 import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Level;
 import ru.mousecray.mousecore.api.asm.MouseContainer;
 import ru.mousecray.mousecore.api.asm.event.MouseLoadEvent;
-import ru.mousecray.mousecore.core.visit.CheckMouseVisitor;
+import ru.mousecray.mousecore.core.MousecoreConfig;
+import ru.mousecray.mousecore.core.utils.CheckMouseVisitor;
+import ru.mousecray.mousecore.core.utils.InterfaceHookException;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -13,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,13 +28,15 @@ import static ru.mousecray.mousecore.core.Mousecore.LOGGER;
 
 public class TransformersFinder {
     private final List<String> mouseContainers = new ArrayList<>();
+    private final List<Object> mouseContainerObjs = new ArrayList<>();
+    private final int[] returnData = new int[6];
 
     public TransformersFinder() {
         findMouseContainers();
     }
 
-    private List<String> findMouseContainers() {
-        Path developPath = Paths.get("../build/classes/main/");
+    private void findMouseContainers() {
+        Path developPath = Paths.get(MousecoreConfig.devPath);
         if (developPath.toFile().exists()) {
             try {
                 Stream<Path> walk = Files.walk(developPath);
@@ -45,7 +50,7 @@ public class TransformersFinder {
                     try (FileInputStream inputStream = new FileInputStream(file)) {
                         String candidatePath = file.getPath();
                         checkMouseContainer(candidatePath
-                                .substring(22, candidatePath.length() - 6)
+                                .substring(MousecoreConfig.devPath.length(), candidatePath.length() - 6)
                                 .replace("\\", "."), IOUtils.toByteArray(inputStream));
                     } catch (IOException e) {
                         LOGGER.log(Level.FATAL, "Error while loading \"" + file.getName() + "\"! It will be skipped.");
@@ -57,19 +62,16 @@ public class TransformersFinder {
                 e.printStackTrace();
             }
         }
-        return mouseContainers;
     }
 
     private void checkMouseContainer(String name, byte[] bytes) {
         if (new CheckMouseVisitor().getResult(bytes)) mouseContainers.add(name);
     }
 
-    @Nonnull
-    public List<MouseLoadEvent> registerHooks() {
-        List<MouseLoadEvent> loadEventList = new ArrayList<>();
+    private void initializeContainers() {
+        int containersCount = 0;
         if (mouseContainers.isEmpty()) LOGGER.log(Level.WARN, "List of hooks is empty!");
         else {
-            int containersCount = 0;
             for (String name : mouseContainers) {
                 Class<?> clazz = null;
                 try {
@@ -79,27 +81,95 @@ public class TransformersFinder {
                     e.printStackTrace();
                 }
                 if (clazz != null) {
-                    Method[] methods = clazz.getMethods();
-                    for (Method method : methods) {
-                        if (method.isAccessible() && method.isAnnotationPresent(Mod.EventHandler.class)) {
-                            MouseLoadEvent event = new MouseLoadEvent();
-                            try { method.invoke(clazz, event); } catch (IllegalAccessException | InvocationTargetException e) {
-                                LOGGER.log(Level.ERROR, "Method annotated as " +
-                                        Mod.EventHandler.class.getSimpleName() + " in " +
-                                        MouseContainer.class.getSimpleName() + " \"" + clazz.getSimpleName() +
-                                        "\" can't be invoked! This container will be skipped!");
-                                e.printStackTrace();
-                                event = null;
-                            }
-                            if (event != null && !event.isEmpty()) loadEventList.add(event);
-                        }
+                    Object initClazz = null;
+                    try {
+                        initClazz = clazz.newInstance();
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        LOGGER.log(Level.ERROR, "Error while initialize " + MouseContainer.class.getSimpleName() + " " + name + "!");
+                        e.printStackTrace();
                     }
+                    if (initClazz != null) mouseContainerObjs.add(initClazz);
                     ++containersCount;
                 }
             }
-            LOGGER.log(Level.INFO, "Coremod found " + containersCount + " HookContainers");
+            mouseContainers.clear();
         }
+        returnData[0] = containersCount;
+        returnData[1] = mouseContainerObjs.size();
+    }
+
+    @Nonnull
+    public List<MouseLoadEvent> registerHooks() {
+        initializeContainers();
+
+        List<MouseLoadEvent> loadEventList = new ArrayList<>();
+        int adaptersCount = 0;
+        int interfaceAdderCount = 0;
+        int methodCount = 0;
+        int methodAdderCount = 0;
+        if (mouseContainerObjs.isEmpty()) LOGGER.log(Level.WARN, "List of loaded hooks is empty!");
+        else {
+            for (Object obj : mouseContainerObjs) {
+                Method[] methods = obj.getClass().getMethods();
+                for (Method method : methods) {
+                    if (method.isAnnotationPresent(Mod.EventHandler.class)) {
+                        if (Modifier.isPublic(method.getModifiers())
+                                && !Modifier.isStatic(method.getModifiers())
+                                && method.getReturnType() == void.class) {
+                            MouseLoadEvent event = new MouseLoadEvent();
+                            try {
+                                method.invoke(obj, event);
+                                adaptersCount += event.size(0);
+                                interfaceAdderCount += event.size(1);
+                                methodCount += event.size(2);
+                                methodAdderCount += event.size(3);
+                                loadEventList.add(event);
+                                continue;
+                            } catch (IllegalAccessException ignore) {} catch (InvocationTargetException err) {
+                                Throwable target = err.getTargetException();
+                                if (target instanceof InterfaceHookException) throw (InterfaceHookException) target;
+                                target.printStackTrace();
+                            }
+                        }
+                    } else continue;
+                    LOGGER.log(Level.ERROR, "Method \"" + method.getName() + "\" annotated as @" +
+                            Mod.EventHandler.class.getSimpleName() + " in " +
+                            MouseContainer.class.getSimpleName() + " \"" + obj.getClass().getSimpleName() +
+                            "\" can't be invoked! Please make sure that the method matches the \"public void\" " +
+                            "signature and that only MouseLoadEvent is specified in its arguments.");
+                }
+            }
+        }
+        returnData[2] = adaptersCount;
+        returnData[3] = interfaceAdderCount;
+        returnData[4] = methodCount;
+        returnData[5] = methodAdderCount;
+
+        printStatus();
+
         return loadEventList;
+    }
+
+    private void printStatus() {
+        LOGGER.log(Level.INFO, "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓");
+        LOGGER.log(Level.INFO, " " + correct("Coremod found " + returnData[0] + " HookContainer(s)"));
+        LOGGER.log(Level.INFO, " " + correct("Coremod initialized " + returnData[1] + " HookContainer(s)"));
+        LOGGER.log(Level.INFO, " " + correct("Coremod registered " + returnData[2] + " hook adapters(s)"));
+        LOGGER.log(Level.INFO, " " + correct("Coremod registered " + returnData[5] + " method creator(s)"));
+        LOGGER.log(Level.INFO, " " + correct("Coremod registered " + returnData[4] + " method refactor(s)"));
+        LOGGER.log(Level.INFO, " " + correct("Coremod registered " + returnData[3] + " interface creator(s)"));
+        LOGGER.log(Level.INFO, "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛");
+    }
+
+    private String correct(String s) {
+        StringBuilder builder = new StringBuilder(s);
+        int factor = 44 - s.length();
+        for (int i = 0; i < factor; ++i) {
+            if (i < factor / 2) builder.insert(0, " ");
+            else builder.append(" ");
+        }
+
+        return builder.toString();
     }
 
 //    /**

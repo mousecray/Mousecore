@@ -1,4 +1,4 @@
-package ru.mousecray.mousecore.api.asm.method;
+package ru.mousecray.mousecore.api.asm.method.utils;
 
 public enum MouseReturnCondition {
     NEVER,

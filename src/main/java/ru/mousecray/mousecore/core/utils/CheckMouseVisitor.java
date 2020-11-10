@@ -1,4 +1,4 @@
-package ru.mousecray.mousecore.core.visit;
+package ru.mousecray.mousecore.core.utils;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;

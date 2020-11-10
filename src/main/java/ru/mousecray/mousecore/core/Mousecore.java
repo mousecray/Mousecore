@@ -1,15 +1,20 @@
 package ru.mousecray.mousecore.core;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.mousecray.mousecore.api.asm.adapter.MouseHookAdapter;
 import ru.mousecray.mousecore.api.asm.event.MouseLoadEvent;
-import ru.mousecray.mousecore.core.find.TransformersFinder;
+import ru.mousecray.mousecore.api.asm.method.MouseMethod;
+import ru.mousecray.mousecore.core.transformer.TransformersFinder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,18 +24,47 @@ import java.util.Map;
 @IFMLLoadingPlugin.SortingIndex(1001)
 public class Mousecore implements IFMLLoadingPlugin {
     public static final Logger LOGGER = LogManager.getLogger("mousecore");
-    public static final List<MouseLoadEvent> events = new ArrayList<>();
+    public static Mousecore INSTANCE;
     private static boolean deobfEnvironment;
+    public final List<String> visitedClasses = new ArrayList<>();
+    public final Map<String, List<String>> interfaceAdderHooks;
+    public final List<MouseHookAdapter> rawHooks;
+    public final Map<String, Map<String, MouseMethod>> methodAdderHooks;
+    public final Map<String, Map<String, MouseMethod>> methodRefractorHooks;
 
     public Mousecore() {
-        LOGGER.log(Level.INFO, "Coremod initialized");
+        INSTANCE = this;
+        MousecoreConfig.setupAllValues();
 
         TransformersFinder finder = new TransformersFinder();
-        events.addAll(finder.registerHooks());
+        LOGGER.log(Level.INFO, "Coremod began to search...");
+        List<MouseLoadEvent> events = finder.registerHooks();
+
+        Map<String, List<String>> interfaceAdderHooks = new HashMap<>();
+        List<MouseHookAdapter> rawHooks = new ArrayList<>();
+        Map<String, Map<String, MouseMethod>> methodRefractorHooks = new HashMap<>();
+        Map<String, Map<String, MouseMethod>> methodAdderHooks = new HashMap<>();
+        for (MouseLoadEvent event : events) {
+            if (!event.isEmpty()) {
+                interfaceAdderHooks.putAll(event.getInterfaceAdders());
+                rawHooks.addAll(event.getAdapters());
+                event.getMethodRefactors().forEach((key, value) -> methodRefractorHooks.put(key, ImmutableMap.copyOf(value)));
+                event.getMethodAdders().forEach((key, value) -> methodRefractorHooks.put(key, ImmutableMap.copyOf(value)));
+            }
+        }
+
+        this.interfaceAdderHooks = ImmutableMap.copyOf(interfaceAdderHooks);
+        this.rawHooks = ImmutableList.copyOf(rawHooks);
+        this.methodAdderHooks = ImmutableMap.copyOf(methodAdderHooks);
+        this.methodRefractorHooks = ImmutableMap.copyOf(methodRefractorHooks);
     }
 
     public static boolean isDeobf() {
         return deobfEnvironment;
+    }
+
+    public boolean isEmpty() {
+        return interfaceAdderHooks.isEmpty() && rawHooks.isEmpty() && methodAdderHooks.isEmpty() && methodRefractorHooks.isEmpty();
     }
 
     @Override
