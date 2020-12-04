@@ -1,52 +1,55 @@
 package ru.mousecray.mousecore.core.transformer;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
+import ru.mousecray.mousecore.api.asm.MinecraftClass;
 import ru.mousecray.mousecore.api.asm.adapter.MouseHookAdapter;
+import ru.mousecray.mousecore.api.asm.method.MouseMethod;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
-public class CoreHookAddInterface extends MouseHookAdapter {
+public class CoreClassHookWithAddInterface extends MouseHookAdapter {
 
-    private final List<String> interfaces;
+    private final List<MinecraftClass> interfaces;
+    private final Map<String, MouseMethod> methods;
+    private final Map<String, MouseMethod> methodRefactor;
 
-    public CoreHookAddInterface(String targetClass, @Nonnull List<String> interfaces) {
+    public CoreClassHookWithAddInterface(MinecraftClass targetClass, @Nonnull List<MinecraftClass> interfaces, @Nonnull Map<String, MouseMethod> methods, Map<String, MouseMethod> methodRefactor) {
         super(targetClass);
         this.interfaces = interfaces;
+        this.methods = methods;
+        this.methodRefactor = methodRefactor;
     }
 
     @Override
     protected final byte[] transformClass(String name, String transformedName, byte[] basicClass) {
-
-        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-//        ClassVisitor visitor = new AddInterfaceClassVisitor(writer, interfaces,
-//                transformedName.replace(".", "/"), defaultMethod, normalMethod);
-//        ClassReader reader = new ClassReader(basicClass);
-//        reader.accept(visitor, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+        ClassWriter writer = new ClassWriter(WRITER_FLAGS);
+        ClassVisitor visitor = new AddInterfaceClassVisitor(writer);
+        ClassReader reader = new ClassReader(basicClass);
+        reader.accept(visitor, READER_FLAGS);
 
         return writer.toByteArray();
     }
 
     //TODO
-    private static class AddInterfaceClassVisitor extends ClassVisitor {
-        private final List<String> interfaze;
-        private final List<Method> defaultMethod;
-        private final List<Method> normalMethod;
+    private class AddInterfaceClassVisitor extends ClassVisitor {
 
-        public AddInterfaceClassVisitor(ClassVisitor visitor, List<String> input, List<Method> defaultMethod, List<Method> normalMethod) {
+        public AddInterfaceClassVisitor(ClassVisitor visitor) {
             super(ASM5, visitor);
-            interfaze = input;
-            this.defaultMethod = defaultMethod;
-            this.normalMethod = normalMethod;
         }
 
-//        @Override
-//        public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-//            super.visit(version, access, name, signature, superName, ArrayUtils.addAll(interfaces, interfaze));
-//        }
+        @Override
+        public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+            String[] addInterfaces = CoreClassHookWithAddInterface.this.interfaces.stream()
+                    .map(MinecraftClass::getInternalName)
+                    .toArray(String[]::new);
+            super.visit(version, access, name, signature, superName, ArrayUtils.addAll(interfaces, addInterfaces));
+        }
 
         @Override
         public void visitEnd() {
@@ -75,16 +78,20 @@ public class CoreHookAddInterface extends MouseHookAdapter {
 //
 //            mv.visitEnd();
 
+            for (Map.Entry<String, MouseMethod> entry : methods.entrySet()) {
+                MouseMethod method = entry.getValue();
+                mv = super.visitMethod(ACC_PUBLIC, method.);
+            }
 //            for (int count = 0; count < methods.size(); ++count) {
 //                Method method = methods.get(count);
 
-//                mv = super.visitMethod(ACC_PUBLIC, method.getName(),
-//                        Type.getMethodDescriptor(method.getReturnType(), method.getParameterTypes()), null, null);
-//                mv.visitCode();
-//                mv.visitVarInsn(ALOAD, 0);
+
+                        Type.getMethodDescriptor(method.getReturnType(), method.getParameterTypes()), null, null);
+                mv.visitCode();
+                mv.visitVarInsn(ALOAD, 0);
             //TODO:
 //                mv.visitFieldInsn(GETFIELD, "ru/mousecray/mousecore/Get", "transformer",
-//                        "Lru/mousecray/mousecore/api/asm/transformers/CoreHookAddInterface;");
+//                        "Lru/mousecray/mousecore/api/asm/transformers/CoreClassHookWithAddInterface;");
 //            }
 
 //            super.visitEnd();

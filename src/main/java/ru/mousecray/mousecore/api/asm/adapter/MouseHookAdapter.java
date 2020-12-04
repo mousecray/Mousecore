@@ -4,6 +4,7 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
+import ru.mousecray.mousecore.api.asm.MinecraftClass;
 
 public abstract class MouseHookAdapter implements IClassTransformer, Opcodes {
     private static final boolean RECALC_FRAMES = Boolean.parseBoolean(System.getProperty("FORGE_FORCE_FRAME_RECALC", "false"));
@@ -13,16 +14,16 @@ public abstract class MouseHookAdapter implements IClassTransformer, Opcodes {
     /**
      * targetClass must be {@link org.objectweb.asm.Type#getInternalName Type#getInternalName()}
      */
-    private final String targetClass;
+    private final MinecraftClass targetClass;
 
     /**
      * @param targetClass - must be {@link org.objectweb.asm.Type#getInternalName Type#getInternalName()}
      */
-    public MouseHookAdapter(String targetClass) {
+    public MouseHookAdapter(MinecraftClass targetClass) {
         this.targetClass = targetClass;
     }
 
-    public String getTargetClass() {
+    public MinecraftClass getTargetClass() {
         return targetClass;
     }
 
@@ -35,6 +36,6 @@ public abstract class MouseHookAdapter implements IClassTransformer, Opcodes {
     protected abstract byte[] transformClass(String name, String transformedName, byte[] basicClass);
 
     protected boolean canTransform(String name) {
-        return targetClass.equals(name);
+        return targetClass.getCanonicalName().equals(name);
     }
 }

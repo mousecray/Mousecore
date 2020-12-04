@@ -1,10 +1,10 @@
 package ru.mousecray.mousecore.core.utils;
 
-public class InterfaceHookException extends RuntimeException {
+public class MouseMethodException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    public InterfaceHookException(String s) {
+    public MouseMethodException(String s) {
         super(s);
     }
 }

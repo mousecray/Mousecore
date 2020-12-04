@@ -1,17 +1,16 @@
 package ru.mousecray.mousecore.core.transformer;
 
 import net.minecraftforge.fml.common.Mod;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Level;
 import ru.mousecray.mousecore.api.asm.MouseContainer;
 import ru.mousecray.mousecore.api.asm.event.MouseLoadEvent;
 import ru.mousecray.mousecore.core.MousecoreConfig;
 import ru.mousecray.mousecore.core.utils.CheckMouseVisitor;
 import ru.mousecray.mousecore.core.utils.InterfaceHookException;
+import ru.mousecray.mousecore.core.utils.MouseMethodException;
 
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ru.mousecray.mousecore.core.Mousecore.LOGGER;
+import static ru.mousecray.mousecore.api.asm.event.MouseLoadEvent.LOGGER;
 
 public class TransformersFinder {
     private final List<String> mouseContainers = new ArrayList<>();
@@ -47,11 +46,9 @@ public class TransformersFinder {
                         .collect(Collectors.toList());
                 walk.close();
                 for (File file : files) {
-                    try (FileInputStream inputStream = new FileInputStream(file)) {
-                        String candidatePath = file.getPath();
-                        checkMouseContainer(candidatePath
-                                .substring(MousecoreConfig.devPath.length(), candidatePath.length() - 6)
-                                .replace("\\", "."), IOUtils.toByteArray(inputStream));
+                    try {
+                        String name = file.getPath().substring(MousecoreConfig.devPath.length(), file.getPath().length() - 6).replace("\\", ".");
+                        checkMouseContainer(name, MouseLoadEvent.getClassLoader().getClassBytes(name));
                     } catch (IOException e) {
                         LOGGER.log(Level.FATAL, "Error while loading \"" + file.getName() + "\"! It will be skipped.");
                         e.printStackTrace();
@@ -127,7 +124,8 @@ public class TransformersFinder {
                                 continue;
                             } catch (IllegalAccessException ignore) {} catch (InvocationTargetException err) {
                                 Throwable target = err.getTargetException();
-                                if (target instanceof InterfaceHookException) throw (InterfaceHookException) target;
+                                if (target instanceof InterfaceHookException || target instanceof MouseMethodException)
+                                    throw (RuntimeException) target;
                                 target.printStackTrace();
                             }
                         }

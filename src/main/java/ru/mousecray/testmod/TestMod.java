@@ -30,8 +30,12 @@ public class TestMod {
     public void preInit(FMLPreInitializationEvent event) {
         proxy.preInit(event);
         Logger logger = LogManager.getLogger("testmod");
-        if (Blocks.AIR instanceof AirInterface) logger.log(Level.FATAL, "YEEEEEESSS!!!!!");
-        else logger.log(Level.FATAL, "NOOOOOOOOO!!!!!");
+        if (Blocks.AIR instanceof AirInterface) {
+            logger.log(Level.FATAL, "YEEEEEESSS!!!!!");
+            AirInterface air = (AirInterface) Blocks.AIR;
+            air.test();
+            logger.log(Level.FATAL, "OU MAY GOD!!!!!");
+        } else logger.log(Level.FATAL, "NOOOOOOOOO!!!!!");
     }
 
     @Mod.EventHandler

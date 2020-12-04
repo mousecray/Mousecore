@@ -1,15 +1,9 @@
 package com;
 
-public class Test {
-    public static void main(String[] args) {
-        int x = 13;
-        new Get(x);
+public interface Test {
+    default int get(String s) {
+        return 0;
     }
 
-    public static class Get {
-
-        public Get(Object obj) {
-            System.out.println(obj.getClass());
-        }
-    }
+    void set(int n);
 }

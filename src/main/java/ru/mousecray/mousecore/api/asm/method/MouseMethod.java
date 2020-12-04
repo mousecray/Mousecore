@@ -1,25 +1,26 @@
 package ru.mousecray.mousecore.api.asm.method;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.objectweb.asm.Type;
-import ru.mousecray.mousecore.api.asm.method.utils.MouseExecutor;
+import ru.mousecray.mousecore.api.asm.MinecraftClass;
 import ru.mousecray.mousecore.api.asm.method.utils.MouseReturnCondition;
+import ru.mousecray.mousecore.api.asm.method.utils.MouseSpecialExecutor;
+import ru.mousecray.mousecore.api.asm.method.utils.MouseSpecialField;
 import ru.mousecray.mousecore.api.asm.method.utils.MouseSpecialFieldType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-public class MouseMethod implements MouseExecutor {
+public class MouseMethod {
     private final String name;
-    private final Class returnClass;
+    private final MinecraftClass returnClass;
     private final MouseReturnCondition condition;
-    private final Class<?>[] arguments;
-    private final MouseExecutor methodBody;
-    private final Map<Pair<String, MouseSpecialFieldType>, MouseValue> fields;
+    private final MinecraftClass[] arguments;
+    private final MouseSpecialExecutor methodBody;
+    private final Map<MouseSpecialField, MouseValue> fields;
     private String descriptor;
 
-    public MouseMethod(String name, MouseReturnCondition condition, MouseExecutor methodBody, Class returnClass, @Nullable Map<Pair<String, MouseSpecialFieldType>, MouseValue> fields, Class<?>... arguments) {
+    public MouseMethod(String name, MouseReturnCondition condition, MouseSpecialExecutor methodBody, MinecraftClass returnClass, @Nullable Map<MouseSpecialField, MouseValue> fields, MinecraftClass... arguments) {
         this.name = name;
         this.returnClass = returnClass;
         this.condition = condition;
@@ -38,7 +39,7 @@ public class MouseMethod implements MouseExecutor {
     }
 
     public MouseValue getSpecialField(MouseSpecialFieldType type, String name) {
-        return fields.get(Pair.of(name, type));
+        return fields.get(new MouseSpecialField(type, name));
     }
 
     public MouseReturnCondition getReturnCondition() {
@@ -48,13 +49,12 @@ public class MouseMethod implements MouseExecutor {
     public String getNewDescriptor() {
         int length = arguments == null ? 0 : arguments.length;
         Type[] argTypes = new Type[length];
-        for (int i = 0; i < length; ++i) argTypes[i] = Type.getType(arguments[i]);
-        return descriptor = Type.getMethodDescriptor(Type.getType(returnClass), argTypes);
+        for (int i = 0; i < length; ++i) argTypes[i] = Type.getType(arguments[i].getDescriptor());
+        return descriptor = Type.getMethodDescriptor(Type.getType(returnClass.getDescriptor()), argTypes);
     }
 
     @Nonnull
-    @Override
     public MouseValue onExecuted(MouseValue... pars) {
-        return methodBody.onExecuted(pars);
+        return methodBody.onExecuted(fields, pars);
     }
 }

@@ -1,57 +1,69 @@
 package ru.mousecray.mousecore.api.asm.event;
 
+import net.minecraft.launchwrapper.LaunchClassLoader;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.Level;
-import org.objectweb.asm.Type;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import ru.mousecray.mousecore.api.asm.MinecraftClass;
 import ru.mousecray.mousecore.api.asm.adapter.MouseHookAdapter;
 import ru.mousecray.mousecore.api.asm.method.MouseMethod;
+import ru.mousecray.mousecore.core.Mousecore;
+import ru.mousecray.mousecore.core.utils.CheckInterfaceVisitor;
 import ru.mousecray.mousecore.core.utils.InterfaceHookException;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Modifier;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static ru.mousecray.mousecore.core.Mousecore.LOGGER;
+import java.util.Set;
 
 public class MouseLoadEvent {
-    private final Map<String, List<String>> interfaceAdderHooks = new HashMap<>();
+    public static final Logger LOGGER = LogManager.getLogger("mousecore");
+    private static LaunchClassLoader loader;
+    private final Map<MinecraftClass, List<MinecraftClass>> interfaceAdderHooks = new HashMap<>();
     private final List<MouseHookAdapter> rawHooks = new ArrayList<>();
-    private final Map<String, Map<String, MouseMethod>> methodRefactorHooks = new HashMap<>();
-    private final Map<String, Map<String, MouseMethod>> methodAdderHooks = new HashMap<>();
-
+    private final Map<MinecraftClass, Map<String, MouseMethod>> methodRefactorHooks = new HashMap<>();
+    private final Map<MinecraftClass, Map<String, MouseMethod>> methodAdderHooks = new HashMap<>();
     private int interfaceSize;
     private int rawSize;
     private int refactorSize;
     private int adderSize;
 
-    public void registerInterfaceCreator(String targetClass, @Nonnull Class<?> interfaze, MouseMethod... hooks) {
-        if (!interfaze.isInterface()) throw new InterfaceHookException("Interface " + interfaze.getName() + "isn't interface");
-        if (interfaceAdderHooks.containsKey(targetClass)) interfaceAdderHooks.get(targetClass).add(Type.getInternalName(interfaze));
+    public static LaunchClassLoader getClassLoader() {
+        if (loader != null) return loader;
+        ClassLoader loader = Mousecore.class.getClassLoader();
+        if (loader instanceof LaunchClassLoader) return MouseLoadEvent.loader = (LaunchClassLoader) loader;
+        else throw new RuntimeException("Mousecore loaded with incompatible ClassLoader");
+    }
+
+    public void registerInterfaceCreator(MinecraftClass targetClass, @Nonnull MinecraftClass interfaze, MouseMethod... hooks) {
+        String canonicalName = interfaze.getCanonicalName();
+        Triple<Boolean, Set<String>, Set<String>> triple;
+        try {
+            triple = new CheckInterfaceVisitor().getResult(getClassLoader().getClassBytes(canonicalName));
+        } catch (IOException e) {
+            throw new InterfaceHookException("Interface " + canonicalName + "can't be read");
+        }
+        if (!triple.getLeft()) throw new InterfaceHookException("Interface " + canonicalName + " isn't interface");
+        if (interfaceAdderHooks.containsKey(targetClass)) interfaceAdderHooks.get(targetClass).add(interfaze);
         else {
-            List<String> list = new ArrayList<>();
-            list.add(Type.getInternalName(interfaze));
+            List<MinecraftClass> list = new ArrayList<>();
+            list.add(interfaze);
             interfaceAdderHooks.put(targetClass, list);
         }
 
-        List<String> allMethod = new ArrayList<>();
-        List<String> defaultMethod = new ArrayList<>();
 
-        Arrays.stream(interfaze.getMethods())
-                .filter(method -> !Modifier.isStatic(method.getModifiers()))
-                .forEach(method -> {
-                    String desc = Type.getMethodDescriptor(method);
-                    if (method.isDefault()) {
-                        defaultMethod.add(desc);
-                        allMethod.add(desc);
-                    } else allMethod.add(desc);
-                });
+        Set<String> defaultMethod = triple.getMiddle();
+        Set<String> allMethod = triple.getRight();
+
         Arrays.stream(hooks).forEach(method -> {
             if (!allMethod.remove(method.getDescriptor())) LOGGER.log(Level.WARN,
                     "Registered method with descriptor \"" + method.getDescriptor() +
-                            "\" is missing in the interface \"" + interfaze.getName() +
+                            "\" is missing in the interface \"" + canonicalName +
                             "\". Please, use \"MouseLoadEvent#registerMethodCreator\" " +
                             "to register unrelated methods!");
             registerMethodCreator(targetClass, method);
@@ -60,13 +72,13 @@ public class MouseLoadEvent {
 
         if (!allMethod.isEmpty()) {
             throw new InterfaceHookException("You must implement all interface methods, " +
-                    "which nonstatic and nondefault. Interface: " + interfaze.getName() +
-                    ", Not implemented methods descriptors: " + allMethod.stream().reduce((str1, str2) -> str1 + ", " + str2).get());
+                    "which nonstatic and nondefault. Interface: " + interfaze.getCanonicalName() +
+                    ", Not implemented methods descriptors: " + allMethod.stream().reduce((str1, str2) -> str1 + ", " + str2).orElse(""));
         }
         ++interfaceSize;
     }
 
-    public void registerMethodRefactor(String targetClass, @Nonnull MouseMethod hook) {
+    public void registerMethodRefactor(MinecraftClass targetClass, @Nonnull MouseMethod hook) {
         if (methodRefactorHooks.containsKey(targetClass)) methodRefactorHooks.get(targetClass).put(hook.getDescriptor(), hook);
         else {
             Map<String, MouseMethod> map = new HashMap<>();
@@ -76,7 +88,7 @@ public class MouseLoadEvent {
         ++refactorSize;
     }
 
-    public void registerMethodCreator(String targetClass, @Nonnull MouseMethod hook) {
+    public void registerMethodCreator(MinecraftClass targetClass, @Nonnull MouseMethod hook) {
         if (methodAdderHooks.containsKey(targetClass)) methodAdderHooks.get(targetClass).put(hook.getDescriptor(), hook);
         else {
             Map<String, MouseMethod> map = new HashMap<>();
@@ -95,19 +107,19 @@ public class MouseLoadEvent {
         return interfaceAdderHooks.isEmpty() && rawHooks.isEmpty() && methodRefactorHooks.isEmpty() && methodAdderHooks.isEmpty();
     }
 
+    public Map<MinecraftClass, List<MinecraftClass>> getInterfaceAdders() {
+        return interfaceAdderHooks;
+    }
+
     public List<MouseHookAdapter> getAdapters() {
         return rawHooks;
     }
 
-    public Map<String, List<String>> getInterfaceAdders() {
-        return interfaceAdderHooks;
-    }
-
-    public Map<String, Map<String, MouseMethod>> getMethodAdders() {
+    public Map<MinecraftClass, Map<String, MouseMethod>> getMethodAdders() {
         return methodAdderHooks;
     }
 
-    public Map<String, Map<String, MouseMethod>> getMethodRefactors() {
+    public Map<MinecraftClass, Map<String, MouseMethod>> getMethodRefactors() {
         return methodRefactorHooks;
     }
 

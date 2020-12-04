@@ -4,8 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import ru.mousecray.mousecore.api.asm.MinecraftClass;
 import ru.mousecray.mousecore.api.asm.adapter.MouseHookAdapter;
 import ru.mousecray.mousecore.api.asm.event.MouseLoadEvent;
 import ru.mousecray.mousecore.api.asm.method.MouseMethod;
@@ -18,19 +17,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ru.mousecray.mousecore.api.asm.event.MouseLoadEvent.LOGGER;
+
 @IFMLLoadingPlugin.Name("Mousecore")
 @IFMLLoadingPlugin.MCVersion("1.12.2")
 @IFMLLoadingPlugin.TransformerExclusions({"ru.mousecray.mousecore"})
 @IFMLLoadingPlugin.SortingIndex(1001)
 public class Mousecore implements IFMLLoadingPlugin {
-    public static final Logger LOGGER = LogManager.getLogger("mousecore");
     public static Mousecore INSTANCE;
     private static boolean deobfEnvironment;
-    public final List<String> visitedClasses = new ArrayList<>();
-    public final Map<String, List<String>> interfaceAdderHooks;
+    public final Map<MinecraftClass, List<MinecraftClass>> interfaceAdderHooks;
     public final List<MouseHookAdapter> rawHooks;
-    public final Map<String, Map<String, MouseMethod>> methodAdderHooks;
-    public final Map<String, Map<String, MouseMethod>> methodRefractorHooks;
+    public final Map<MinecraftClass, Map<String, MouseMethod>> methodAdderHooks;
+    public final Map<MinecraftClass, Map<String, MouseMethod>> methodRefractorHooks;
 
     public Mousecore() {
         INSTANCE = this;
@@ -40,10 +39,10 @@ public class Mousecore implements IFMLLoadingPlugin {
         LOGGER.log(Level.INFO, "Coremod began to search...");
         List<MouseLoadEvent> events = finder.registerHooks();
 
-        Map<String, List<String>> interfaceAdderHooks = new HashMap<>();
+        Map<MinecraftClass, List<MinecraftClass>> interfaceAdderHooks = new HashMap<>();
         List<MouseHookAdapter> rawHooks = new ArrayList<>();
-        Map<String, Map<String, MouseMethod>> methodRefractorHooks = new HashMap<>();
-        Map<String, Map<String, MouseMethod>> methodAdderHooks = new HashMap<>();
+        Map<MinecraftClass, Map<String, MouseMethod>> methodRefractorHooks = new HashMap<>();
+        Map<MinecraftClass, Map<String, MouseMethod>> methodAdderHooks = new HashMap<>();
         for (MouseLoadEvent event : events) {
             if (!event.isEmpty()) {
                 interfaceAdderHooks.putAll(event.getInterfaceAdders());

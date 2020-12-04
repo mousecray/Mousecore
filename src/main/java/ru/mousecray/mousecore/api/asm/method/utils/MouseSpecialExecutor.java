@@ -3,9 +3,11 @@ package ru.mousecray.mousecore.api.asm.method.utils;
 import ru.mousecray.mousecore.api.asm.method.MouseValue;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 
 @FunctionalInterface
-public interface MouseExecutor {
+public interface MouseSpecialExecutor {
+
     @Nonnull
-    MouseValue onExecuted(MouseValue... pars);
+    MouseValue onExecuted(Map<MouseSpecialField, MouseValue> specialFields, MouseValue... pars);
 }
