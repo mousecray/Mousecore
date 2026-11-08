@@ -146,53 +146,13 @@ public class OperationRegistry {
         return null;
     }
 
-    private static class BinaryRuleRecord<L, R, RES> {
-        final Class<L>              leftType;
-        final Class<R>              rightType;
-        final IBinaryOperator       op;
-        final BiFunction<L, R, RES> action;
+    private record BinaryRuleRecord<L, R, RES>(
+            Class<L> leftType, Class<R> rightType, IBinaryOperator op, BiFunction<L, R, RES> action
+    ) { }
 
-        BinaryRuleRecord(Class<L> l, Class<R> r, IBinaryOperator o, BiFunction<L, R, RES> a) {
-            leftType = l;
-            rightType = r;
-            op = o;
-            action = a;
-        }
-    }
+    private record UnaryRuleRecord<T, RES>(Class<T> type, IUnaryOperator op, Function<T, RES> action) { }
 
-    private static class UnaryRuleRecord<T, RES> {
-        final Class<T>         type;
-        final IUnaryOperator   op;
-        final Function<T, RES> action;
+    private record ShiftRuleRecord<T extends CustomType<?>, RES>(Class<T> type, IShiftOperator op, ShiftOperation<T, RES> action) { }
 
-        UnaryRuleRecord(Class<T> t, IUnaryOperator o, Function<T, RES> a) {
-            type = t;
-            op = o;
-            action = a;
-        }
-    }
-
-    private static class ShiftRuleRecord<T extends CustomType<?>, RES> {
-        final Class<T>               type;
-        final IShiftOperator         op;
-        final ShiftOperation<T, RES> action;
-
-        ShiftRuleRecord(Class<T> t, IShiftOperator o, ShiftOperation<T, RES> a) {
-            type = t;
-            op = o;
-            action = a;
-        }
-    }
-
-    private static class CastRuleRecord<S, T> {
-        final Class<S>       sourceType;
-        final Class<T>       targetType;
-        final Function<S, T> action;
-
-        CastRuleRecord(Class<S> s, Class<T> t, Function<S, T> a) {
-            sourceType = s;
-            targetType = t;
-            action = a;
-        }
-    }
+    private record CastRuleRecord<S, T>(Class<S> sourceType, Class<T> targetType, Function<S, T> action) { }
 }

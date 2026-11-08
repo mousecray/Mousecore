@@ -16,7 +16,6 @@ import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseLambdas;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -44,7 +43,7 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<T, T
     public static <T extends CustomType<?>> SimpleListType<T> create(
             Class<T> valClass,
             @Nullable Function<String, T> valCreator,
-            @Nonnull T... values
+            T... values
     ) {
         return new SimpleListType<>(
                 valClass, valCreator,
@@ -68,7 +67,7 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<T, T
     }
 
     @SafeVarargs
-    public static <T extends CustomType<T>> SimpleListType<T> create(Class<T> valClass, @Nonnull T... values) {
+    public static <T extends CustomType<T>> SimpleListType<T> create(Class<T> valClass, T... values) {
         return create(valClass, null, values);
     }
 

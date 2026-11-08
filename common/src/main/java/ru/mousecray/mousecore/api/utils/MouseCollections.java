@@ -9,7 +9,6 @@ import ru.mousecray.mousecore.api.anno.Fast;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.Slowly;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.reflect.Array;
@@ -41,7 +40,7 @@ public final class MouseCollections {
                 .toArray(i -> (T[]) Array.newInstance(array.getClass().getComponentType(), i));
     }
 
-    @SafeVarargs @Nonnull
+    @SafeVarargs
     public static <T, D> List<D> mapAsList(@Nullable Function<T, D> mapper, boolean removeNulls, @Nullable T... array) {
         if (array == null || mapper == null) return new ArrayList<>();
 
@@ -51,7 +50,7 @@ public final class MouseCollections {
                 .collect(Collectors.toList());
     }
 
-    @Fast @Nonnull
+    @Fast
     public static <T, D> List<D> map(@Nullable Function<T, D> mapper, boolean removeNulls, @Nullable Collection<T> input) {
         if (input == null || mapper == null) return new ArrayList<>();
 
@@ -64,7 +63,7 @@ public final class MouseCollections {
      * Adds list to array. Order not granted
      */
     @SuppressWarnings("unchecked") @Slowly
-    public static <T> T[] addAll(@Nonnull Class<? super T> componentType, @Nullable T[] array, @Nullable Collection<T> collection) {
+    public static <T> T[] addAll(Class<? super T> componentType, @Nullable T[] array, @Nullable Collection<T> collection) {
         Objects.requireNonNull(componentType);
         if (array == null && collection != null) return collection.toArray((T[]) Array.newInstance(componentType, 0));
         else if (array != null && collection == null) return array;

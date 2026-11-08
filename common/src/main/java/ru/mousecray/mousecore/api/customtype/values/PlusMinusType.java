@@ -19,14 +19,11 @@ public final class PlusMinusType extends LogicalType<String> {
         storage.put(PlusMinusType.class, str -> {
             str = MouseStrings.trimWith(str, true, '\t');
             if (str == null || str.isEmpty()) return NULL;
-            switch (str.charAt(0)) {
-                case '+':
-                    return TRUE;
-                case '-':
-                    return FALSE;
-                default:
-                    return NULL;
-            }
+            return switch (str.charAt(0)) {
+                case '+' -> TRUE;
+                case '-' -> FALSE;
+                default -> NULL;
+            };
         });
     }
 

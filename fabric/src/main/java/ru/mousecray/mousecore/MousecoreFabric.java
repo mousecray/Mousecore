@@ -11,6 +11,6 @@ public class MousecoreFabric implements ModInitializer {
         Mousecore.LOGGER.atInfo()
                 .withPrefix(LogPrefixes.INIT)
                 .withStyle(ConsoleColor.GREEN_BG)
-                .log("Initialize library");
+                .log("Initialize Fabric library");
     }
 }

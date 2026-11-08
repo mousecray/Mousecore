@@ -16,7 +16,6 @@ import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseLambdas;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -30,7 +29,7 @@ public final class ConditionalListType<T extends CustomType<?>> extends ListType
     }
 
     private ConditionalListType(
-            Class<T> valClass, @Nullable Function<String, T> valCreator, @Nonnull List<ConditionalValType<T>> values
+            Class<T> valClass, @Nullable Function<String, T> valCreator, List<ConditionalValType<T>> values
     ) {
         super(checkValClass(valClass), valCreator, values);
     }
@@ -46,7 +45,7 @@ public final class ConditionalListType<T extends CustomType<?>> extends ListType
     public static <T extends CustomType<?>> ConditionalListType<T> createFrom(
             Class<T> valClass,
             @Nullable Function<String, T> valCreator,
-            @Nonnull T... values
+            T... values
     ) {
         return new ConditionalListType<>(
                 valClass, valCreator,
@@ -55,14 +54,14 @@ public final class ConditionalListType<T extends CustomType<?>> extends ListType
     }
 
     @SafeVarargs
-    public static <T extends CustomType<?>> ConditionalListType<T> createFrom(Class<T> valClass, @Nonnull T... values) {
+    public static <T extends CustomType<?>> ConditionalListType<T> createFrom(Class<T> valClass, T... values) {
         return createFrom(valClass, null, values);
     }
 
     public static <T extends CustomType<?>> ConditionalListType<T> createFrom(
             Class<T> valClass,
             @Nullable Function<String, T> valCreator,
-            @Nonnull List<T> values
+            List<T> values
     ) {
         return new ConditionalListType<>(
                 valClass, valCreator,
@@ -70,7 +69,7 @@ public final class ConditionalListType<T extends CustomType<?>> extends ListType
         );
     }
 
-    public static <T extends CustomType<?>> ConditionalListType<T> createFrom(Class<T> valClass, @Nonnull List<T> values) {
+    public static <T extends CustomType<?>> ConditionalListType<T> createFrom(Class<T> valClass, List<T> values) {
         return createFrom(valClass, null, values);
     }
 
@@ -78,7 +77,7 @@ public final class ConditionalListType<T extends CustomType<?>> extends ListType
     public static <T extends CustomType<?>> ConditionalListType<T> create(
             Class<T> valClass,
             @Nullable Function<String, T> valCreator,
-            @Nonnull ConditionalValType<T>... values
+            ConditionalValType<T>... values
     ) {
         return new ConditionalListType<>(
                 valClass, valCreator,
@@ -87,14 +86,14 @@ public final class ConditionalListType<T extends CustomType<?>> extends ListType
     }
 
     @SafeVarargs
-    public static <T extends CustomType<?>> ConditionalListType<T> create(Class<T> valClass, @Nonnull ConditionalValType<T>... values) {
+    public static <T extends CustomType<?>> ConditionalListType<T> create(Class<T> valClass, ConditionalValType<T>... values) {
         return create(valClass, null, values);
     }
 
     public static <T extends CustomType<?>> ConditionalListType<T> create(
             Class<T> valClass,
             @Nullable Function<String, T> valCreator,
-            @Nonnull List<ConditionalValType<T>> values
+            List<ConditionalValType<T>> values
     ) {
         return new ConditionalListType<>(
                 valClass, valCreator,
@@ -102,7 +101,7 @@ public final class ConditionalListType<T extends CustomType<?>> extends ListType
         );
     }
 
-    public static <T extends CustomType<?>> ConditionalListType<T> create(Class<T> valClass, @Nonnull List<ConditionalValType<T>> values) {
+    public static <T extends CustomType<?>> ConditionalListType<T> create(Class<T> valClass, List<ConditionalValType<T>> values) {
         return create(valClass, null, values);
     }
 

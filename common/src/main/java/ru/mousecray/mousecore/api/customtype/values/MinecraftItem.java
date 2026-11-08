@@ -10,7 +10,6 @@ import ru.mousecray.mousecore.api.customtype.OtherType;
 import ru.mousecray.mousecore.api.error.UnsupportedValException;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.minecraft.MouseIItemState;
-import ru.mousecray.mousecore.api.utils.MouseNumbers;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
 import javax.annotation.Nonnull;
@@ -27,17 +26,15 @@ public class MinecraftItem extends OtherType<MouseIItemState> {
 
     @Nonnull protected final String prefix;
     @Nonnull protected final String name;
-    protected final          int    meta;
 
-    protected MinecraftItem(String prefix, String name, int meta) {
-        super(MouseIItemState.create(prefix, name, meta));
+    protected MinecraftItem(String prefix, String name) {
+        super(MouseIItemState.create(prefix, name));
         this.prefix = prefix;
         this.name = name;
-        this.meta = meta;
     }
 
     @SuppressWarnings("DataFlowIssue")
-    public static MinecraftItem create(String prefix, String name, int meta) {
+    public static MinecraftItem create(String prefix, String name) {
         prefix = MouseStrings.trimWith(Objects.requireNonNull(prefix), true, '\t');
         if (prefix.isEmpty()) throw new ValueFormatException("prefix cannot be empty");
         if (prefix.contains("\t")) throw new ValueFormatException("prefix cannot contains tabs");
@@ -46,22 +43,19 @@ public class MinecraftItem extends OtherType<MouseIItemState> {
         if (name.isEmpty()) throw new ValueFormatException("name cannot be empty");
         if (name.contains("\t")) throw new ValueFormatException("name cannot contains tabs");
         if (name.contains(" ")) throw new ValueFormatException("name cannot contains space");
-        meta = Math.max(meta, 0);
-        return new MinecraftItem(prefix, name, meta);
+        return new MinecraftItem(prefix, name);
     }
 
-    public static MinecraftItem create(String name, int meta) { return create("minecraft", name, meta); }
-    public static MinecraftItem create(String name)           { return create(name, 0); }
+    public static MinecraftItem create(String name) { return create("minecraft", name); }
 
-    @Nullable public MouseIItemState asItemState()            { return value; }
+    @Nullable public MouseIItemState asItemState()  { return value; }
 
-    public String getPrefix()                                 { return prefix; }
-    public String getName()                                   { return name; }
-    public int getMeta()                                      { return meta; }
+    public String getPrefix()                       { return prefix; }
+    public String getName()                         { return name; }
 
     public static MinecraftItem parse(@Nullable Object value) throws UnsupportedValException, ValueFormatException {
         if (value instanceof MinecraftItem) return ((MinecraftItem) value);
-        else if (value instanceof String) return parse((String) null, ((String) value));
+        else if (value instanceof String) return parse((String) null, (String) value);
         throw new UnsupportedValException();
     }
 
@@ -71,7 +65,6 @@ public class MinecraftItem extends OtherType<MouseIItemState> {
 
         String[] split = value.split(":");
         String   name  = null;
-        int      meta  = 0;
 
         if (split.length > 0) {
             String prefixCandidate = MouseStrings.trimWith(split[0], true, '\t');
@@ -79,8 +72,7 @@ public class MinecraftItem extends OtherType<MouseIItemState> {
                 if (expectedPrefix != null) {
                     if (!prefixCandidate.equals(expectedPrefix)) {
                         name = prefixCandidate;
-                        if (split.length > 1) meta = MouseNumbers.tryParseInt(split[1], 0);
-                        return create(expectedPrefix, name, meta);
+                        return create(expectedPrefix, name);
                     }
                 } else expectedPrefix = prefixCandidate;
             }
@@ -88,12 +80,10 @@ public class MinecraftItem extends OtherType<MouseIItemState> {
             if (split.length > 1) {
                 String rawName = MouseStrings.trimWith(split[1], true, '\t');
                 if (!rawName.isEmpty() && !rawName.contains(" ") && !rawName.contains("\t")) name = rawName;
-
-                if (split.length > 2) meta = MouseNumbers.tryParseInt(split[2], 0);
             }
         }
 
-        if (name != null && expectedPrefix != null) return create(expectedPrefix, name, meta);
+        if (name != null && expectedPrefix != null) return create(expectedPrefix, name);
         throw new ValueFormatException();
     }
 

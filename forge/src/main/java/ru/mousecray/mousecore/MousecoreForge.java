@@ -12,6 +12,6 @@ public class MousecoreForge {
         Mousecore.LOGGER.atInfo()
                 .withPrefix(LogPrefixes.INIT)
                 .withStyle(ConsoleColor.GREEN_BG)
-                .log("Initialize library");
+                .log("Initialize Forge library");
     }
 }
