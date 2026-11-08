@@ -14,7 +14,8 @@
   "license": "${license}",
   "environment": "*",
   "entrypoints": {
-    "client": [
+    "main": [
+      "ru.mousecray.mousecore.MousecoreFabric"
     ]
   },
   "mixins": [

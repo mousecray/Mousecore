@@ -10,7 +10,6 @@ import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.pars.ConfigParGroup;
 import ru.mousecray.mousecore.api.utils.MouseReflection;
 
-import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 
@@ -19,7 +18,7 @@ import java.util.Objects;
 public abstract class ConfigCustomParGroupBuilder<VAL extends Comparable<VAL>, BUILDER extends ConfigParameterGroupBuilder<VAL>> {
     private BUILDER parBuilder;
 
-    @Nonnull protected abstract ConfigParGroup<VAL> createGroup(DisplayName groupName);
+    protected abstract ConfigParGroup<VAL> createGroup(DisplayName groupName);
 
     public final BUILDER buildGroup() {
         ConfigParGroup<?> val = createGroup(parBuilder.name);
