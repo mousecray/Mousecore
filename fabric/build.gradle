@@ -1,0 +1,71 @@
+plugins {
+    id 'multiloader-loader'
+    id 'fabric-loom' version '1.9-SNAPSHOT'
+    id 'java-library'
+    id 'idea'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+
+loom {
+    mixin {
+        defaultRefmapName = "${mod_id}.refmap.json"
+        useLegacyMixinAp = true
+    }
+
+    runs {
+        client {
+            client()
+            setConfigName('Fabric Client')
+            ideConfigGenerated(true)
+            runDir('runs/client')
+        }
+        server {
+            server()
+            setConfigName('Fabric Server')
+            ideConfigGenerated(true)
+            runDir('runs/server')
+        }
+    }
+}
+
+repositories {
+    maven { name = 'Modrinth'; url = 'https://api.modrinth.com/maven' }
+    maven { name = 'Bawnorton'; url = 'https://maven.bawnorton.com/releases' }
+    mavenCentral()
+    mavenLocal()
+    maven {
+        name = "Ladysnake Mods"
+        url = "https://maven.ladysnake.org/releases"
+    }
+    maven {
+        name = "Fabric"
+        url = "https://maven.fabricmc.net/"
+    }
+    maven { url "https://maven.terraformersmc.com/" }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
+    }
+
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
+    include(modImplementation("io.github.llamalad7:mixinextras-fabric:${mixinextras_version}"))
+    
+    modCompileOnly "com.terraformersmc:modmenu:7.2.2"
+    modLocalRuntime "com.terraformersmc:modmenu:7.2.2"
+}
+
+layout.buildDirectory.set(file("build"))
+
+tasks.named('remapJar').configure {
+    doFirst {
+        java.nio.file.Files.deleteIfExists(archiveFile.get().asFile.toPath())
+    }
+}

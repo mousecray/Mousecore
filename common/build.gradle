@@ -1,0 +1,65 @@
+plugins {
+    id 'idea'
+    id 'java'
+    id 'net.minecraftforge.gradle'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+
+    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformer = at
+    }
+}
+
+repositories {
+    maven { name = 'Forge'; url = 'https://maven.minecraftforge.net/' }
+    maven { name = 'Bawnorton'; url = 'https://maven.bawnorton.com/releases' }
+    mavenCentral()
+    mavenLocal()
+
+    maven {
+        name = "Ladysnake Mods"
+        url = "https://maven.ladysnake.org/releases"
+    }
+    maven {
+        name = "Fabric"
+        url = "https://maven.fabricmc.net/"
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
+
+    implementation "org.ow2.asm:asm:9.5"
+    implementation "org.ow2.asm:asm-tree:9.5"
+}
+
+configurations {
+    commonJava {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+    commonResources {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+}
+
+artifacts {
+    commonJava sourceSets.main.java.sourceDirectories.singleFile
+    commonResources sourceSets.main.resources.sourceDirectories.singleFile
+}
+
+idea.module { downloadJavadoc = downloadSources = true }
+
+layout.buildDirectory.set(file("build"))

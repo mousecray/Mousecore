@@ -1,0 +1,31 @@
+plugins {
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)' apply false
+}
+
+if (project.hasProperty('official')) {
+    def propFile = file('gradle.properties')
+    def lines = propFile.readLines()
+    def oldVersion = ""
+    def newVersion = ""
+    def newLines = lines.collect { line ->
+        if (line.startsWith('version=')) {
+            oldVersion = line.substring('version='.length()).trim()
+            def parts = oldVersion.split('\\.')
+            if (parts.length > 0 && parts[-1].isInteger()) {
+                parts[-1] = (parts[-1].toInteger() + 1).toString()
+                newVersion = parts.join('.')
+            } else {
+                newVersion = oldVersion + "-release"
+            }
+            return "version=" + newVersion
+        }
+        return line
+    }
+    if (newVersion != "") {
+        propFile.text = newLines.join('\n') + '\n'
+        project.ext.version = newVersion
+        println "========================================================="
+        println " Official Build: Auto-incremented version $oldVersion -> $newVersion "
+        println "========================================================="
+    }
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "mousecore",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${description}",
+  "authors": [
+    "${mod_authors}"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": ""
+  },
+  "license": "${license}",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+    ]
+  },
+  "mixins": [
+  ],
+  "depends": {
+    "fabricloader": ">=0.14",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}",
+    "java": ">=17"
+  }
+}

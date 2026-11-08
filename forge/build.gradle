@@ -1,0 +1,146 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.minecraftforge.gradle'
+    id 'java-library'
+    id 'idea'
+    id 'org.spongepowered.mixin' version '0.7.+'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+
+println "Java: ${providers.systemProperty('java.version').get()}, " +
+        "JVM: ${providers.systemProperty('java.vm.version').get()} (${providers.systemProperty('java.vendor').get()}), " +
+        "Arch: ${providers.systemProperty('os.arch').get()}"
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+
+    def at = file("${rootProject.projectDir}/common/src/main/resources/META-INF/accesstransformer.cfg")
+    if (at.exists()) {
+        accessTransformer = at
+    }
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            ideaModule "${project.name}.main"
+            property 'forge.logging.console.level', 'debug'
+            property 'eventbus.api.strictRuntimeChecks', 'true'
+            property 'forge.enabledGameTestNamespaces', mod_id
+
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${layout.buildDirectory.get().asFile}/createSrgToMcp/output.srg"
+            mods {
+                create(mod_id) {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            ideaModule "${project.name}.main"
+            property 'forge.logging.console.level', 'debug'
+            property 'eventbus.api.strictRuntimeChecks', 'true'
+            property 'forge.enabledGameTestNamespaces', mod_id
+            args '--nogui'
+
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${layout.buildDirectory.get().asFile}/createSrgToMcp/output.srg"
+            mods {
+                create(mod_id) {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run-data')
+            args '--mod', mod_id, '--all', '--output', file('src/generated/resources'), '--existing', file('src/main/resources')
+        }
+    }
+}
+
+repositories {
+    maven { name = 'Forge'; url = 'https://maven.minecraftforge.net/' }
+    maven { name = 'Bawnorton'; url = 'https://maven.bawnorton.com/releases' }
+    mavenCentral()
+    mavenLocal()
+
+    maven {
+        name = "Ladysnake Mods"
+        url = "https://maven.ladysnake.org/releases"
+    }
+    maven {
+        name = "Fabric"
+        url = "https://maven.fabricmc.net/"
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
+
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
+    implementation(jarJar("io.github.llamalad7:mixinextras-forge:${mixinextras_version}")) {
+        jarJar.ranged(it, "[${mixinextras_version},)")
+    }
+}
+
+mixin {
+    add(sourceSets.main, "${mod_id}.refmap.json")
+
+    config("${mod_id}.common.mixins.json")
+    config("${mod_id}.forge.mixins.json")
+}
+
+jarJar.enable()
+tasks.named('jarJar').configure {
+    archiveClassifier = 'runtime'
+    def licenseFile = rootProject.file('LICENSE')
+    if (licenseFile.exists()) {
+        from(licenseFile)
+    }
+    manifest.attributes('MixinConfigs': "${mod_id}.common.mixins.json,${mod_id}.forge.mixins.json")
+}
+
+reobf { jarJar {} }
+tasks.named('jarJar').configure { finalizedBy 'reobfJarJar' }
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+jar.finalizedBy('reobfJar')
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.incremental = false
+}
+
+tasks.named('compileJava', JavaCompile) {
+    outputs.files(
+            layout.buildDirectory.file('tmp/compileJava/compileJava-mappings.tsrg'),
+            layout.buildDirectory.file('tmp/compileJava/compileJava-refmap.json'),
+            layout.buildDirectory.file("tmp/compileJava/${mod_id}.refmap.json")
+    ).withPropertyName('mixinAnnotationOutputs')
+}
+
+idea.module { downloadJavadoc = downloadSources = true }
+
+layout.buildDirectory.set(file("build"))
+
+def distributionJar = tasks.register('distributionJar', Jar) {
+    dependsOn tasks.named('reobfJarJar')
+    archiveBaseName = base.archivesName
+    archiveVersion = project.version
+    archiveClassifier = 'all'
+    destinationDirectory = layout.buildDirectory.dir('libs')
+    from(tasks.named('jarJar').flatMap { it.archiveFile }) { rename { "${mod_id}-runtime.jar" } }
+    from(sourceSets.main.output.resourcesDir) { include 'META-INF/mods.toml', "${mod_id}.png" }
+    def licenseFile = rootProject.file('LICENSE')
+    if (licenseFile.exists()) {
+        from(licenseFile)
+    }
+    manifest.attributes('Implementation-Version': project.version)
+}
+
+tasks.named('assemble') { dependsOn distributionJar }
