@@ -11,8 +11,6 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import ru.mousecray.mousecore.api.VariableValue;
-import ru.mousecray.mousecore.api.config.pars.ConfigPar;
-import ru.mousecray.mousecore.api.config.pars.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.specific.ConfigLocaleType;
 import ru.mousecray.mousecore.api.config.specific.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
@@ -24,6 +22,7 @@ import ru.mousecray.mousecore.api.customtype.range.Range;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
 import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
+import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.log.MouseLogger;
 import ru.mousecray.mousecore.api.utils.MouseNumbers;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
@@ -71,7 +70,7 @@ public final class ConfigParser {
         if (!parentDir.exists() || !file.exists()) {
             if (logger != null) {
                 logger.atInfo()
-                        .withPrefix("Config")
+                        .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("Config file '{0}' is not found. It will be created on save", file.getAbsolutePath());
             }
@@ -79,7 +78,7 @@ public final class ConfigParser {
         } else {
             if (logger != null) {
                 logger.atInfo()
-                        .withPrefix("Config")
+                        .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.GREEN_BG)
                         .log("Config file '{0}' is found. It will be reading", file.getAbsolutePath());
             }
@@ -371,7 +370,7 @@ public final class ConfigParser {
                                 && !((ConfigSect) section).disablePar.setByConfig
                 ) {
                     logger.atWarn()
-                            .withPrefix("Config")
+                            .withPrefix(LogPrefixes.CONFIG)
                             .withStyle(ConsoleColor.YELLOW_BG)
                             .log("SectionDisabler '{0}' is not found or corrupted", section.getFullInternalName());
                 }
@@ -381,7 +380,7 @@ public final class ConfigParser {
                                 && !((ConfigParGroup) section).disablePar.setByConfig
                 ) {
                     logger.atWarn()
-                            .withPrefix("Config")
+                            .withPrefix(LogPrefixes.CONFIG)
                             .withStyle(ConsoleColor.YELLOW_BG)
                             .log("ParGroupDisabler '{0}' is not found or corrupted", section.getFullInternalName());
                 }
@@ -389,34 +388,34 @@ public final class ConfigParser {
                 if (section instanceof ConfigSect) {
                     if (!section.setByConfig) {
                         logger.atWarn()
-                                .withPrefix("Config")
+                                .withPrefix(LogPrefixes.CONFIG)
                                 .withStyle(ConsoleColor.YELLOW_BG)
                                 .log("Section '{0}' is not found or corrupted", section.getFullInternalName());
                     }
                 } else if (section instanceof ConfigPar) {
                     if (!section.setByConfig) {
                         logger.atWarn()
-                                .withPrefix("Config")
+                                .withPrefix(LogPrefixes.CONFIG)
                                 .withStyle(ConsoleColor.YELLOW_BG)
                                 .log("Parameter '{0}' is not found or corrupted", section.getFullInternalName());
                     }
                     if (!((ConfigPar) section).getConfigVal().setByConfig) {
                         logger.atWarn()
-                                .withPrefix("Config")
+                                .withPrefix(LogPrefixes.CONFIG)
                                 .withStyle(ConsoleColor.YELLOW_BG)
                                 .log("Parameter Value '{0}' is not found or corrupted", section.getFullInternalName());
                     }
                 } else if (section instanceof ConfigParGroup) {
                     if (!section.setByConfig) {
                         logger.atWarn()
-                                .withPrefix("Config")
+                                .withPrefix(LogPrefixes.CONFIG)
                                 .withStyle(ConsoleColor.YELLOW_BG)
                                 .log("ParameterGroup '{0}' is not found or corrupted", section.getFullInternalName());
                     }
                     ((ConfigParGroup<?>) section).getValues().forEach((name, value) -> {
                         if (!value.setByConfig) {
                             logger.atWarn()
-                                    .withPrefix("Config")
+                                    .withPrefix(LogPrefixes.CONFIG)
                                     .withStyle(ConsoleColor.YELLOW_BG)
                                     .log("Value '{0}' of ParameterGroup '{1}' is not found or corrupted",
                                             name, section.getFullInternalName());
@@ -935,7 +934,7 @@ public final class ConfigParser {
             }
             if (logger != null) {
                 logger.atInfo()
-                        .withPrefix("Config")
+                        .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.GREEN_BG)
                         .log("Config file '{0}' has been saved", file.getAbsolutePath());
             }

@@ -7,8 +7,8 @@ package ru.mousecray.mousecore.api.config.build;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mousecore.api.config.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.ConfigSectBase;
-import ru.mousecray.mousecore.api.config.pars.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.utils.MouseReflection;
@@ -71,7 +71,7 @@ public final class ConfigParameterGroupBuilder<T extends Comparable<T>> {
     void setGroup(ConfigParGroup group) {
         if (this.group != null && configBuilder.logger != null) {
             configBuilder.logger.atWarn()
-                    .withPrefix("Config")
+                    .withPrefix(LogPrefixes.CONFIG)
                     .withStyle(ConsoleColor.YELLOW_BG)
                     .log("Value '{0}' in ConfigParGroup '{1}' was overwritten by ConfigParGroup '{2}'",
                             this.group.getFullInternalName(), getFullName(), group.getFullInternalName());
@@ -93,7 +93,7 @@ public final class ConfigParameterGroupBuilder<T extends Comparable<T>> {
             canBeDisabled = parent.canBeDisabled();
             if (configBuilder.logger != null && !configBuilder.autoDisable) {
                 configBuilder.logger.atWarn()
-                        .withPrefix("Config")
+                        .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("The Parent section of ConfigParameterGroup '{0}' has flag 'canBeDisabled' " +
                                         "other then the ConfigParameterGroup value. " +

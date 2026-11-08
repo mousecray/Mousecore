@@ -31,7 +31,7 @@ public abstract class ConfigSectBase {
     protected                 int                                             deep;
     protected                 MouseConfig                                     config;
 
-    public ConfigSectBase(@Nonnull DisplayName name, boolean canBeDisabled, @Nullable String comment) {
+    public ConfigSectBase(DisplayName name, boolean canBeDisabled, @Nullable String comment) {
         this.name = Objects.requireNonNull(name);
         this.canBeDisabled = canBeDisabled;
 
@@ -55,8 +55,7 @@ public abstract class ConfigSectBase {
     public boolean isSupportChild(ConfigSectBase child) { return true; }
 
     private boolean checkChildren() {
-        if (!isSupportChildren())
-            throw new UnsupportedOperationException("This ConfigSection cannot contains children");
+        if (!isSupportChildren()) throw new UnsupportedOperationException("This ConfigSection cannot contains children");
         if (children == null) {
             children = new ImmutableDisplayNameMap.Mutable<>();
             return true;
@@ -131,6 +130,7 @@ public abstract class ConfigSectBase {
         if (hasChildren()) children.values().forEach(c -> c.setConfig(config));
     }
 
+    @SuppressWarnings("DataFlowIssue")
     public void removeChild(DisplayName name) {
         Objects.requireNonNull(name);
         if (checkChildren()) {
@@ -188,20 +188,22 @@ public abstract class ConfigSectBase {
         if (hasChildren()) children.forEach((key, value) -> value.reloadCache());
     }
 
-    @Nonnull public DisplayName getName()                     { return name; }
-    @Nullable public ConfigSectBase getParent()               { return parent; }
-    @Nullable public String getComment()                      { return comment; }
-    public int getDeep()                                      { return deep; }
+    @Nonnull public DisplayName getName()                                       { return name; }
+    @Nullable public ConfigSectBase getParent()                                 { return parent; }
+    @Nullable public String getComment()                                        { return comment; }
+    public int getDeep()                                                        { return deep; }
 
-    @Nullable public MouseConfig getConfig()                  { return config; }
-    public boolean hasConfig()                                { return config != null; }
+    @Nullable public MouseConfig getConfig()                                    { return config; }
+    public boolean hasConfig()                                                  { return config != null; }
 
-    @Nullable public MouseLogger getLogger()                  { return getConfig().getLogger(); }
-    public boolean hasLogger()                                { return hasConfig() && config.getLogger() != null; }
+    @SuppressWarnings("DataFlowIssue") @Nullable public MouseLogger getLogger() { return getConfig().getLogger(); }
+    public boolean hasLogger()                                                  { return hasConfig() && config.getLogger() != null; }
+    protected void setParent(@Nullable ConfigSectBase parent)                   { this.parent = parent; }
 
-    protected void setParent(@Nullable ConfigSectBase parent) { this.parent = parent; }
-
-    public boolean isLoaded()                                 { return setByConfig && hasConfig() && getConfig().isLoaded(); }
+    @SuppressWarnings("DataFlowIssue")
+    public boolean isLoaded() {
+        return setByConfig && hasConfig() && getConfig().isLoaded();
+    }
 
     public void setDisabled(boolean disabled) {
         if (!canBeDisabled()) throw new UnsupportedOperationException("This ConfigSection does not support disabling");

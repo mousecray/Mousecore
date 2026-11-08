@@ -6,8 +6,6 @@
 package ru.mousecray.mousecore.api.config;
 
 import ru.mousecray.mousecore.api.DisplayName;
-import ru.mousecray.mousecore.api.config.pars.ConfigPar;
-import ru.mousecray.mousecore.api.config.pars.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.config.values.*;
 import ru.mousecray.mousecore.api.config.values.base.ConfigListVal;
@@ -47,11 +45,11 @@ public class MouseConfig {
     protected final          List<ConfigParBase>                         dirtySections = new ArrayList<>();
     private                  boolean                                     built;
 
-    public MouseConfig(String folderName, String name, @Nonnull ConfigDictionary dictionary) {
+    public MouseConfig(String folderName, String name, ConfigDictionary dictionary) {
         this(folderName, name, null, dictionary, 0, 0);
     }
 
-    public MouseConfig(String folderName, String name, @Nullable MouseLogger logger, @Nonnull ConfigDictionary dictionary,
+    public MouseConfig(String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
                        int autoSyncSecInterval, int autoSaveSecInterval) {
         this.name = name;
         /*new File(FMLCommonHandler.instance().getSavesDirectory().getParentFile()*/
@@ -160,12 +158,10 @@ public class MouseConfig {
             String s = MouseStrings.trimWith(splitted[i], true, '\t');
             if (section == null) section = sections.getByInternalName(s);
             else {
-                if (section instanceof ConfigSect) {
-                    ConfigSect sect = (ConfigSect) section;
+                if (section instanceof ConfigSect sect) {
                     if (sect.canBeDisabled() && sect.disablePar.getName().getInternalName().equals(s)) section = sect.disablePar;
                     else section = section.getChild(s);
-                } else if (section instanceof ConfigParGroup) {
-                    ConfigParGroup<?> sect = (ConfigParGroup<?>) section;
+                } else if (section instanceof ConfigParGroup<?> sect) {
                     if (sect.canBeDisabled() && sect.disablePar.getName().getInternalName().equals(s)) section = sect.disablePar;
                     else {
                         stopped = i;
@@ -175,8 +171,7 @@ public class MouseConfig {
             }
         }
 
-        if (stopped >= 0) return splitted.length - stopped > 1 ? null
-                : ((ConfigParGroup<?>) section).getConfigVal(splitted[stopped]);
+        if (stopped >= 0) return splitted.length - stopped > 1 ? null : ((ConfigParGroup<?>) section).getConfigVal(splitted[stopped]);
 
         if (section instanceof ConfigPar) return ((ConfigPar) section).getConfigVal();
         return null;
@@ -248,7 +243,8 @@ public class MouseConfig {
 
     public List<ConfigSectBase> getChildrenRecursively() { return getChildrenRecursivelyInternal(null); }
 
-    @Nonnull List<ConfigSectBase> getChildrenRecursivelyInternal(@Nullable List<ConfigSectBase> sections) {
+    @Nonnull
+    List<ConfigSectBase> getChildrenRecursivelyInternal(@Nullable List<ConfigSectBase> sections) {
         if (sections == null) sections = this.sections.values().toList();
         List<ConfigSectBase> output = new ArrayList<>(sections);
 
@@ -348,24 +344,15 @@ public class MouseConfig {
     }
 
     public void update(long sec) {
-        if (isEnableAutoSync()) {
-            if ((sec - lastSyncSec) % syncSecInterval == 0) {
-                ConfigIOThread.getInstance().addLoadAction(this);
-            }
-        }
+        if (isEnableAutoSync() && (sec - lastSyncSec) % syncSecInterval == 0) ConfigIOThread.getInstance().addLoadAction(this);
 
-        if (isEnableAutoSave()) {
-            if ((sec - lastSaveSec) % saveSecInterval == 0) {
-                ConfigIOThread.getInstance().addSaveAction(this);
-            }
-        }
+        if (isEnableAutoSave() && (sec - lastSaveSec) % saveSecInterval == 0) ConfigIOThread.getInstance().addSaveAction(this);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MouseConfig)) return false;
-        MouseConfig that = (MouseConfig) o;
+        if (!(o instanceof MouseConfig that)) return false;
         return syncSecInterval == that.syncSecInterval
                 && saveSecInterval == that.saveSecInterval
                 && Objects.equals(name, that.name) && Objects.equals(path, that.path)

@@ -11,7 +11,7 @@ import ru.mousecray.mousecore.api.customtype.NumberType;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
 
 public interface ISupportRange<T extends NumberType<?>> {
-    boolean isInRange(T other);
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted") boolean isInRange(T other);
     RangeContainer<T> getRange();
     VariableValue<T> getMinValue();
     VariableValue<T> getMaxValue();

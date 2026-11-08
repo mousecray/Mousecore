@@ -3,16 +3,14 @@
  * Licensed under the GNU Lesser General Public License, Version 3.0
  ******************************************************************************/
 
-package ru.mousecray.mousecore.api.config.pars;
+package ru.mousecray.mousecore.api.config;
 
 import org.apache.commons.lang3.tuple.Pair;
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.*;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.utils.MouseReflection;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Map;
@@ -25,7 +23,7 @@ public abstract class ConfigParGroup<T extends CustomType<?>> extends ConfigParB
     public ConfigParGroup(
             DisplayName name,
             @Nullable ConfigParDisabler disablePar,
-            @Nonnull Pair<DisplayName, ? extends ConfigVal<T>> valuePair,
+            Pair<DisplayName, ? extends ConfigVal<T>> valuePair,
             @Nullable String comment, @Nullable Map<DisplayName, ConfigVal<?>> values
     ) {
         super(name, disablePar != null, valuePair, values, comment);

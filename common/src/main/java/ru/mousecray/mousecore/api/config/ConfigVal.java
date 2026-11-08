@@ -18,6 +18,7 @@ import ru.mousecray.mousecore.api.config.utils.ValueParseResult;
 import ru.mousecray.mousecore.api.config.values.base.ConfigNumberVal;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
+import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.log.MouseLogger;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
@@ -29,7 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static ru.mousecray.mousecore.api.config.utils.Constraint.ConstraintConditionType.IN_RANGE;
 import static ru.mousecray.mousecore.api.customtype.CustomValType.*;
@@ -74,14 +74,14 @@ public abstract class ConfigVal<V extends CustomType<?>> {
             this.constraints.addAll(
                     Arrays.stream(constraints)
                             .filter(Objects::nonNull)
-                            .collect(Collectors.toList())
+                            .toList()
             );
         }
         if (configureValues != null) {
             this.configureValues.addAll(
                     Arrays.stream(configureValues)
                             .filter(Objects::nonNull)
-                            .collect(Collectors.toList())
+                            .toList()
             );
         }
         currentConfigure = getCurrConfigureFromValue(value);
@@ -97,7 +97,6 @@ public abstract class ConfigVal<V extends CustomType<?>> {
     @Nullable protected PredefinedValue<V> getCurrentConfigure()             { return currentConfigure; }
     @Nullable protected Function<ConfigVal<V>, String> getSpecificDataType() { return specificDataType; }
 
-    @Nullable
     protected final ImmutableList<Constraint> getConstraints() {
         return ImmutableList.copyOf(constraints);
     }
@@ -122,7 +121,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
             if (hasLogger()) {
                 assert owner != null;
                 getLogger().atWarn()
-                        .withPrefix("Config")
+                        .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("ConfigValue '{0}' got value that not valid. It was adapted", owner.getFullInternalName());
             }
@@ -161,7 +160,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
             if (hasLogger()) {
                 assert owner != null;
                 getLogger().atWarn()
-                        .withPrefix("Config")
+                        .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("ConfigValue '{0}' got value that not valid. It was adapted", owner.getFullInternalName());
             }
@@ -191,7 +190,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
         if (hasLogger()) {
             assert owner != null;
             getLogger().atWarn()
-                    .withPrefix("Config")
+                    .withPrefix(LogPrefixes.CONFIG)
                     .withStyle(ConsoleColor.YELLOW_BG)
                     .log("ConfigValue '{0}' got a Constraint but it constraining is disabled. Constraints will be skipped",
                             owner.getFullInternalName());
@@ -202,7 +201,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
         if (hasLogger()) {
             assert owner != null;
             getLogger().atWarn()
-                    .withPrefix("Config")
+                    .withPrefix(LogPrefixes.CONFIG)
                     .withStyle(ConsoleColor.YELLOW_BG)
                     .log(
                             "ConfigValue '{0}' got a Constraints but it config not found or not already built. Constraints will be skipped",
@@ -215,7 +214,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
         if (hasLogger()) {
             assert owner != null;
             getLogger().atInfo()
-                    .withPrefix("Config")
+                    .withPrefix(LogPrefixes.CONFIG)
                     .log("ConfigValue '{0}' got a Constraint '{1}' with path '{2}'" +
                                     "and that Constraint was applied. All other Constraints will be skipped",
                             owner.getFullInternalName(), constraint.getConditionType(), constraint.getPath());
@@ -226,7 +225,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
         if (hasLogger()) {
             assert owner != null;
             getLogger().atWarn()
-                    .withPrefix("Config")
+                    .withPrefix(LogPrefixes.CONFIG)
                     .withStyle(ConsoleColor.YELLOW_BG)
                     .log("ConfigValue '{0}' got a Constraint '{1}' with path '{2}' to ConfigSectBase that cannot disabling. " +
                                     "It Constraint will be skipped",
@@ -266,7 +265,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
     private void logConstraintWarn(Constraint<?> constraint, String uniqueMessage) {
         assert owner != null;
         getLogger().atWarn()
-                .withPrefix("Config")
+                .withPrefix(LogPrefixes.CONFIG)
                 .withStyle(ConsoleColor.YELLOW_BG)
                 .log("ConfigValue '{0}' got a {1} Constraint '{2}' with path '{3}' {4} It Constraint will be skipped",
                         owner.getFullInternalName(), constraint.getValType(), constraint.getConditionType(), constraint.getPath(), uniqueMessage
@@ -277,7 +276,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
         if (hasLogger()) {
             assert owner != null;
             getLogger().atInfo()
-                    .withPrefix("Config")
+                    .withPrefix(LogPrefixes.CONFIG)
                     .log("ConfigValue '{0}' got a {1} Constraint '{2}' of {3} type with path '{4}'" +
                                     "and that Constraint was applied. All other Constraints will be skipped",
                             owner.getFullInternalName(), constraint.getValType(), constraint.getConditionType(),
@@ -289,7 +288,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
         if (hasLogger()) {
             assert owner != null;
             getLogger().atInfo()
-                    .withPrefix("Config")
+                    .withPrefix(LogPrefixes.CONFIG)
                     .log("ConfigValue '{0}' got a {1} Constraint '{2}' of {3} type with path '{4}'" +
                                     "and that Constraint was applied. Current Value is '{5}'",
                             owner.getFullInternalName(), constraint.getValType(), constraint.getConditionType(),
@@ -685,7 +684,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                         if (hasLogger()) {
                             assert owner != null;
                             getLogger().atWarn()
-                                    .withPrefix("Config")
+                                    .withPrefix(LogPrefixes.CONFIG)
                                     .withStyle(ConsoleColor.YELLOW_BG)
                                     .log("ConfigValue '{0}' got a Constraint with path '{1}' that isn't ConfigParBase. " +
                                             "It Constraint will be skipped", owner.getFullInternalName(), path);
@@ -694,7 +693,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                 } else {
                     if (hasLogger()) {
                         getLogger().atWarn()
-                                .withPrefix("Config")
+                                .withPrefix(LogPrefixes.CONFIG)
                                 .withStyle(ConsoleColor.YELLOW_BG)
                                 .log("ConfigValue '{0}' got a Constraint with path '{1}' to self. " +
                                         "It Constraint will be skipped", owner.getFullInternalName(), path);
@@ -704,7 +703,7 @@ public abstract class ConfigVal<V extends CustomType<?>> {
                 if (hasLogger()) {
                     assert owner != null;
                     getLogger().atWarn()
-                            .withPrefix("Config")
+                            .withPrefix(LogPrefixes.CONFIG)
                             .withStyle(ConsoleColor.YELLOW_BG)
                             .log("ConfigValue '{0}' got a Constraint with path '{1}' that does not exist. " +
                                     "It Constraint will be skipped", owner.getFullInternalName(), path

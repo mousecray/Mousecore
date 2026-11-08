@@ -16,6 +16,7 @@ import ru.mousecray.mousecore.api.customtype.NumberType;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
 import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
+import ru.mousecray.mousecore.api.log.LogPrefixes;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -71,7 +72,7 @@ public abstract class ConfigSimpleListNumberVal<
         if (!isInRange(value)) {
             if (hasLogger()) {
                 getLogger().atWarn()
-                        .withPrefix("Config")
+                        .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("ConfigValueSimpleListNumber '{0}' got value that not valid. It was adapted",
                                 owner.getFullInternalName());

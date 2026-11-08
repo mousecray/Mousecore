@@ -7,7 +7,7 @@ package ru.mousecray.mousecore.api.config.build;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.pars.ConfigParGroup;
+import ru.mousecray.mousecore.api.config.ConfigParGroup;
 import ru.mousecray.mousecore.api.utils.MouseReflection;
 
 import javax.annotation.ParametersAreNonnullByDefault;

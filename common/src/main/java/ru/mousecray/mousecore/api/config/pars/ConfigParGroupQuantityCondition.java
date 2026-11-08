@@ -10,6 +10,7 @@ import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.VariableValue;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.ConfigParDisabler;
+import ru.mousecray.mousecore.api.config.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.values.ConfigConditionVal;
 import ru.mousecray.mousecore.api.config.values.ConfigValRandomQuantity;
 import ru.mousecray.mousecore.api.config.values.base.ConfigListVal;
@@ -33,11 +34,11 @@ public class ConfigParGroupQuantityCondition<T extends CustomType<?>> extends Co
     @Nullable protected final DisplayName listParName;
 
     public ConfigParGroupQuantityCondition(
-            @Nonnull DisplayName name,
+            DisplayName name,
             @Nullable ConfigParDisabler disablePar,
-            @Nonnull Pair<DisplayName, ConfigValRandomQuantity> mainPar,
+            Pair<DisplayName, ConfigValRandomQuantity> mainPar,
             @Nullable String comment,
-            @Nonnull Pair<DisplayName, ConfigConditionVal<T>> conditionPar,
+            Pair<DisplayName, ConfigConditionVal<T>> conditionPar,
             @Nullable Pair<DisplayName, ConfigListVal<?, T, ?>> listPar
     ) {
         super(
@@ -57,7 +58,7 @@ public class ConfigParGroupQuantityCondition<T extends CustomType<?>> extends Co
     }
 
     private static <T extends CustomType<?>> Pair<DisplayName, ConfigConditionVal<T>> checkConditionAndList(
-            @Nonnull Pair<DisplayName, ConfigConditionVal<T>> conditionPar,
+            Pair<DisplayName, ConfigConditionVal<T>> conditionPar,
             @Nullable Pair<DisplayName, ConfigListVal<?, T, ?>> listPar
     ) {
         if (listPar != null) {
@@ -73,7 +74,7 @@ public class ConfigParGroupQuantityCondition<T extends CustomType<?>> extends Co
             );
             if (var.isPresent()) {
                 @SuppressWarnings("unchecked") Supplier<ListType<?, ?>> sup = var.getValue();
-                if (sup != null && listPar.getValue().getValue().getLogicPipeline().isEqual(sup.get())) {
+                if (sup != null && listPar.getValue().getValue().getLogicPipeline().isEqual(sup.get()).asBoolean()) {
                     return conditionPar;
                 }
             }

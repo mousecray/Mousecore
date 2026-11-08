@@ -65,8 +65,7 @@ public final class Constraint<T extends CustomType<?>> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Constraint)) return false;
-        Constraint value = (Constraint) o;
+        if (!(o instanceof Constraint value)) return false;
         return type == value.type && relationType == value.relationType
                 && Objects.equals(path, value.path) && Objects.equals(customValType, value.customValType)
                 && Objects.equals(val, value.val) && Objects.equals(range, value.range);
@@ -129,14 +128,14 @@ public final class Constraint<T extends CustomType<?>> {
                 );
             }
 
-            public <T extends LogicalType<?>> Constraint<T> setConditionEqual(@Nonnull T val) {
+            public <T extends LogicalType<?>> Constraint<T> setConditionEqual(T val) {
                 return new Constraint<>(
                         type, ConstraintConditionType.EQUAL,
                         path, CustomValType.LOGICAL, Objects.requireNonNull(val), null
                 );
             }
 
-            public <T extends LogicalType<?>> Constraint<T> setConditionNotEqual(@Nonnull T val) {
+            public <T extends LogicalType<?>> Constraint<T> setConditionNotEqual(T val) {
                 return new Constraint<>(
                         type, ConstraintConditionType.NOT_EQUAL,
                         path, CustomValType.LOGICAL, Objects.requireNonNull(val), null
@@ -168,14 +167,14 @@ public final class Constraint<T extends CustomType<?>> {
                 );
             }
 
-            public <T extends NumberType<?>> Constraint<T> setConditionEqual(@Nonnull T val) {
+            public <T extends NumberType<?>> Constraint<T> setConditionEqual(T val) {
                 return new Constraint<>(
                         type, ConstraintConditionType.EQUAL,
                         path, CustomValType.NUMBER, Objects.requireNonNull(val), null
                 );
             }
 
-            public <T extends NumberType<?>> Constraint<T> setConditionNotEqual(@Nonnull T val) {
+            public <T extends NumberType<?>> Constraint<T> setConditionNotEqual(T val) {
                 return new Constraint<>(
                         type, ConstraintConditionType.NOT_EQUAL,
                         path, CustomValType.NUMBER, Objects.requireNonNull(val), null
@@ -210,35 +209,35 @@ public final class Constraint<T extends CustomType<?>> {
                 );
             }
 
-            public <T extends NumberType<?>> Constraint<T> setConditionLess(@Nonnull T val) {
+            public <T extends NumberType<?>> Constraint<T> setConditionLess(T val) {
                 return new Constraint<>(
                         type, ConstraintConditionType.LESS,
                         path, CustomValType.NUMBER, Objects.requireNonNull(val), null
                 );
             }
 
-            public <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual(@Nonnull T val) {
+            public <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual(T val) {
                 return new Constraint<>(
                         type, ConstraintConditionType.LESS_OR_EQUAL,
                         path, CustomValType.NUMBER, Objects.requireNonNull(val), null
                 );
             }
 
-            public <T extends NumberType<?>> Constraint<T> setConditionMore(@Nonnull T val) {
+            public <T extends NumberType<?>> Constraint<T> setConditionMore(T val) {
                 return new Constraint<>(
                         type, ConstraintConditionType.MORE,
                         path, CustomValType.NUMBER, Objects.requireNonNull(val), null
                 );
             }
 
-            public <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual(@Nonnull T val) {
+            public <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual(T val) {
                 return new Constraint<>(
                         type, ConstraintConditionType.MORE_OR_EQUAL,
                         path, CustomValType.NUMBER, Objects.requireNonNull(val), null
                 );
             }
 
-            public <T extends NumberType<?>> Constraint<T> setConditionRange(@Nonnull RangeContainer<T> range) {
+            public <T extends NumberType<?>> Constraint<T> setConditionRange(RangeContainer<T> range) {
                 return new Constraint<>(
                         type, ConstraintConditionType.IN_RANGE,
                         path, CustomValType.NUMBER, null, Objects.requireNonNull(range)
@@ -270,14 +269,14 @@ public final class Constraint<T extends CustomType<?>> {
                 );
             }
 
-            public <T extends OtherType<?>> Constraint<T> setConditionEqual(@Nonnull T val) {
+            public <T extends OtherType<?>> Constraint<T> setConditionEqual(T val) {
                 return new Constraint<>(
                         type, ConstraintConditionType.EQUAL,
                         path, CustomValType.OTHER, Objects.requireNonNull(val), null
                 );
             }
 
-            public <T extends OtherType<?>> Constraint<T> setConditionNotEqual(@Nonnull T val) {
+            public <T extends OtherType<?>> Constraint<T> setConditionNotEqual(T val) {
                 return new Constraint<>(
                         type, ConstraintConditionType.NOT_EQUAL,
                         path, CustomValType.OTHER, Objects.requireNonNull(val), null

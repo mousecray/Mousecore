@@ -21,6 +21,7 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
 import ru.mousecray.mousecore.api.customtype.values.ConditionType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
+import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseReflection;
 
@@ -223,7 +224,7 @@ public class ConfigConditionVal<
                     } else {
                         if (hasLogger()) {
                             getLogger().atWarn()
-                                    .withPrefix("Config")
+                                    .withPrefix(LogPrefixes.CONFIG)
                                     .withStyle(ConsoleColor.YELLOW_BG)
                                     .log("'{0}' for ConfigConditionVal '{1}' found but that method 'getList' not present or broken",
                                             pathToParList, owner.getName());
@@ -233,7 +234,7 @@ public class ConfigConditionVal<
             }
             if (hasLogger()) {
                 getLogger().atWarn()
-                        .withPrefix("Config")
+                        .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("'{0}' is not found or incompatible type for ConfigConditionVal '{1}'",
                                 pathToParList, owner.getName());
@@ -243,7 +244,7 @@ public class ConfigConditionVal<
             if (list != null) cachedList = list;
             else if (hasLogger()) {
                 getLogger().atWarn()
-                        .withPrefix("Config")
+                        .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("listSupplier returns null for ConfigConditionVal '{0}'",
                                 owner.getName());

@@ -9,7 +9,7 @@ import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.OtherType;
 import ru.mousecray.mousecore.api.error.UnsupportedValException;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
-import ru.mousecray.mousecore.api.minecraft.MouseIBlockState;
+import ru.mousecray.mousecore.api.minecraft.MouseBlockState;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
 import javax.annotation.Nonnull;
@@ -19,7 +19,7 @@ import java.util.Objects;
 
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
-public class MinecraftBlock extends OtherType<MouseIBlockState> {
+public class MinecraftBlock extends OtherType<MouseBlockState> {
     public static final MinecraftBlock AIR = MinecraftBlock.create("air");
 
     static { storage.put(MinecraftBlock.class, MinecraftBlock::parse); }
@@ -28,7 +28,7 @@ public class MinecraftBlock extends OtherType<MouseIBlockState> {
     @Nonnull protected final String name;
 
     protected MinecraftBlock(String prefix, String name) {
-        super(MouseIBlockState.create(prefix, name));
+        super(MouseBlockState.create(prefix, name));
         this.prefix = prefix;
         this.name = name;
     }
@@ -48,7 +48,7 @@ public class MinecraftBlock extends OtherType<MouseIBlockState> {
 
     public static MinecraftBlock create(String name) { return create("minecraft", name); }
 
-    @Nullable public MouseIBlockState asBlockState() { return value; }
+    @Nullable public MouseBlockState asBlockState()  { return value; }
 
     public String getPrefix()                        { return prefix; }
     public String getName()                          { return name; }

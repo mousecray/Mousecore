@@ -70,9 +70,9 @@ public final class MouseMath {
         long  remain     = total;
 
         for (int i = 0; i < groupCount; ++i) {
-            int groupSize = (int) Math.min(remain, max); //Текущий размер группы
+            int groupSize = (int) Math.min(remain, max); //Current group size
             result[i] = groupSize;
-            remain -= groupSize; //Уменьшаем остаток
+            remain -= groupSize; //Reduce remain
         }
 
         return result;
@@ -81,7 +81,7 @@ public final class MouseMath {
     public static float normalize(float value, float min, float max) {
         if (max == min) return 0.0f;
         float normalized = (value - min) / (max - min);
-        return Mth.clamp(normalized, 0.0f, 1.0f);  // Ограничиваем [0, 1]
+        return Mth.clamp(normalized, 0.0f, 1.0f);  // Constraint [0, 1]
     }
 
     private MouseMath() { throw new UnsupportedOperationException("Cannot create utility class"); }

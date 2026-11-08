@@ -20,7 +20,7 @@ public class RangeContainer<T extends NumberType<?>> implements Comparable<Range
     private final T          minValue;
     private final T          maxValue;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "SafeVarargsHasNoEffect" }) @SafeVarargs
     public RangeContainer(Range<T>... ranges) {
         if (ranges == null) ranges = (Range<T>[]) Array.newInstance(Range.class, 0);
 

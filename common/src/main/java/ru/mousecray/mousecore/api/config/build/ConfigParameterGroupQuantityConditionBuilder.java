@@ -92,7 +92,7 @@ public final class ConfigParameterGroupQuantityConditionBuilder<T extends Compar
     void addDisabler(ConfigParDisabler disabler) {
         if (disablePar != null && configBuilder.logger != null) {
             configBuilder.logger.atWarn()
-                    .withPrefix("Config")
+                    .withPrefix(LogPrefixes.CONFIG)
                     .withStyle(ConsoleColor.YELLOW_BG)
                     .log("Disabler '{0}' in configSection '{1}.{2}' was overwritten by Disabler '{3}'",
                             disablePar.getName().getInternalName(), path, name.getInternalName(), disabler.getName().getInternalName());
@@ -112,7 +112,7 @@ public final class ConfigParameterGroupQuantityConditionBuilder<T extends Compar
         }
         if (logVal && configBuilder.logger != null) {
             configBuilder.logger.atWarn()
-                    .withPrefix("Config")
+                    .withPrefix(LogPrefixes.CONFIG)
                     .withStyle(ConsoleColor.YELLOW_BG)
                     .log("ConfigValue '{0}' in ConfigParameter '{1}' was overwritten by ConfigValue '{2}'",
                             listPar, getFullName(), value);
@@ -135,7 +135,7 @@ public final class ConfigParameterGroupQuantityConditionBuilder<T extends Compar
             canBeDisabled = parent.canBeDisabled();
             if (configBuilder.logger != null && !configBuilder.autoDisable) {
                 configBuilder.logger.atWarn()
-                        .withPrefix("Config")
+                        .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("The Parent section of ConfigParameterGroup '{0}' has flag 'canBeDisabled' " +
                                         "other then the ConfigParameterGroup value. " +

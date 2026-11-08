@@ -23,9 +23,9 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 
-public class MouseIItemState implements Comparable<MouseIItemState> {
-    private static final   Map<Item, MouseIItemState> cache = new SoftHashMap<>();
-    @Nonnull private final Item                       item;
+public class MouseItemState implements Comparable<MouseItemState> {
+    private static final Map<Item, MouseItemState> cache = new SoftHashMap<>();
+    @Nonnull private final Item item;
 
     private Boolean    hasBlock        = null;
     private Block      block           = null;
@@ -37,22 +37,22 @@ public class MouseIItemState implements Comparable<MouseIItemState> {
     private Boolean    isFireResistant = null;
     private String     descriptionId   = null;
 
-    public MouseIItemState(@Nonnull Item item) { this.item = Objects.requireNonNull(item); }
+    public MouseItemState(@Nonnull Item item) { this.item = Objects.requireNonNull(item); }
 
-    public static MouseIItemState create(Item item) {
+    public static MouseItemState create(Item item) {
         if (item == null) return null;
         if (Mousecore.getInstance().getConfig().ITEM_STATE_CACHE.getBooleanAnyway()) {
-            return cache.computeIfAbsent(item, MouseIItemState::new);
-        } else return new MouseIItemState(item);
+            return cache.computeIfAbsent(item, MouseItemState::new);
+        } else return new MouseItemState(item);
     }
 
     @SuppressWarnings("deprecation")
-    public static MouseIItemState create(String prefix, String name) {
+    public static MouseItemState create(String prefix, String name) {
         return create(BuiltInRegistries.ITEM.get(ResourceLocation.tryBuild(prefix, name)));
     }
 
     @SuppressWarnings("deprecation")
-    public static MouseIItemState create(ResourceLocation location) { return create(BuiltInRegistries.ITEM.get(location)); }
+    public static MouseItemState create(ResourceLocation location) { return create(BuiltInRegistries.ITEM.get(location)); }
 
     @Nonnull public Item getItem() { return item; }
 
@@ -126,16 +126,16 @@ public class MouseIItemState implements Comparable<MouseIItemState> {
                 : descriptionId;
     }
 
-    public Rarity getRarity()                     { return item.getRarity(ItemStack.EMPTY); }
-    public ItemStack getItemStack(int stackSize)  { return new ItemStack(item, Math.min(stackSize, getMaxStackSize())); }
-    public ItemStack getItemStack()               { return new ItemStack(item, 1); }
-    public boolean isEqual(MouseIItemState other) { return other != null && (other == this || item == other.item); }
-    private static boolean checkCacheDisabled()   { return !Mousecore.getInstance().getConfig().ITEM_STATE_CACHE_DATA.getBooleanAnyway(); }
+    public Rarity getRarity()                    { return item.getRarity(ItemStack.EMPTY); }
+    public ItemStack getItemStack(int stackSize) { return new ItemStack(item, Math.min(stackSize, getMaxStackSize())); }
+    public ItemStack getItemStack()              { return new ItemStack(item, 1); }
+    public boolean isEqual(MouseItemState other) { return other != null && (other == this || item == other.item); }
+    private static boolean checkCacheDisabled()  { return !Mousecore.getInstance().getConfig().ITEM_STATE_CACHE_DATA.getBooleanAnyway(); }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MouseIItemState that)) return false;
+        if (!(o instanceof MouseItemState that)) return false;
         return Objects.equals(item, that.item);
     }
 
@@ -143,9 +143,9 @@ public class MouseIItemState implements Comparable<MouseIItemState> {
     @SuppressWarnings("deprecation") @Override public String toString() { return BuiltInRegistries.ITEM.getKey(item).toString(); }
 
     @SuppressWarnings("deprecation") @Override
-    public int compareTo(@Nonnull MouseIItemState o) {
+    public int compareTo(@Nonnull MouseItemState o) {
         return Comparator
-                .comparing((MouseIItemState t) -> BuiltInRegistries.ITEM.getKey(t.getItem()))
+                .comparing((MouseItemState t) -> BuiltInRegistries.ITEM.getKey(t.getItem()))
                 .compare(this, o);
     }
 }

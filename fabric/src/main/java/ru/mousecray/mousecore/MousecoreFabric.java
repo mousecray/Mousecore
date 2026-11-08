@@ -8,7 +8,7 @@ import ru.mousecray.mousecore.core.Mousecore;
 public class MousecoreFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        Mousecore.LOGGER.atInfo()
+        Mousecore.getInstance().getLogger().atInfo()
                 .withPrefix(LogPrefixes.INIT)
                 .withStyle(ConsoleColor.GREEN_BG)
                 .log("Initialize Fabric library");

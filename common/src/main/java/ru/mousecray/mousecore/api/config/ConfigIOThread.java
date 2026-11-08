@@ -7,6 +7,7 @@ package ru.mousecray.mousecore.api.config;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
+import ru.mousecray.mousecore.api.log.LogPrefixes;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -83,11 +84,15 @@ public class ConfigIOThread extends Thread {
                         for (Map.Entry<MouseConfig, Callable<IOResult>> entry : savePool.entrySet()) {
                             if (entry != null) service.submit(() -> {
                                 try {
-                                    if (entry.getKey().hasUnsavedChanges()) {
-                                        entry.getValue().call();
-                                    }
+                                    if (entry.getKey().hasUnsavedChanges()) entry.getValue().call();
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    try {
+                                        MouseConfig key = entry.getKey();
+                                        //noinspection DataFlowIssue
+                                        key.logger.atFatal(e)
+                                                .withPrefix(LogPrefixes.CONFIG)
+                                                .log("Error when save MouseConfig '{1}'", key.getName());
+                                    } catch (Exception ignore) { }
                                 }
                             });
                         }
@@ -106,7 +111,13 @@ public class ConfigIOThread extends Thread {
                                             entry.getValue().call();
                                         }
                                     } catch (Exception e) {
-                                        e.printStackTrace();
+                                        try {
+                                            MouseConfig key = entry.getKey();
+                                            //noinspection DataFlowIssue
+                                            key.logger.atFatal(e)
+                                                    .withPrefix(LogPrefixes.CONFIG)
+                                                    .log("Error when load MouseConfig '{1}'", key.getName());
+                                        } catch (Exception ignore) { }
                                     }
                                 });
                                 iterator.remove();
@@ -167,7 +178,7 @@ public class ConfigIOThread extends Thread {
                         result.getType() != IOResult.ConfigIOResultType.NOT_FOUND) {
                     if (config.logger != null) {
                         config.logger.atError()
-                                .withPrefix("Config")
+                                .withPrefix(LogPrefixes.CONFIG)
                                 .withStyle(ConsoleColor.RED_BG)
                                 .log("MouseConfig '{0}' cannot be '{1}", config.getName(), operationTypeCompl);
                     }
@@ -176,14 +187,14 @@ public class ConfigIOThread extends Thread {
             } catch (InterruptedException e) {
                 if (config.logger != null) {
                     config.logger.atFatal(e)
-                            .withPrefix("Config")
+                            .withPrefix(LogPrefixes.CONFIG)
                             .log("During {0} of MouseConfig '{1}' an error occurred", operationType, config.getName());
                 }
                 return IOResult.createError(e);
             } catch (ExecutionException e) {
                 if (config.logger != null) {
                     config.logger.atFatal(e)
-                            .withPrefix("Config")
+                            .withPrefix(LogPrefixes.CONFIG)
                             .log("{0} of MouseConfig '{1}' was interrupted", operationTypeUpperCase, config.getName());
                 }
                 return IOResult.createError(e);
@@ -224,8 +235,7 @@ public class ConfigIOThread extends Thread {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof IOResult)) return false;
-            IOResult that = (IOResult) o;
+            if (!(o instanceof IOResult that)) return false;
             return type == that.type && Objects.equals(error, that.error);
         }
 

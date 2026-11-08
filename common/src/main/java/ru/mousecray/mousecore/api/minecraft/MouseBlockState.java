@@ -30,8 +30,8 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 
-public class MouseIBlockState implements Comparable<MouseIBlockState> {
-    private static final Map<BlockState, MouseIBlockState> cache = new SoftHashMap<>();
+public class MouseBlockState implements Comparable<MouseBlockState> {
+    private static final Map<BlockState, MouseBlockState> cache = new SoftHashMap<>();
 
     @Nonnull private final BlockState state;
 
@@ -57,26 +57,26 @@ public class MouseIBlockState implements Comparable<MouseIBlockState> {
     private VoxelShape shape          = null;
     private Integer    lightEmission  = null;
 
-    public MouseIBlockState(@Nonnull BlockState state) {
+    public MouseBlockState(@Nonnull BlockState state) {
         this.state = Objects.requireNonNull(state);
     }
 
-    public static MouseIBlockState create(BlockState state) {
+    public static MouseBlockState create(BlockState state) {
         if (state == null) return null;
         if (Mousecore.getInstance().getConfig().BLOCK_STATE_CACHE.getBooleanAnyway()) {
-            return cache.computeIfAbsent(state, MouseIBlockState::new);
-        } else return new MouseIBlockState(state);
+            return cache.computeIfAbsent(state, MouseBlockState::new);
+        } else return new MouseBlockState(state);
     }
 
-    public static MouseIBlockState create(Block block) { return block != null ? create(block.defaultBlockState()) : null; }
+    public static MouseBlockState create(Block block) { return block != null ? create(block.defaultBlockState()) : null; }
 
     @SuppressWarnings("deprecation")
-    public static MouseIBlockState create(String prefix, String name) {
+    public static MouseBlockState create(String prefix, String name) {
         return create(BuiltInRegistries.BLOCK.get(ResourceLocation.tryBuild(prefix, name)).defaultBlockState());
     }
 
     @SuppressWarnings("deprecation")
-    public static MouseIBlockState create(ResourceLocation location) {
+    public static MouseBlockState create(ResourceLocation location) {
         return create(BuiltInRegistries.BLOCK.get(location).defaultBlockState());
     }
 
@@ -249,18 +249,18 @@ public class MouseIBlockState implements Comparable<MouseIBlockState> {
                 : isRandomlyTicking;
     }
 
-    public MapColor getMapColor()                  { return state.getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO); }
-    public SoundType getSoundType()                { return state.getSoundType(); }
-    public PushReaction getPistonPushReaction()    { return state.getPistonPushReaction(); }
+    public MapColor getMapColor()                 { return state.getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO); }
+    public SoundType getSoundType()               { return state.getSoundType(); }
+    public PushReaction getPistonPushReaction()   { return state.getPistonPushReaction(); }
 
-    public boolean isEqual(MouseIBlockState other) { return other != null && (other == this || state == other.state); }
+    public boolean isEqual(MouseBlockState other) { return other != null && (other == this || state == other.state); }
 
-    private static boolean checkCacheDisabled()    { return !Mousecore.getInstance().getConfig().BLOCK_STATE_CACHE_DATA.getBooleanAnyway(); }
+    private static boolean checkCacheDisabled()   { return !Mousecore.getInstance().getConfig().BLOCK_STATE_CACHE_DATA.getBooleanAnyway(); }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MouseIBlockState that)) return false;
+        if (!(o instanceof MouseBlockState that)) return false;
         return Objects.equals(state, that.state);
     }
 
@@ -272,9 +272,9 @@ public class MouseIBlockState implements Comparable<MouseIBlockState> {
     }
 
     @SuppressWarnings("deprecation") @Override
-    public int compareTo(@Nonnull MouseIBlockState o) {
+    public int compareTo(@Nonnull MouseBlockState o) {
         return Comparator
-                .comparing((MouseIBlockState t) -> BuiltInRegistries.BLOCK.getKey(t.getState().getBlock()))
+                .comparing((MouseBlockState t) -> BuiltInRegistries.BLOCK.getKey(t.getState().getBlock()))
                 .thenComparingInt(t -> Block.getId(t.getState()))
                 .compare(this, o);
     }

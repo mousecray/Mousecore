@@ -52,7 +52,7 @@ public final class ConfigSectionBuilder extends AbstractConfigChildBuilder {
     void addDisabler(ConfigParDisabler disabler) {
         if (disablePar != null && configBuilder.logger != null) {
             configBuilder.logger.atWarn()
-                    .withPrefix("Config")
+                    .withPrefix(LogPrefixes.CONFIG)
                     .withStyle(ConsoleColor.YELLOW_BG)
                     .log("Disabler '{0}' in ConfigSection '{1}.{2}' was overwritten by Disabler '{3}'",
                             disablePar.getName().getInternalName(), path, name.getInternalName(), disabler.getName().getInternalName());

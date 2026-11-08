@@ -7,9 +7,9 @@ package ru.mousecray.mousecore.api.config.build;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mousecore.api.config.ConfigPar;
 import ru.mousecray.mousecore.api.config.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.ConfigVal;
-import ru.mousecray.mousecore.api.config.pars.ConfigPar;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.utils.MouseReflection;
 
@@ -66,7 +66,7 @@ public final class ConfigParameterBuilder<T extends Comparable<T>> extends Abstr
     protected void setValue(ConfigVal value) {
         if (this.value != null && configBuilder.logger != null) {
             configBuilder.logger.atWarn()
-                    .withPrefix("Config")
+                    .withPrefix(LogPrefixes.CONFIG)
                     .withStyle(ConsoleColor.YELLOW_BG)
                     .log("ConfigValue '{0}' in ConfigParameter '{1}' was overwritten by ConfigValue '{2}' " +
                             "It Constraint will be skipped", this.value, getFullName(), value
@@ -89,7 +89,7 @@ public final class ConfigParameterBuilder<T extends Comparable<T>> extends Abstr
             canBeDisabled = parent.canBeDisabled();
             if (configBuilder.logger != null && !configBuilder.autoDisable) {
                 configBuilder.logger.atWarn()
-                        .withPrefix("Config")
+                        .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("The Parent section of ConfigParameter '{0}' has flag 'canBeDisabled' other then the ConfigParameter value. " +
                                 "The value of ConfigParameter has been changed", getFullName()

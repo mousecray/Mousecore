@@ -9,7 +9,7 @@ import ru.mousecray.mousecore.core.Mousecore;
 @Mod(Mousecore.MOD_ID)
 public class MousecoreForge {
     public MousecoreForge(FMLJavaModLoadingContext ignoredContext) {
-        Mousecore.LOGGER.atInfo()
+        Mousecore.getInstance().getLogger().atInfo()
                 .withPrefix(LogPrefixes.INIT)
                 .withStyle(ConsoleColor.GREEN_BG)
                 .log("Initialize Forge library");

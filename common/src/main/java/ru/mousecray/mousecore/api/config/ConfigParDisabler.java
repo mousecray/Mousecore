@@ -7,7 +7,6 @@ package ru.mousecray.mousecore.api.config;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.VariableValue;
-import ru.mousecray.mousecore.api.config.pars.ConfigPar;
 import ru.mousecray.mousecore.api.config.specific.ConfigLocaleType;
 import ru.mousecray.mousecore.api.config.utils.ValueParseResult;
 import ru.mousecray.mousecore.api.config.values.ConfigValDisabler;
@@ -27,7 +26,7 @@ public class ConfigParDisabler extends ConfigPar<PlusMinusType> {
         this.useDefaultName = useDefaultName;
     }
 
-    @Nonnull @Override
+    @SuppressWarnings("DataFlowIssue") @Nonnull @Override
     public DisplayName getName() {
         return useDefaultName && hasConfig()
                 ? new DisplayName(

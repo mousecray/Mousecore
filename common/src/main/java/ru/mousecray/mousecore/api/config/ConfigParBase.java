@@ -22,8 +22,8 @@ public abstract class ConfigParBase<T extends CustomType<?>> extends ConfigSectB
     @Nonnull protected final DisplayName                           firstValName;
 
     public ConfigParBase(
-            @Nonnull DisplayName name, boolean canBeDisabled,
-            @Nonnull Pair<DisplayName, ? extends ConfigVal<T>> valuePair,
+            DisplayName name, boolean canBeDisabled,
+            Pair<DisplayName, ? extends ConfigVal<T>> valuePair,
             @Nullable Map<DisplayName, ConfigVal<?>> values, @Nullable String comment
     ) {
         super(name, canBeDisabled, comment);
