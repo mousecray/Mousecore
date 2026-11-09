@@ -186,7 +186,7 @@ abstract class RefHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
         @Nonnull
         @Override
         public Iterator<Entry<K, V>> iterator() {
-            return new Iterator<Entry<K, V>>() {
+            return new Iterator<>() {
                 private final Iterator<Entry<Key<K>, V>> hashIterator = hashEntrySet.iterator();
                 private       MyEntry<K, V>              next;
 

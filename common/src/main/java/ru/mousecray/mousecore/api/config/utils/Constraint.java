@@ -1,377 +1,99 @@
-/*******************************************************************************
- * Copyright © 2026 mousecray
- * Licensed under the GNU Lesser General Public License, Version 3.0
- ******************************************************************************/
+/*
+ * ******************************************************************************
+ *  * Copyright © 2026 mousecray
+ *  * Licensed under the GNU Lesser General Public License, Version 3.0
+ *  *****************************************************************************
+ */
 
 package ru.mousecray.mousecore.api.config.utils;
 
-import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.*;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
-import ru.mousecray.mousecore.api.utils.MouseStrings;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Objects;
 
-@MethodReturnsNonnullByDefault
-@ParametersAreNonnullByDefault
-public final class Constraint<T extends CustomType<?>> {
-    @Nonnull private final  ConstraintType          type;
-    @Nonnull private final  ConstraintConditionType relationType;
-    @Nullable private final String                  path;
-    @Nonnull private final  CustomValType           customValType;
-    @Nullable private final T                       val;
-    @Nullable private final RangeContainer<?>       range;
+public interface Constraint<T extends CustomType<?>> {
+    ConstraintType getType();
+    ConstraintConditionType getConditionType();
+    boolean hasSpecific();
+    @Nullable String getPath();
+    CustomValType getValType();
+    @Nullable T getVal();
+    @Nullable RangeContainer<?> getRange();
 
-    private Constraint(
-            ConstraintType type, ConstraintConditionType relationType,
-            @Nullable String path, CustomValType customValType, @Nullable T val, @Nullable RangeContainer<?> range
-    ) {
-        this.type = Objects.requireNonNull(type);
-        this.relationType = Objects.requireNonNull(relationType);
-        path = MouseStrings.trimWith(path, true, '\t');
-        if (path != null) {
-            if (path.isEmpty()) throw new IllegalArgumentException("path cannot be empty");
-            if (path.contains("\t")) throw new IllegalArgumentException("path cannot contains tabs");
-        }
-        this.path = path;
-        this.customValType = Objects.requireNonNull(customValType);
-        this.val = val;
-        this.range = range;
-    }
 
-    public ConstraintType getType()                   { return type; }
-    public ConstraintConditionType getConditionType() { return relationType; }
-    public boolean hasSpecific()                      { return val != null || range != null; }
-    @Nullable public String getPath()                 { return path; }
-    public CustomValType getValType()                 { return customValType; }
-    @Nullable public T getVal()                       { return val; }
-    @Nullable public RangeContainer<?> getRange()     { return range; }
+    enum ConstraintType {DISABLED, RELATION}
 
-    @Override
-    public String toString() {
-        return "Constraint{" +
-                "type=" + type +
-                ", relationType=" + relationType +
-                ", path='" + path + '\'' +
-                ", customValType=" + customValType +
-                ", val=" + val +
-                ", range=" + range +
-                '}';
-    }
+    enum ConstraintConditionType {DISABLED, LESS, MORE, EQUAL, NOT_EQUAL, LESS_OR_EQUAL, MORE_OR_EQUAL, IN_RANGE}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Constraint value)) return false;
-        return type == value.type && relationType == value.relationType
-                && Objects.equals(path, value.path) && Objects.equals(customValType, value.customValType)
-                && Objects.equals(val, value.val) && Objects.equals(range, value.range);
-    }
+    interface Builder {
+        static Builder create() { return ConfigTypeFactory.getInstance().CONSTRAINT_BUILDER(); }
 
-    @Override public int hashCode() { return Objects.hash(type, relationType, path, customValType, val, range); }
+        DisabledBuilder setDisabledType(String path);
+        RelationBuilder setRelationType(String path);
 
-    public enum ConstraintType {DISABLED, RELATION}
-
-    public enum ConstraintConditionType {DISABLED, LESS, MORE, EQUAL, NOT_EQUAL, LESS_OR_EQUAL, MORE_OR_EQUAL, IN_RANGE}
-
-    public static final class Builder {
-        private ConstraintType type;
-        private String         path;
-
-        private Builder()              { }
-        public static Builder create() { return new Builder(); }
-
-        public DisabledBuilder setDisabledType(String path) {
-            this.path = Objects.requireNonNull(path);
-            type = ConstraintType.DISABLED;
-            return new DisabledBuilder();
+        interface DisabledBuilder {
+            DisabledBuilderLogical setLogicalType();
+            DisabledBuilderNumber setNumberType();
+            DisabledBuilderOther setOtherType();
         }
 
-        public RelationBuilder setRelationType(String path) {
-            this.path = Objects.requireNonNull(path);
-            type = ConstraintType.RELATION;
-            return new RelationBuilder();
+        interface DisabledBuilderLogical {
+            <T extends LogicalType<?>> Constraint<T> setConditionDisabled();
+            <T extends LogicalType<?>> Constraint<T> setConditionEqual();
+            <T extends LogicalType<?>> Constraint<T> setConditionNotEqual();
+            <T extends LogicalType<?>> Constraint<T> setConditionEqual(T val);
+            <T extends LogicalType<?>> Constraint<T> setConditionNotEqual(T val);
         }
 
-        public final class DisabledBuilder {
-            private DisabledBuilder()                      { }
-
-            public DisabledBuilderLogical setLogicalType() { return new DisabledBuilderLogical(); }
-            public DisabledBuilderNumber setNumberType()   { return new DisabledBuilderNumber(); }
-            public DisabledBuilderOther setOtherType()     { return new DisabledBuilderOther(); }
+        interface DisabledBuilderNumber {
+            <T extends NumberType<?>> Constraint<T> setConditionDisabled();
+            <T extends NumberType<?>> Constraint<T> setConditionEqual();
+            <T extends NumberType<?>> Constraint<T> setConditionNotEqual();
+            <T extends NumberType<?>> Constraint<T> setConditionEqual(T val);
+            <T extends NumberType<?>> Constraint<T> setConditionNotEqual(T val);
+            <T extends NumberType<?>> Constraint<T> setConditionLess();
+            <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual();
+            <T extends NumberType<?>> Constraint<T> setConditionMore();
+            <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual();
+            <T extends NumberType<?>> Constraint<T> setConditionLess(T val);
+            <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual(T val);
+            <T extends NumberType<?>> Constraint<T> setConditionMore(T val);
+            <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual(T val);
+            <T extends NumberType<?>> Constraint<T> setConditionRange(RangeContainer<T> range);
         }
 
-        public final class DisabledBuilderLogical {
-            private DisabledBuilderLogical() { }
-
-            public <T extends LogicalType<?>> Constraint<T> setConditionDisabled() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.DISABLED,
-                        path, CustomValType.LOGICAL, null, null
-                );
-            }
-
-            public <T extends LogicalType<?>> Constraint<T> setConditionEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.EQUAL,
-                        path, CustomValType.LOGICAL, null, null
-                );
-            }
-
-            public <T extends LogicalType<?>> Constraint<T> setConditionNotEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.NOT_EQUAL,
-                        path, CustomValType.LOGICAL, null, null
-                );
-            }
-
-            public <T extends LogicalType<?>> Constraint<T> setConditionEqual(T val) {
-                return new Constraint<>(
-                        type, ConstraintConditionType.EQUAL,
-                        path, CustomValType.LOGICAL, Objects.requireNonNull(val), null
-                );
-            }
-
-            public <T extends LogicalType<?>> Constraint<T> setConditionNotEqual(T val) {
-                return new Constraint<>(
-                        type, ConstraintConditionType.NOT_EQUAL,
-                        path, CustomValType.LOGICAL, Objects.requireNonNull(val), null
-                );
-            }
+        interface DisabledBuilderOther {
+            <T extends OtherType<?>> Constraint<T> setConditionDisabled();
+            <T extends OtherType<?>> Constraint<T> setConditionEqual();
+            <T extends OtherType<?>> Constraint<T> setConditionNotEqual();
+            <T extends OtherType<?>> Constraint<T> setConditionEqual(T val);
+            <T extends OtherType<?>> Constraint<T> setConditionNotEqual(T val);
         }
 
-        public final class DisabledBuilderNumber {
-            private DisabledBuilderNumber() { }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionDisabled() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.DISABLED,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.EQUAL,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionNotEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.NOT_EQUAL,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionEqual(T val) {
-                return new Constraint<>(
-                        type, ConstraintConditionType.EQUAL,
-                        path, CustomValType.NUMBER, Objects.requireNonNull(val), null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionNotEqual(T val) {
-                return new Constraint<>(
-                        type, ConstraintConditionType.NOT_EQUAL,
-                        path, CustomValType.NUMBER, Objects.requireNonNull(val), null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionLess() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.LESS,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.LESS_OR_EQUAL,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionMore() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.MORE,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.MORE_OR_EQUAL,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionLess(T val) {
-                return new Constraint<>(
-                        type, ConstraintConditionType.LESS,
-                        path, CustomValType.NUMBER, Objects.requireNonNull(val), null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual(T val) {
-                return new Constraint<>(
-                        type, ConstraintConditionType.LESS_OR_EQUAL,
-                        path, CustomValType.NUMBER, Objects.requireNonNull(val), null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionMore(T val) {
-                return new Constraint<>(
-                        type, ConstraintConditionType.MORE,
-                        path, CustomValType.NUMBER, Objects.requireNonNull(val), null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual(T val) {
-                return new Constraint<>(
-                        type, ConstraintConditionType.MORE_OR_EQUAL,
-                        path, CustomValType.NUMBER, Objects.requireNonNull(val), null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionRange(RangeContainer<T> range) {
-                return new Constraint<>(
-                        type, ConstraintConditionType.IN_RANGE,
-                        path, CustomValType.NUMBER, null, Objects.requireNonNull(range)
-                );
-            }
+        interface RelationBuilder {
+            RelationBuilderLogical setLogicalType();
+            RelationBuilderNumber setNumberType();
+            RelationBuilderOther setOtherType();
         }
 
-        public final class DisabledBuilderOther {
-            private DisabledBuilderOther() { }
-
-            public <T extends OtherType<?>> Constraint<T> setConditionDisabled() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.DISABLED,
-                        path, CustomValType.OTHER, null, null
-                );
-            }
-
-            public <T extends OtherType<?>> Constraint<T> setConditionEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.EQUAL,
-                        path, CustomValType.OTHER, null, null
-                );
-            }
-
-            public <T extends OtherType<?>> Constraint<T> setConditionNotEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.NOT_EQUAL,
-                        path, CustomValType.OTHER, null, null
-                );
-            }
-
-            public <T extends OtherType<?>> Constraint<T> setConditionEqual(T val) {
-                return new Constraint<>(
-                        type, ConstraintConditionType.EQUAL,
-                        path, CustomValType.OTHER, Objects.requireNonNull(val), null
-                );
-            }
-
-            public <T extends OtherType<?>> Constraint<T> setConditionNotEqual(T val) {
-                return new Constraint<>(
-                        type, ConstraintConditionType.NOT_EQUAL,
-                        path, CustomValType.OTHER, Objects.requireNonNull(val), null
-                );
-            }
+        interface RelationBuilderLogical {
+            <T extends LogicalType<?>> Constraint<T> setConditionEqual();
+            <T extends LogicalType<?>> Constraint<T> setConditionNotEqual();
         }
 
-        public final class RelationBuilder {
-            private RelationBuilder()                      { }
-
-            public RelationBuilderLogical setLogicalType() { return new RelationBuilderLogical(); }
-            public RelationBuilderNumber setNumberType()   { return new RelationBuilderNumber(); }
-            public RelationBuilderOther setOtherType()     { return new RelationBuilderOther(); }
+        interface RelationBuilderNumber {
+            <T extends NumberType<?>> Constraint<T> setConditionEqual();
+            <T extends NumberType<?>> Constraint<T> setConditionNotEqual();
+            <T extends NumberType<?>> Constraint<T> setConditionLess();
+            <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual();
+            <T extends NumberType<?>> Constraint<T> setConditionMore();
+            <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual();
         }
 
-        public final class RelationBuilderLogical {
-            private RelationBuilderLogical() { }
-
-            public <T extends LogicalType<?>> Constraint<T> setConditionEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.EQUAL,
-                        path, CustomValType.LOGICAL, null, null
-                );
-            }
-
-            public <T extends LogicalType<?>> Constraint<T> setConditionNotEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.NOT_EQUAL,
-                        path, CustomValType.LOGICAL, null, null
-                );
-            }
-        }
-
-        public final class RelationBuilderNumber {
-            private RelationBuilderNumber() { }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.EQUAL,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionNotEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.NOT_EQUAL,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionLess() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.LESS,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.LESS_OR_EQUAL,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionMore() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.MORE,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-
-            public <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.MORE_OR_EQUAL,
-                        path, CustomValType.NUMBER, null, null
-                );
-            }
-        }
-
-        public final class RelationBuilderOther {
-            private RelationBuilderOther() { }
-
-            public <T extends OtherType<?>> Constraint<T> setConditionEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.EQUAL,
-                        path, CustomValType.OTHER, null, null
-                );
-            }
-
-            public <T extends OtherType<?>> Constraint<T> setConditionNotEqual() {
-                return new Constraint<>(
-                        type, ConstraintConditionType.NOT_EQUAL,
-                        path, CustomValType.OTHER, null, null
-                );
-            }
+        interface RelationBuilderOther {
+            <T extends OtherType<?>> Constraint<T> setConditionEqual();
+            <T extends OtherType<?>> Constraint<T> setConditionNotEqual();
         }
     }
 }

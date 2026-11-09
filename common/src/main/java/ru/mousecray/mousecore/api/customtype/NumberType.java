@@ -9,7 +9,6 @@ import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.utils.MouseNumbers;
 import ru.mousecray.mousecore.api.utils.MouseUtils;
 
-import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Comparator;
 import java.util.Objects;
@@ -49,7 +48,7 @@ public abstract class NumberType<T extends Comparable<T>> extends CustomType<Num
     }
 
     @Override
-    public int compareTo(@Nonnull NumberType<?> o) {
+    public int compareTo(NumberType<?> o) {
         return Comparator
                 .<NumberType<?>, Comparable>comparing(NumberType::getValue)
                 .compare(this, o);

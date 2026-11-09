@@ -47,12 +47,13 @@ public class Range<T extends NumberType<?>> implements Comparable<Range<T>> {
     }
 
     public boolean isInRange(T value) {
-        return includeMin
+        boolean minOk = includeMin
                 ? minValue.getLogicPipeline().isLessOrEqual(value)
-                : minValue.getLogicPipeline().isLess(value)
-                && includeMax
+                : minValue.getLogicPipeline().isLess(value);
+        boolean maxOk = includeMax
                 ? maxValue.getLogicPipeline().isMoreOrEqual(value)
                 : maxValue.getLogicPipeline().isMore(value);
+        return minOk && maxOk;
     }
 
     @Override

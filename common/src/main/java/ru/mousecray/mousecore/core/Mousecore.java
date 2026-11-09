@@ -1,9 +1,9 @@
 package ru.mousecray.mousecore.core;
 
 import org.apache.logging.log4j.LogManager;
-import ru.mousecray.mousecore.api.config.MouseConfig;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.MouseLogger;
+import ru.mousecray.mousecore.core.config.MouseConfigImpl;
 
 public final class Mousecore {
     public static final String MOD_ID      = "mousecore";
@@ -14,8 +14,8 @@ public final class Mousecore {
     private static Mousecore instance;
     public static Mousecore getInstance() { return instance != null ? instance : (instance = new Mousecore()); }
 
-    private final MouseLogger logger;
-    private final MouseConfig config;
+    private final MouseLogger     logger;
+    private final MouseConfigImpl config;
 
     private Mousecore() {
         logger = new MouseLogger(LogManager.getLogger(MOD_ID), "[${value}]", ConsoleColor.PURPLE);
@@ -23,6 +23,6 @@ public final class Mousecore {
         config = null;
     }
 
-    public MouseLogger getLogger() { return logger; }
-    public MouseConfig getConfig() { return config; }
+    public MouseLogger getLogger()     { return logger; }
+    public MouseConfigImpl getConfig() { return config; }
 }

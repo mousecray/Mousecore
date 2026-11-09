@@ -1,24 +1,41 @@
 # eclipse
-bin
+bin/
 *.launch
-.settings
-.metadata
+.settings/
+.metadata/
 .classpath
 .project
+eclipse/
 
-# idea
-out
+# idea artifacts
+/out/
 *.ipr
 *.iws
 *.iml
 .idea/*
-!.idea/scopes
+!.idea/scopes/
 
-# gradle
-./build
-.gradle
+# gradle build output
+.gradle/
+/build/
+/*/build/
+/buildSrc/build/
 
-# other
-eclipse
-run
-runs
+# run dirs
+/run/
+/runs/
+/run-data/
+/*/run/
+/*/runs/
+/*/run-data/
+
+# SigMap & AI context
+/.contextignore
+/gen-context.config.json
+/CLAUDE.md
+/AGENTS.md
+/.github/
+/.context/
+/gemini-context.md
+
+!**/src/**

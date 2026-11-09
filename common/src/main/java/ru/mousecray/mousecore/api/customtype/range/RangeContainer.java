@@ -108,17 +108,53 @@ public class RangeContainer<T extends NumberType<?>> implements Comparable<Range
         Arrays.sort(array, Comparator.comparing(Range::getMinValue));
 
         List<Range<T>> result = new ArrayList<>();
-        result.add(array[0]);
+        result.add(Range.of(
+                array[0].getMinValue(),
+                array[0].getMaxValue(),
+                array[0].isIncludeMin(),
+                array[0].isIncludeMax()
+        ));
 
         for (int i = 1; i < array.length; i++) {
             Range<T> last = result.get(result.size() - 1);
             Range<T> curr = array[i];
 
+            int touchCmp = curr.getMinValue().compareTo(last.getMaxValue());
 
-            if (curr.getMinValue().getLogicPipeline().isMoreOrEqual(last.getMaxValue()))
-                result.set(result.size() - 1, Range.of(last.getMinValue(), getMaxFromRanges(last, curr)));
-            else
-                result.add(Range.of(curr.getMinValue(), curr.getMaxValue()));
+            boolean canMerge = touchCmp < 0
+                    || (touchCmp == 0 && (last.isIncludeMax() || curr.isIncludeMin()));
+
+            if (canMerge) {
+                T       newMin        = last.getMinValue();
+                boolean newIncludeMin = last.isIncludeMin();
+                if (curr.getMinValue().compareTo(last.getMinValue()) == 0) {
+                    newIncludeMin = last.isIncludeMin() || curr.isIncludeMin();
+                }
+
+                T       newMax;
+                boolean newIncludeMax;
+                int     maxCmp = curr.getMaxValue().compareTo(last.getMaxValue());
+
+                if (maxCmp > 0) {
+                    newMax = curr.getMaxValue();
+                    newIncludeMax = curr.isIncludeMax();
+                } else if (maxCmp < 0) {
+                    newMax = last.getMaxValue();
+                    newIncludeMax = last.isIncludeMax();
+                } else {
+                    newMax = last.getMaxValue();
+                    newIncludeMax = last.isIncludeMax() || curr.isIncludeMax();
+                }
+
+                result.set(result.size() - 1, Range.of(newMin, newMax, newIncludeMin, newIncludeMax));
+            } else {
+                result.add(Range.of(
+                        curr.getMinValue(),
+                        curr.getMaxValue(),
+                        curr.isIncludeMin(),
+                        curr.isIncludeMax()
+                ));
+            }
         }
 
         return result.toArray((Range<T>[]) Array.newInstance(Range.class, 0));
