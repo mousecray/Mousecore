@@ -56,7 +56,32 @@ public class OperationRegistry {
         CAST_CACHE.clear();
     }
 
-    public static Object evaluateBinary(CustomType<?> left, CustomType<?> right, IBinaryOperator op) {
+    public static boolean canEvaluate(Class<? extends CustomType<?>> targetClass, IUnaryOperator op) {
+        if (targetClass == null || op == null) return false;
+        String cacheKey = targetClass.getName() + "|" + op;
+        return UNARY_CACHE.computeIfAbsent(cacheKey, k -> findBestUnaryMatch(targetClass, op)) != null;
+    }
+
+    public static boolean canEvaluate(Class<? extends CustomType<?>> leftClass, Class<? extends CustomType<?>> rightClass, IBinaryOperator op) {
+        if (leftClass == null || rightClass == null || op == null) return false;
+        String cacheKey = leftClass.getName() + "|" + rightClass.getName() + "|" + op;
+        return BINARY_CACHE.computeIfAbsent(cacheKey, k -> findBestBinaryMatch(leftClass, rightClass, op)) != null;
+    }
+
+    public static boolean canEvaluate(Class<? extends CustomType<?>> sourceClass, Class<?> targetClass) {
+        if (sourceClass == null || targetClass == null) return false;
+        if (targetClass.isAssignableFrom(sourceClass)) return true;
+        String cacheKey = sourceClass.getName() + "|CAST_TO|" + targetClass.getName();
+        return CAST_CACHE.computeIfAbsent(cacheKey, k -> findBestCastMatch(sourceClass, targetClass)) != null;
+    }
+
+    public static boolean canEvaluate(Class<? extends CustomType<?>> targetClass, IShiftOperator op) {
+        if (targetClass == null || op == null) return false;
+        String cacheKey = targetClass.getName() + "|" + op;
+        return SHIFT_CACHE.computeIfAbsent(cacheKey, k -> findBestShiftMatch(targetClass, op)) != null;
+    }
+
+    public static Object evaluate(CustomType<?> left, CustomType<?> right, IBinaryOperator op) {
         if (left == null || right == null) throw new UnsupportedValException("Arguments cannot be null");
 
         String     cacheKey = left.getClass().getName() + "|" + right.getClass().getName() + "|" + op.toString();
@@ -69,7 +94,7 @@ public class OperationRegistry {
         return action.apply(left, right);
     }
 
-    public static Object evaluateUnary(CustomType<?> target, IUnaryOperator op) {
+    public static Object evaluate(CustomType<?> target, IUnaryOperator op) {
         if (target == null) throw new UnsupportedValException("Argument cannot be null");
 
         String   cacheKey = target.getClass().getName() + "|" + op.toString();
@@ -82,7 +107,7 @@ public class OperationRegistry {
         return action.apply(target);
     }
 
-    public static Object evaluateShift(CustomType<?> target, int shiftAmount, IShiftOperator op) {
+    public static Object evaluate(CustomType<?> target, int shiftAmount, IShiftOperator op) {
         if (target == null) throw new UnsupportedValException("Аргумент не может быть null");
 
         String         cacheKey = target.getClass().getName() + "|" + op.toString();
@@ -96,7 +121,7 @@ public class OperationRegistry {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends CustomType<?>> T evaluateCast(CustomType<?> source, Class<T> targetClass) {
+    public static <T extends CustomType<?>> T evaluate(CustomType<?> source, Class<T> targetClass) {
         if (source == null) throw new UnsupportedValException("Cast source cannot be null");
         if (targetClass.isInstance(source)) return (T) source;
 

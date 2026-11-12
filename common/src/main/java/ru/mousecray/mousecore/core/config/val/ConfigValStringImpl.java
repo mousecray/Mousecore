@@ -6,11 +6,11 @@
 package ru.mousecray.mousecore.core.config.val;
 
 import ru.mousecray.mousecore.api.VariableValue;
-import ru.mousecray.mousecore.api.config.utils.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.ConfigValString;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.customtype.values.StringType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.core.config.val.base.ConfigOtherValImpl;
@@ -27,7 +27,7 @@ public class ConfigValStringImpl extends ConfigOtherValImpl<StringType> implemen
             @Nullable PredefinedValue<StringType>... configureValues
     ) {
         super(
-                ConfigValType.STRING,
+                ValType.SIMPLE_STRING,
                 defaultValue == null ? StringType.NULL : defaultValue,
                 disabledValue == null ? StringType.NULL : disabledValue,
                 specificDataType, constraints, configureValues

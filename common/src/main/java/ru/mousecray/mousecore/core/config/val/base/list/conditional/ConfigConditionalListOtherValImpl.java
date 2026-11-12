@@ -9,8 +9,8 @@ import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.val.IValType;
 import ru.mousecray.mousecore.api.config.val.base.list.conditional.ConfigConditionalListOtherVal;
+import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.OtherType;
 import ru.mousecray.mousecore.api.customtype.values.ConditionalListType;
 
@@ -24,15 +24,11 @@ import java.util.function.Function;
 public abstract class ConfigConditionalListOtherValImpl<T extends OtherType<?>> extends ConfigConditionalListValImpl<T> implements ConfigConditionalListOtherVal<T> {
     @SafeVarargs
     public ConfigConditionalListOtherValImpl(
-            IValType listComponentType, Class<T> listTypeClass,
             @Nullable Function<String, T> valCreator,
             ConditionalListType<T> defaultValue, ConditionalListType<T> disabledValue,
-            @Nullable Constraint<? extends ru.mousecray.mousecore.api.customtype.CustomType<?>>[] constraints,
+            @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<ConditionalListType<T>>... configureValues
     ) {
-        super(
-                listComponentType, listTypeClass, valCreator, defaultValue, disabledValue,
-                constraints, configureValues
-        );
+        super(valCreator, defaultValue, disabledValue, constraints, configureValues);
     }
 }

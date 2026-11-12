@@ -72,16 +72,6 @@ public class RangeContainer<T extends NumberType<?>> implements Comparable<Range
         return isEmpty() || MouseCollections.ifAny(ranges, p -> p.isInRange(other));
     }
 
-//    public boolean isMoreMinExclude(T other) {
-//        if (isEmpty()) return true;
-//        return MouseCollections.ifAny(ranges, p -> p.isMoreMinExclude(other));
-//    }
-//
-//    public boolean isLessMaxExclude(T other) {
-//        if (isEmpty()) return true;
-//        return MouseCollections.ifAny(ranges, p -> p.isLessMaxExclude(other));
-//    }
-
     public T getNearValue(T other) {
         if (other == null || isEmpty()) return other;
 
@@ -165,7 +155,7 @@ public class RangeContainer<T extends NumberType<?>> implements Comparable<Range
         if (ranges == null) return null;
         T currentMin = null;
         for (Range<T> range : ranges) {
-            if (currentMin == null || currentMin.getLogicPipeline().isMoreOrEqual(range.getMinValue())) {
+            if (currentMin == null || currentMin.getLogicPipeline().isMoreOrEqual(range.getMinValue()).asBoolean()) {
                 currentMin = range.getMinValue();
             }
         }
@@ -177,7 +167,7 @@ public class RangeContainer<T extends NumberType<?>> implements Comparable<Range
         if (ranges == null) return null;
         T currentMax = null;
         for (Range<T> range : ranges) {
-            if (currentMax == null || currentMax.getLogicPipeline().isLessOrEqual(range.getMaxValue())) {
+            if (currentMax == null || currentMax.getLogicPipeline().isLessOrEqual(range.getMaxValue()).asBoolean()) {
                 currentMax = range.getMaxValue();
             }
         }
@@ -187,8 +177,7 @@ public class RangeContainer<T extends NumberType<?>> implements Comparable<Range
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RangeContainer)) return false;
-        RangeContainer<?> that = (RangeContainer<?>) o;
+        if (!(o instanceof RangeContainer<?> that)) return false;
         return Objects.deepEquals(ranges, that.ranges)
                 && Objects.equals(minValue, that.minValue)
                 && Objects.equals(maxValue, that.maxValue);

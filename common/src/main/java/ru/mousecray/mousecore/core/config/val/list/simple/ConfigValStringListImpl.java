@@ -7,11 +7,11 @@ package ru.mousecray.mousecore.core.config.val.list.simple;
 
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.utils.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.list.simple.ConfigValStringList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
 import ru.mousecray.mousecore.api.customtype.values.StringType;
 import ru.mousecray.mousecore.core.config.val.base.list.simple.ConfigSimpleListOtherValImpl;
@@ -31,12 +31,12 @@ public class ConfigValStringListImpl extends ConfigSimpleListOtherValImpl<String
             @Nullable PredefinedValue<SimpleListType<StringType>>... configureValues
     ) {
         super(
-                ConfigValType.STRING, StringType.class, createValCreator(),
+                createValCreator(),
                 defaultValue == null
-                        ? SimpleListType.create(StringType.class, createValCreator())
+                        ? SimpleListType.create(ValType.SIMPLE_STRING, createValCreator())
                         : defaultValue,
                 disabledValue == null
-                        ? SimpleListType.create(StringType.class, createValCreator())
+                        ? SimpleListType.create(ValType.SIMPLE_STRING, createValCreator())
                         : disabledValue,
                 constraints, configureValues
         );

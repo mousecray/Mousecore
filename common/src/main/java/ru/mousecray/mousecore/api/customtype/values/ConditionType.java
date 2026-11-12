@@ -7,6 +7,8 @@ package ru.mousecray.mousecore.api.customtype.values;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.OtherType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.utils.MouseLambdas;
 import ru.mousecray.mousecore.api.utils.MouseUtils;
 
@@ -19,6 +21,10 @@ import java.util.function.BiPredicate;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 public final class ConditionType<T1, T2> extends OtherType<String> {
+    private static final MouseUtils.Equator<ConditionType<?, ?>> EQUATOR = MouseUtils.Equator
+            .<ConditionType<?, ?>>equaling(ConditionType::getDisplayName)
+            .thenEqualing(ConditionType::getPredicate);
+
     public static <TYPE1, TYPE2> ConditionType<TYPE1, TYPE2> ANY(String displayName) {
         return new ConditionType<>(MouseLambdas::ANY, displayName);
     }
@@ -37,6 +43,8 @@ public final class ConditionType<T1, T2> extends OtherType<String> {
     public static <T1, T2> ConditionType<T1, T2> create(BiPredicate<T1, T2> predicate, String displayName) {
         return new ConditionType<>(predicate, displayName);
     }
+
+    @Override public IValType getValType()                { return ValType.SIMPLE_CONDITION; }
 
     public boolean test(@Nullable T1 t1, @Nullable T2 t2) { return predicate.test(t1, t2); }
 
@@ -58,10 +66,5 @@ public final class ConditionType<T1, T2> extends OtherType<String> {
     @Override public int hashCode()    { return Objects.hash(predicate, value); }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass") @Override
-    public boolean equals(Object o) {
-        return MouseUtils.Equator
-                .<ConditionType<T1, T2>, String>equaling(ConditionType::getDisplayName)
-                .thenEqualing(ConditionType::getPredicate)
-                .equals(getClass(), this, o);
-    }
+    public boolean equals(Object o) { return EQUATOR.test(this, o); }
 }

@@ -8,19 +8,16 @@
 package ru.mousecray.mousecore.api.config;
 
 import ru.mousecray.mousecore.api.DisplayName;
+import ru.mousecray.mousecore.api.config.io.IOFuture;
+import ru.mousecray.mousecore.api.config.par.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
-import ru.mousecray.mousecore.api.config.val.ConfigVal;
-import ru.mousecray.mousecore.api.config.val.ConfigValRandomQuantity;
-import ru.mousecray.mousecore.api.config.val.ConfigValString;
+import ru.mousecray.mousecore.api.config.val.*;
 import ru.mousecray.mousecore.api.config.val.base.ConfigListVal;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
 import ru.mousecray.mousecore.api.log.MouseLogger;
-import ru.mousecray.mousecore.core.config.ConfigIOThread;
-import ru.mousecray.mousecore.core.config.par.ConfigParGroupImpl;
-import ru.mousecray.mousecore.core.config.val.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,14 +27,14 @@ import java.util.List;
 
 public interface MouseConfig {
     @Nullable <T extends CustomType<?>, D extends ConfigVal<T>> D getValue(@Nullable String fullName);
-    @Nullable ConfigValPlusMinusImpl getBooleanVal(@Nullable String fullName);
-    @Nullable ConfigValDecimalImpl getDecimalVal(@Nullable String fullName);
-    @Nullable ConfigValIntegralImpl getIntegerVal(@Nullable String fullName);
+    @Nullable ConfigValPlusMinus getBooleanVal(@Nullable String fullName);
+    @Nullable ConfigValDecimal getDecimalVal(@Nullable String fullName);
+    @Nullable ConfigValIntegral getIntegerVal(@Nullable String fullName);
     @Nullable ConfigValString getStringVal(@Nullable String fullName);
     @Nullable ConfigValRandomQuantity getRandomQuantityVal(@Nullable String fullName);
-    @Nullable ConfigValPercentImpl getPercentVal(@Nullable String fullName);
+    @Nullable ConfigValPercent getPercentVal(@Nullable String fullName);
 
-    @Nullable <TYPE extends CustomType<TYPE>> ConfigConditionValImpl<TYPE> getConditionVal(@Nullable String fullName);
+    @Nullable <TYPE extends CustomType<TYPE>> ConfigValCondition<TYPE> getConditionVal(@Nullable String fullName);
     @Nullable <
             LIST_VAL extends CustomType<?>,
             VAL extends CustomType<?>,
@@ -45,7 +42,7 @@ public interface MouseConfig {
             >
     ConfigListVal<LIST_VAL, VAL, TYPE> getListVal(@Nullable String fullName);
 
-    <T extends CustomType<T>, D extends ConfigParGroupImpl<T>> D getGroup(@Nullable String fullName);
+    <T extends CustomType<T>, D extends ConfigParGroup<T>> D getGroup(@Nullable String fullName);
 
     ConfigSect getSection(DisplayName name);
     @Nullable ConfigSectBase getSectionBase(@Nullable String fullName);
@@ -71,6 +68,6 @@ public interface MouseConfig {
     @Nullable MouseLogger getLogger();
 
     void reset();
-    ConfigIOThread.IOFuture load();
-    ConfigIOThread.IOFuture save(boolean markUnloaded);
+    IOFuture load();
+    IOFuture save(boolean markUnloaded);
 }

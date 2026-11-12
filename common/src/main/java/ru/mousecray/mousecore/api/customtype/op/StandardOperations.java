@@ -12,7 +12,7 @@ import ru.mousecray.mousecore.api.utils.MouseNumbers;
 
 public class StandardOperations {
 
-    @SuppressWarnings("unchecked") public static void registerDefaults() {
+    public static void registerDefaults() {
         OperationRegistry.registerCast(LogicalType.class, NumberType.class,
                 source -> IntegralType.create(source.asBoolean() ? 1L : 0L));
 
@@ -150,29 +150,29 @@ public class StandardOperations {
 
         for (ArithmeticOperator.Binary op : ArithmeticOperator.Binary.values()) {
             OperationRegistry.registerBinary(ConditionalValType.class, CustomType.class, op, (left, right) ->
-                    left.createType((CustomType<?>) OperationRegistry.evaluateBinary(left.getValue(), right, op), left.isAnti()));
+                    left.createType((CustomType<?>) OperationRegistry.evaluate(left.getValue(), right, op), left.isAnti()));
         }
 
         for (BitwiseOperator.Binary op : BitwiseOperator.Binary.values()) {
             OperationRegistry.registerBinary(ConditionalValType.class, CustomType.class, op, (left, right) ->
-                    left.createType((CustomType<?>) OperationRegistry.evaluateBinary(left.getValue(), right, op), left.isAnti()));
+                    left.createType((CustomType<?>) OperationRegistry.evaluate(left.getValue(), right, op), left.isAnti()));
         }
 
         OperationRegistry.registerBinary(ConditionalValType.class, CustomType.class, LogicalOperator.Binary.AND, (left, right) ->
-                left.createType((CustomType<?>) OperationRegistry.evaluateBinary(left.getValue(), right, LogicalOperator.Binary.AND), left.isAnti()));
+                left.createType((CustomType<?>) OperationRegistry.evaluate(left.getValue(), right, LogicalOperator.Binary.AND), left.isAnti()));
         OperationRegistry.registerBinary(ConditionalValType.class, CustomType.class, LogicalOperator.Binary.OR, (left, right) ->
-                left.createType((CustomType<?>) OperationRegistry.evaluateBinary(left.getValue(), right, LogicalOperator.Binary.OR), left.isAnti()));
+                left.createType((CustomType<?>) OperationRegistry.evaluate(left.getValue(), right, LogicalOperator.Binary.OR), left.isAnti()));
 
         OperationRegistry.registerBinary(ConditionalValType.class, CustomType.class, LogicalOperator.Binary.LESS, (left, right) ->
-                (CustomType<?>) OperationRegistry.evaluateBinary(left.getValue(), right, LogicalOperator.Binary.LESS));
+                (CustomType<?>) OperationRegistry.evaluate(left.getValue(), right, LogicalOperator.Binary.LESS));
         OperationRegistry.registerBinary(ConditionalValType.class, CustomType.class, LogicalOperator.Binary.MORE, (left, right) ->
-                (CustomType<?>) OperationRegistry.evaluateBinary(left.getValue(), right, LogicalOperator.Binary.MORE));
+                (CustomType<?>) OperationRegistry.evaluate(left.getValue(), right, LogicalOperator.Binary.MORE));
         OperationRegistry.registerBinary(ConditionalValType.class, CustomType.class, LogicalOperator.Binary.EQUAL, (left, right) ->
-                (CustomType<?>) OperationRegistry.evaluateBinary(left.getValue(), right, LogicalOperator.Binary.EQUAL));
+                (CustomType<?>) OperationRegistry.evaluate(left.getValue(), right, LogicalOperator.Binary.EQUAL));
         OperationRegistry.registerBinary(ConditionalValType.class, CustomType.class, LogicalOperator.Binary.LESS_OR_EQUAL, (left, right) ->
-                (CustomType<?>) OperationRegistry.evaluateBinary(left.getValue(), right, LogicalOperator.Binary.LESS_OR_EQUAL));
+                (CustomType<?>) OperationRegistry.evaluate(left.getValue(), right, LogicalOperator.Binary.LESS_OR_EQUAL));
         OperationRegistry.registerBinary(ConditionalValType.class, CustomType.class, LogicalOperator.Binary.MORE_OR_EQUAL, (left, right) ->
-                (CustomType<?>) OperationRegistry.evaluateBinary(left.getValue(), right, LogicalOperator.Binary.MORE_OR_EQUAL));
+                (CustomType<?>) OperationRegistry.evaluate(left.getValue(), right, LogicalOperator.Binary.MORE_OR_EQUAL));
 
         for (ArithmeticOperator.Unary op : ArithmeticOperator.Unary.values()) {
             OperationRegistry.registerUnary(ConditionalValType.class, op, target ->
@@ -183,7 +183,7 @@ public class StandardOperations {
                 ConditionalValType.create(target.getValue(), PlusMinusType.create(!target.isAnti().asBoolean())));
 
         OperationRegistry.registerUnary(ConditionalValType.class, BitwiseOperator.Unary.NOT, target ->
-                target.createType((CustomType<?>) OperationRegistry.evaluateUnary(target.getValue(), BitwiseOperator.Unary.NOT), target.isAnti()));
+                target.createType((CustomType<?>) OperationRegistry.evaluate(target.getValue(), BitwiseOperator.Unary.NOT), target.isAnti()));
 
         OperationRegistry.registerBinary(ListType.class, ListType.class, LogicalOperator.Binary.EQUAL,
                 (left, right) -> PlusMinusType.create(left.equals(right)));

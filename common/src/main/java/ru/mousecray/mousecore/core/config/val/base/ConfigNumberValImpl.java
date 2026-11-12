@@ -10,7 +10,6 @@ import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.val.IValType;
 import ru.mousecray.mousecore.api.config.val.base.ConfigNumberVal;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.NumberType;
@@ -36,12 +35,11 @@ public abstract class ConfigNumberValImpl<
 
     @SafeVarargs
     public ConfigNumberValImpl(
-            IValType type, T defaultValue, T disabledValue, RangeContainer<T> range, @Nullable String specificDataType,
+            T defaultValue, T disabledValue, RangeContainer<T> range, @Nullable String specificDataType,
             @Nullable Function<CustomArithmetic<T>, T> actionIfNotEqualConstraint,
             @Nullable Constraint<? extends CustomType<?>>[] constraints, @Nullable PredefinedValue<T>... configureValues
     ) {
         super(
-                type,
                 checkValue(range, defaultValue, "defaultValue"),
                 checkValue(range, disabledValue, "disabledValue"),
                 val -> specificDataType, constraints, configureValues);
@@ -92,9 +90,7 @@ public abstract class ConfigNumberValImpl<
     }
 
     @SuppressWarnings("unchecked") @Override
-    protected T processValueIfNotEqualConstraint(T value) {
-        return actionIfNotEqualConstraint.apply((CustomArithmetic<T>) value.getArithmeticPipeline());
-    }
+    protected T processValueIfNotEqualConstraint(T value) { return actionIfNotEqualConstraint.apply((CustomArithmetic<T>) value.getArithmeticPipeline()); }
 
     @Override protected boolean saveDisabledValue() { return false; }
 }

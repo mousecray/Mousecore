@@ -18,4 +18,8 @@ public interface CustomLogic<T extends CustomType<?>> {
     T not();
     T and(CustomType<?> other);
     T or(CustomType<?> other);
+
+    boolean isSupport(LogicalOperator.Unary op);
+    boolean isSupport(LogicalOperator.Binary op, CustomType<?> other);
+    boolean isSupport(LogicalOperator.Binary op, Class<? extends CustomType<?>> otherClass);
 }

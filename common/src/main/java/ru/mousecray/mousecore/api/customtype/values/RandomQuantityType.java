@@ -5,19 +5,29 @@
 
 package ru.mousecray.mousecore.api.customtype.values;
 
+import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.NumberType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.api.utils.MouseUtils;
 
-import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 
 import static ru.mousecray.mousecore.api.utils.MouseNumbers.tryParseDouble;
 import static ru.mousecray.mousecore.api.utils.MouseStrings.subAndTrimWithTabs;
 import static ru.mousecray.mousecore.api.utils.MouseStrings.trimWith;
 
+@MethodReturnsNonnullByDefault
+@ParametersAreNonnullByDefault
 public final class RandomQuantityType extends NumberType<Double> {
+    private static final MouseUtils.Equator EQUATOR = MouseUtils.Equator
+            .equaling(RandomQuantityType::getChance)
+            .thenEqualing(RandomQuantityType::getMin)
+            .thenEqualing(RandomQuantityType::getMax);
+
     public static final RandomQuantityType MIN  = new RandomQuantityType(PercentType.MIN, IntegralType.NULL, IntegralType.NULL);
     public static final RandomQuantityType MAX  = new RandomQuantityType(PercentType.MAX, IntegralType.MAX, IntegralType.MAX);
     public static final RandomQuantityType NULL = new RandomQuantityType(PercentType.NULL, IntegralType.NULL, IntegralType.NULL);
@@ -74,7 +84,9 @@ public final class RandomQuantityType extends NumberType<Double> {
         else return new RandomQuantityType(chance, min, max);
     }
 
-    public static RandomQuantityType calcMedium(@Nonnull RandomQuantityType min, @Nonnull RandomQuantityType max) {
+    @Override public IValType getValType() { return ValType.RANDOM_QUANTITY; }
+
+    public static RandomQuantityType calcMedium(RandomQuantityType min, RandomQuantityType max) {
         return create(
                 PercentType.create(min.value + max.value / 2D),
                 IntegralType.create((long) (min.min + max.min / 2D)),
@@ -82,7 +94,7 @@ public final class RandomQuantityType extends NumberType<Double> {
         );
     }
 
-    public static RandomQuantityType calcLow(@Nonnull RandomQuantityType min, @Nonnull RandomQuantityType max) {
+    public static RandomQuantityType calcLow(RandomQuantityType min, RandomQuantityType max) {
         return create(
                 PercentType.create((min.value + (min.value + max.value) / 2D) / 2D),
                 IntegralType.create((long) (min.min + (min.min + max.min / 2D) / 2D)),
@@ -90,7 +102,7 @@ public final class RandomQuantityType extends NumberType<Double> {
         );
     }
 
-    public static RandomQuantityType calcHigh(@Nonnull RandomQuantityType min, @Nonnull RandomQuantityType max) {
+    public static RandomQuantityType calcHigh(RandomQuantityType min, RandomQuantityType max) {
         return create(
                 PercentType.create((max.value + (min.value + max.value) / 2D) / 2D),
                 IntegralType.create((long) (max.min + (min.min + max.min / 2D) / 2D)),
@@ -98,18 +110,18 @@ public final class RandomQuantityType extends NumberType<Double> {
         );
     }
 
-    public PercentType getChance()              { return PercentType.create(value); }
-    public IntegralType getMin()                { return IntegralType.create(min); }
-    public IntegralType getMax()                { return IntegralType.create(max); }
+    public PercentType getChance()     { return PercentType.create(value); }
+    public IntegralType getMin()       { return IntegralType.create(min); }
+    public IntegralType getMax()       { return IntegralType.create(max); }
 
-    @Nonnull @Override public Double asNumber() { return value; }
+    @Override public Double asNumber() { return value; }
 
-    @SuppressWarnings("unchecked") @Nonnull @Override
-    public RandomQuantityType createType(@Nonnull Number value) {
+    @SuppressWarnings("unchecked") @Override
+    public RandomQuantityType createType(Number value) {
         return create(PercentType.create(value.doubleValue()), IntegralType.NULL, IntegralType.NULL);
     }
 
-    @Nonnull @Override
+    @Override
     public String toString() {
         String result = MouseStrings.format("{0}-{1}:{2}%", getMin().toString(), getMax().toString(), super.toString());
         assert result != null;
@@ -117,13 +129,8 @@ public final class RandomQuantityType extends NumberType<Double> {
     }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass") @Override
-    public boolean equals(Object o) {
-        return MouseUtils.Equator
-                .equaling(RandomQuantityType::getChance)
-                .thenEqualing(RandomQuantityType::getMin)
-                .thenEqualing(RandomQuantityType::getMax)
-                .equals(getClass(), this, o);
-    }
+    public boolean equals(Object obj) { return EQUATOR.test(this, obj); }
+
 
     @Override public int hashCode() { return Objects.hash(value, min, max); }
 }

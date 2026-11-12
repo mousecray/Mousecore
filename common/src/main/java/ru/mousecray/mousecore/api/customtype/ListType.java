@@ -7,6 +7,7 @@ package ru.mousecray.mousecore.api.customtype;
 
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseUtils;
 
@@ -21,25 +22,30 @@ import java.util.stream.Collectors;
 @MethodReturnsNonnullByDefault
 @ParametersAreNonnullByDefault
 public abstract class ListType<VAL extends CustomType<?>, T extends CustomType<?>> extends CustomType<ListType<VAL, T>> {
-    private final           Class<T>            valClass;
+    private static final MouseUtils.Equator<ListType<?, ?>> EQUATOR = MouseUtils.Equator
+            .<ListType<?, ?>>equaling(ListType::getListComponentValType)
+            .thenEqualing(ListType::getValCreator)
+            .thenEqualing(ListType::getList);
+
     @Nullable private final Function<String, T> valCreator;
     private final           List<VAL>           list = new ArrayList<>();
+    private final           IValType            listComponentType;
 
-    protected ListType(Class<T> valClass, @Nullable Function<String, T> valCreator) {
-        super(CustomValType.LIST);
-        this.valClass = valClass;
+    protected ListType(IValType listComponentType, @Nullable Function<String, T> valCreator) {
         this.valCreator = valCreator;
+        this.listComponentType = listComponentType;
     }
 
-    protected ListType(Class<T> valClass, @Nullable Function<String, T> valCreator, List<VAL> values) {
-        this(Objects.requireNonNull(valClass), valCreator);
+    protected ListType(IValType listComponentType, @Nullable Function<String, T> valCreator, List<VAL> values) {
+        this(listComponentType, valCreator);
         list.addAll(Objects.requireNonNull(values));
     }
+
+    public IValType getListComponentValType()            { return listComponentType; }
 
     protected abstract <TYPE extends ListType<VAL, T>> TYPE createType(List<VAL> list);
 
     protected List<VAL> getList()                        { return list; }
-    public Class<T> getValClass()                        { return valClass; }
     @Nullable public Function<String, T> getValCreator() { return valCreator; }
 
     public boolean addValue(VAL value)                   { return list.add(value); }
@@ -66,15 +72,9 @@ public abstract class ListType<VAL extends CustomType<?>, T extends CustomType<?
     }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass") @Override
-    public boolean equals(Object obj) {
-        return MouseUtils.Equator
-                .<ListType<VAL, T>, Class<T>>equaling(ListType::getValClass)
-                .thenEqualing(ListType::getValCreator)
-                .thenEqualing(ListType::getList)
-                .equals(getClass(), this, obj);
-    }
+    public boolean equals(Object obj) { return EQUATOR.test(this, obj); }
 
-    @Override public int hashCode() { return Objects.hash(valClass, list, valCreator); }
+    @Override public int hashCode() { return Objects.hash(listComponentType, list, valCreator); }
 
     @Override
     public int compareTo(ListType<VAL, T> o) {

@@ -7,7 +7,7 @@ package ru.mousecray.mousecore.core.config.val.base;
 
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.val.IValType;
+import ru.mousecray.mousecore.api.config.val.base.ConfigLogicalVal;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.LogicalType;
 import ru.mousecray.mousecore.core.config.val.ConfigValImpl;
@@ -15,13 +15,13 @@ import ru.mousecray.mousecore.core.config.val.ConfigValImpl;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class ConfigLogicalValImpl<T extends LogicalType<?>> extends ConfigValImpl<T> implements ru.mousecray.mousecore.api.config.val.base.ConfigLogicalVal<T> {
+public abstract class ConfigLogicalValImpl<T extends LogicalType<?>> extends ConfigValImpl<T> implements ConfigLogicalVal<T> {
     @SafeVarargs
     public ConfigLogicalValImpl(
-            IValType type, T defaultValue, T disabledValue, @Nullable String specificDataType,
+            T defaultValue, T disabledValue, @Nullable String specificDataType,
             @Nullable Constraint<? extends CustomType<?>>[] constraints, @Nullable PredefinedValue<T>... configureValues
     ) {
-        super(type, defaultValue, disabledValue, val -> specificDataType, constraints, configureValues);
+        super(defaultValue, disabledValue, val -> specificDataType, constraints, configureValues);
     }
 
     protected T getLogical()           { return getValue(); }

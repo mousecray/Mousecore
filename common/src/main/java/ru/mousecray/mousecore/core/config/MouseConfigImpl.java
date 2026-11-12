@@ -7,6 +7,8 @@ package ru.mousecray.mousecore.core.config;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.config.MouseConfig;
+import ru.mousecray.mousecore.api.config.io.ConfigIOResultType;
+import ru.mousecray.mousecore.api.config.io.IOFuture;
 import ru.mousecray.mousecore.api.config.par.ConfigPar;
 import ru.mousecray.mousecore.api.config.par.ConfigParBase;
 import ru.mousecray.mousecore.api.config.par.ConfigParGroup;
@@ -21,9 +23,11 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
 import ru.mousecray.mousecore.api.log.MouseLogger;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
+import ru.mousecray.mousecore.core.config.io.ConfigIOThread;
+import ru.mousecray.mousecore.core.config.io.IOResultImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;
-import ru.mousecray.mousecore.core.config.par.ConfigParGroupImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParImpl;
+import ru.mousecray.mousecore.core.config.par.group.ConfigParGroupImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectBaseImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectImpl;
 import ru.mousecray.mousecore.core.config.val.*;
@@ -47,15 +51,15 @@ public class MouseConfigImpl implements MouseConfig {
     protected final          File                                            path;
     protected final          ImmutableDisplayNameMap.Mutable<ConfigSectImpl> sections      = new ImmutableDisplayNameMap.Mutable<>();
     public final             ConfigParser                                    parser;
-    @Nullable                MouseLogger                                     logger;
+    public @Nullable         MouseLogger                                     logger;
     protected                boolean                                         loaded;
     protected final @Nonnull ConfigDictionary                                dictionary;
     protected final          int                                             syncSecInterval;
     protected final          int                                             saveSecInterval;
     protected                LocalTime                                       lastSaveTime;
     protected                LocalTime                                       lastSyncTime;
-    volatile                 long                                            lastSyncSec;
-    volatile                 long                                            lastSaveSec;
+    public volatile          long                                            lastSyncSec;
+    public volatile          long                                            lastSaveSec;
     public final             List<ConfigParBase>                             dirtySections = new ArrayList<>();
     private                  boolean                                         built;
 
@@ -214,7 +218,7 @@ public class MouseConfigImpl implements MouseConfig {
     }
 
     @SuppressWarnings("unchecked") @Override
-    public <T extends CustomType<T>, D extends ConfigParGroupImpl<T>> D getGroup(@Nullable String fullName) {
+    public <T extends CustomType<T>, D extends ConfigParGroup<T>> D getGroup(@Nullable String fullName) {
         try { return (D) getGroup0(fullName); } catch (ClassCastException ignore) { return null; }
     }
 
@@ -231,7 +235,7 @@ public class MouseConfigImpl implements MouseConfig {
     public ConfigValPercentImpl getPercentVal(@Nullable String fullName) { return getValue(fullName); }
 
     @Nullable @Override
-    public <TYPE extends CustomType<TYPE>> ConfigConditionValImpl<TYPE> getConditionVal(@Nullable String fullName) {
+    public <TYPE extends CustomType<TYPE>> ConfigValConditionImpl<TYPE> getConditionVal(@Nullable String fullName) {
         return getValue(fullName);
     }
 
@@ -279,13 +283,13 @@ public class MouseConfigImpl implements MouseConfig {
     public void reloadCache()     { if (built) sections.forEach((key, value) -> value.reloadCache()); }
 
     @Override
-    public ConfigIOThread.IOFuture load() {
+    public IOFuture load() {
         return ConfigIOThread.getInstance().loadIntermediately(this);
     }
 
-    ConfigIOThread.IOResult loadInternal() {
-        ConfigIOThread.IOResult result = parser.readFile();
-        if (result.getType() == ConfigIOThread.IOResult.ConfigIOResultType.SUCCESS) {
+    public IOResultImpl loadInternal() {
+        IOResultImpl result = parser.readFile();
+        if (result.getType() == ConfigIOResultType.SUCCESS) {
             loaded = true;
             lastSyncTime = LocalTime.now();
         }
@@ -293,13 +297,13 @@ public class MouseConfigImpl implements MouseConfig {
     }
 
     @Override
-    public ConfigIOThread.IOFuture save(boolean markUnloaded) {
+    public IOFuture save(boolean markUnloaded) {
         return ConfigIOThread.getInstance().saveIntermediately(this, markUnloaded);
     }
 
-    ConfigIOThread.IOResult saveInternal(boolean markUnloaded) {
-        ConfigIOThread.IOResult result = parser.writeFile();
-        if (result.getType() == ConfigIOThread.IOResult.ConfigIOResultType.SUCCESS) {
+    public IOResultImpl saveInternal(boolean markUnloaded) {
+        IOResultImpl result = parser.writeFile();
+        if (result.getType() == ConfigIOResultType.SUCCESS) {
             synchronized (dirtySections) { dirtySections.clear(); }
             lastSaveTime = LocalTime.now();
         }
@@ -312,7 +316,7 @@ public class MouseConfigImpl implements MouseConfig {
     }
 
     @SuppressWarnings("DataFlowIssue")
-    public boolean putForPath(@Nullable String path, ConfigSectBaseImpl base) {
+    public boolean putForPath(@Nullable String path, ConfigSectBase base) {
         Objects.requireNonNull(base);
         if (path == null) path = "";
         else path = MouseStrings.trimWith(path, true, '.');

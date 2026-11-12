@@ -8,7 +8,6 @@ package ru.mousecray.mousecore.core.config.val;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import ru.mousecray.mousecore.api.VariableValue;
-import ru.mousecray.mousecore.api.config.utils.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.ConfigValPercent;
@@ -41,7 +40,7 @@ public class ConfigValPercentImpl extends ConfigNumberValImpl<PercentType> imple
             @Nullable PredefinedValue<PercentType>... configureValues
     ) {
         super(
-                ConfigValType.PERCENT, defaultValue, disabledValue,
+                defaultValue, disabledValue,
                 range == null ? range = new RangeContainer<>(Range.of(PercentType.MIN, PercentType.MAX)) : range,
                 "0.0%", actionIfNotEqualConstraint, constraints,
                 genValues(

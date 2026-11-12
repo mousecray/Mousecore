@@ -7,8 +7,12 @@
 
 package ru.mousecray.mousecore.api.config.utils;
 
-import ru.mousecray.mousecore.api.customtype.*;
+import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.LogicalType;
+import ru.mousecray.mousecore.api.customtype.NumberType;
+import ru.mousecray.mousecore.api.customtype.OtherType;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
 
 import javax.annotation.Nullable;
 
@@ -17,7 +21,7 @@ public interface Constraint<T extends CustomType<?>> {
     ConstraintConditionType getConditionType();
     boolean hasSpecific();
     @Nullable String getPath();
-    CustomValType getValType();
+    IValType getValType();
     @Nullable T getVal();
     @Nullable RangeContainer<?> getRange();
 

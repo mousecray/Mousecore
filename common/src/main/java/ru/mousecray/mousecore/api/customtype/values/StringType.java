@@ -7,6 +7,8 @@ package ru.mousecray.mousecore.api.customtype.values;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.OtherType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -26,6 +28,8 @@ public final class StringType extends OtherType<String> {
 
     private StringType(String value)              { super(Objects.requireNonNull(value)); }
     public static StringType create(String value) { return new StringType(value); }
+
+    @Override public IValType getValType()        { return ValType.SIMPLE_STRING; }
 
     public String asString()                      { return value; }
 

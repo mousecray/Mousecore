@@ -10,9 +10,9 @@ package ru.mousecray.mousecore.api.config.par;
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
-import ru.mousecray.mousecore.api.config.val.IValType;
 import ru.mousecray.mousecore.api.container.ImmutableDisplayNameMap;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

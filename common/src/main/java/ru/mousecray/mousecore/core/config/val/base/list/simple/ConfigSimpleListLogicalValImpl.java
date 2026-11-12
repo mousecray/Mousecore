@@ -7,7 +7,6 @@ package ru.mousecray.mousecore.core.config.val.base.list.simple;
 
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.utils.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.base.list.simple.ConfigSimpleListLogicalVal;
@@ -24,15 +23,11 @@ import java.util.function.Function;
 public abstract class ConfigSimpleListLogicalValImpl<T extends LogicalType<?>> extends ConfigSimpleListValImpl<T> implements ConfigSimpleListLogicalVal<T> {
     @SafeVarargs
     public ConfigSimpleListLogicalValImpl(
-            Class<T> listTypeClass,
             @Nullable Function<String, T> valCreator,
             SimpleListType<T> defaultValue, SimpleListType<T> disabledValue,
             @Nullable Constraint<? extends ru.mousecray.mousecore.api.customtype.CustomType<?>>[] constraints,
             @Nullable PredefinedValue<SimpleListType<T>>... configureValues
     ) {
-        super(
-                ConfigValType.LOGICAL, listTypeClass, valCreator, defaultValue, disabledValue,
-                constraints, configureValues
-        );
+        super(valCreator, defaultValue, disabledValue, constraints, configureValues);
     }
 }

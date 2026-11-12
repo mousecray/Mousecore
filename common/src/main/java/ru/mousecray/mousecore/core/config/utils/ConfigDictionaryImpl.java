@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import ru.mousecray.mousecore.api.config.utils.ConfigLang;
 import ru.mousecray.mousecore.api.config.val.ILocaleType;
-import ru.mousecray.mousecore.api.config.val.IValType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
 import javax.annotation.Nonnull;

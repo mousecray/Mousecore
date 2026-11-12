@@ -16,9 +16,11 @@ import ru.mousecray.mousecore.api.config.par.ConfigParBase;
 import ru.mousecray.mousecore.api.config.par.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
-import ru.mousecray.mousecore.api.config.utils.*;
+import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
+import ru.mousecray.mousecore.api.config.utils.ConfigLocaleType;
+import ru.mousecray.mousecore.api.config.utils.Constraint;
+import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
-import ru.mousecray.mousecore.api.config.val.IValType;
 import ru.mousecray.mousecore.api.config.val.base.list.simple.ConfigSimpleListVal;
 import ru.mousecray.mousecore.api.container.ImmutableDisplayNameMap;
 import ru.mousecray.mousecore.api.customtype.range.Range;
@@ -29,10 +31,11 @@ import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.log.MouseLogger;
 import ru.mousecray.mousecore.api.utils.MouseNumbers;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
+import ru.mousecray.mousecore.core.config.io.IOResultImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;
-import ru.mousecray.mousecore.core.config.par.ConfigParGroupImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParImpl;
+import ru.mousecray.mousecore.core.config.par.group.ConfigParGroupImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectBaseImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectImpl;
 import ru.mousecray.mousecore.core.config.val.ConfigValImpl;
@@ -70,7 +73,7 @@ public final class ConfigParser {
     private final MouseConfigImpl config;
     private final MouseLogger     logger;
     private final File            parentDir, file, tempFile;
-    FileTime lastModTime;
+    public FileTime lastModTime;
 
     public ConfigParser(@Nonnull MouseConfigImpl config, @Nullable MouseLogger logger) {
         this.config = config;
@@ -80,7 +83,7 @@ public final class ConfigParser {
         this.logger = logger;
     }
 
-    public ConfigIOThread.IOResult readFile() {
+    public IOResultImpl readFile() {
         if (!parentDir.exists() || !file.exists()) {
             if (logger != null) {
                 logger.atInfo()
@@ -88,7 +91,7 @@ public final class ConfigParser {
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("Config file '{0}' is not found. It will be created on save", file.getAbsolutePath());
             }
-            return ConfigIOThread.IOResult.createNotFound();
+            return IOResultImpl.createNotFound();
         } else {
             if (logger != null) {
                 logger.atInfo()
@@ -101,7 +104,7 @@ public final class ConfigParser {
     }
 
     @SuppressWarnings({ "DataFlowIssue" })
-    private ConfigIOThread.IOResult internalReadFile() {
+    private IOResultImpl internalReadFile() {
         final class ReadHelper {
             private Map<Integer, List<ConfigSect>>               deepSectIndex;
             private Map<Integer, List<ConfigParGroup>>           deepGroupIndex;
@@ -369,7 +372,7 @@ public final class ConfigParser {
             helper.closeAllValues();
             helper.destroy();
         } catch (IOException e) {
-            return ConfigIOThread.IOResult.createError(e);
+            return IOResultImpl.createError(e);
         } finally {
             try {
                 lastModTime = Files.getLastModifiedTime(file.getAbsoluteFile().toPath());
@@ -438,10 +441,10 @@ public final class ConfigParser {
                 }
             }
         }
-        return ConfigIOThread.IOResult.createSuccess();
+        return IOResultImpl.createSuccess();
     }
 
-    @SuppressWarnings({ "ResultOfMethodCallIgnored", "DataFlowIssue", "unchecked" }) public ConfigIOThread.IOResult writeFile() {
+    @SuppressWarnings({ "ResultOfMethodCallIgnored", "DataFlowIssue", "unchecked" }) public IOResultImpl writeFile() {
         if (!parentDir.exists()) parentDir.mkdirs();
 
         try (BufferedWriter fileWriter = Files.newBufferedWriter(
@@ -548,7 +551,7 @@ public final class ConfigParser {
                                             fileWriter.newLine();
                                         }
 
-                                        IValType type = configVal.getType();
+                                        IValType0 type = configVal.getType();
                                         String specificDataType = type == ConfigValType.LIST
                                                 ? dictionary.getLocaleForType(((ConfigSimpleListVal) configVal).getListComponentType())
                                                 : configVal.getSpecificDataType();
@@ -960,8 +963,8 @@ public final class ConfigParser {
                         .withStyle(ConsoleColor.GREEN_BG)
                         .log("Config file '{0}' has been saved", file.getAbsolutePath());
             }
-            return ConfigIOThread.IOResult.createSuccess();
-        } catch (IOException e) { return ConfigIOThread.IOResult.createError(e); }
+            return IOResultImpl.createSuccess();
+        } catch (IOException e) { return IOResultImpl.createError(e); }
     }
 
     @SuppressWarnings("SameParameterValue")

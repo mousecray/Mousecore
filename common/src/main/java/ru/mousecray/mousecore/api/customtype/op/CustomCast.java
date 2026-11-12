@@ -9,4 +9,6 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 
 public interface CustomCast<T extends CustomType<?>> {
     <TYPE extends CustomType<?>> TYPE asValue(Class<TYPE> targetClass);
+
+    boolean isSupport(Class<? extends CustomType<?>> targetClass);
 }

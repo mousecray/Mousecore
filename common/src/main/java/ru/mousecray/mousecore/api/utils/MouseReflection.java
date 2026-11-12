@@ -6,6 +6,7 @@
 package ru.mousecray.mousecore.api.utils;
 
 import ru.mousecray.mousecore.api.VariableValue;
+import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.log.MouseLogger;
 import sun.misc.Unsafe;
 
@@ -50,7 +51,7 @@ public class MouseReflection {
                 try {
                     result.add((T) field.get(null));
                 } catch (IllegalAccessException e) {
-                    if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While getting fields an error occurring");
+                    if (logger != null) logger.atFatal(e).withPrefix(LogPrefixes.REFLECTION).log("While getting fields an error occurring");
                     throw new RuntimeException(e);
                 }
             }
@@ -79,7 +80,7 @@ public class MouseReflection {
             else field.set(instance, value);
             return true;
         } catch (Exception e) {
-            if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While setting field occur error");
+            if (logger != null) logger.atFatal(e).withPrefix(LogPrefixes.REFLECTION).log("While setting field occur error");
             return false;
         }
     }
@@ -117,7 +118,7 @@ public class MouseReflection {
             method.invoke(instance);
             return true;
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While invoke method error occurring");
+            if (logger != null) logger.atFatal(e).withPrefix(LogPrefixes.REFLECTION).log("While invoke method error occurring");
             return false;
         }
     }
@@ -133,7 +134,7 @@ public class MouseReflection {
             method.invoke(instance, par);
             return true;
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While invoke method error occurring");
+            if (logger != null) logger.atFatal(e).withPrefix(LogPrefixes.REFLECTION).log("While invoke method error occurring");
             return false;
         }
     }
@@ -154,7 +155,7 @@ public class MouseReflection {
                         method.getReturnType() + "'; Expected type '" + returnType + "'");
             }
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While invoke method error occurring");
+            if (logger != null) logger.atFatal(e).withPrefix(LogPrefixes.REFLECTION).log("While invoke method error occurring");
             return VariableValue.create();
         }
     }
@@ -175,7 +176,7 @@ public class MouseReflection {
                         method.getReturnType() + "'; Expected type '" + returnType + "'");
             }
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            if (logger != null) logger.atFatal(e).withPrefix("Reflection").log("While invoke method error occurring");
+            if (logger != null) logger.atFatal(e).withPrefix(LogPrefixes.REFLECTION).log("While invoke method error occurring");
             return VariableValue.create();
         }
     }

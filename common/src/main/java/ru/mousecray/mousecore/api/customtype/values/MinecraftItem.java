@@ -7,6 +7,8 @@ package ru.mousecray.mousecore.api.customtype.values;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.OtherType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.error.UnsupportedValException;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.minecraft.MouseItemState;
@@ -47,6 +49,8 @@ public class MinecraftItem extends OtherType<MouseItemState> {
     }
 
     public static MinecraftItem create(String name) { return create("minecraft", name); }
+
+    @Override public IValType getValType()          { return ValType.MINECRAFT_ITEM; }
 
     @Nullable public MouseItemState asItemState()   { return value; }
 

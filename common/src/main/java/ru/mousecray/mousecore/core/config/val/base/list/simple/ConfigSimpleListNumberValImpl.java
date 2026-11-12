@@ -10,8 +10,8 @@ import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.val.IValType;
 import ru.mousecray.mousecore.api.config.val.base.list.simple.ConfigSimpleListNumberVal;
+import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.NumberType;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
 import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
@@ -34,15 +34,14 @@ public abstract class ConfigSimpleListNumberValImpl<
     private final RangeContainer<T> range;
     @SafeVarargs
     public ConfigSimpleListNumberValImpl(
-            IValType listComponentType, Class<T> listTypeClass,
             @Nullable Function<String, T> valCreator,
             SimpleListType<T> defaultValue, SimpleListType<T> disabledValue,
             RangeContainer<T> range,
-            @Nullable Constraint<? extends ru.mousecray.mousecore.api.customtype.CustomType<?>>[] constraints,
+            @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<SimpleListType<T>>... configureValues
     ) {
         super(
-                listComponentType, listTypeClass, valCreator,
+                valCreator,
                 checkValue(range, defaultValue, "defaultValue"),
                 checkValue(range, disabledValue, "disabledValue"),
                 constraints, configureValues

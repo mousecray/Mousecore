@@ -7,13 +7,13 @@ package ru.mousecray.mousecore.core.config.val.list.conditional;
 
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.utils.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.list.conditional.ConfigValPercentConditionalList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.range.Range;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.customtype.values.ConditionalListType;
 import ru.mousecray.mousecore.api.customtype.values.PercentType;
 import ru.mousecray.mousecore.core.config.val.base.list.conditional.ConfigConditionalListNumberValImpl;
@@ -34,12 +34,12 @@ public class ConfigValPercentConditionalListImpl extends ConfigConditionalListNu
             @Nullable PredefinedValue<ConditionalListType<PercentType>>... configureValues
     ) {
         super(
-                ConfigValType.PERCENT, PercentType.class, createValCreator(),
+                createValCreator(),
                 defaultValue == null
-                        ? ConditionalListType.create(PercentType.class, createValCreator())
+                        ? ConditionalListType.create(ValType.PERCENT, createValCreator())
                         : defaultValue,
                 disabledValue == null
-                        ? ConditionalListType.create(PercentType.class, createValCreator())
+                        ? ConditionalListType.create(ValType.PERCENT, createValCreator())
                         : disabledValue,
                 range == null
                         ? new RangeContainer<>(Range.of(PercentType.MIN, PercentType.MAX))

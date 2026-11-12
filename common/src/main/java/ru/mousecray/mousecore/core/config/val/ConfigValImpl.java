@@ -19,9 +19,10 @@ import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.utils.ValueParseResult;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
 import ru.mousecray.mousecore.api.config.val.ILocaleType;
-import ru.mousecray.mousecore.api.config.val.IValType;
 import ru.mousecray.mousecore.api.config.val.base.ConfigNumberVal;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.NumberType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.log.MouseLogger;
@@ -40,14 +41,13 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static ru.mousecray.mousecore.api.config.utils.Constraint.ConstraintConditionType.IN_RANGE;
-import static ru.mousecray.mousecore.api.customtype.CustomValType.*;
+import static ru.mousecray.mousecore.api.customtype.type.ValTypeCategory.*;
 
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
 @ParametersAreNonnullByDefault
 public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVal<V> {
     protected           boolean                                   setByConfig;
-    protected final     IValType                                  type;
     protected final     List<PredefinedValue<V>>                  configureValues = new ArrayList<>();
     @Nullable protected ConfigParBaseImpl<?>                      owner;
     protected           V                                         value;
@@ -66,12 +66,10 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
 
     @SafeVarargs
     public ConfigValImpl(
-            IValType type,
             V defaultValue, V disabledValue, Function<ConfigVal<V>, String> specificDataType,
             @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<V>... configureValues
     ) {
-        this.type = Objects.requireNonNull(type);
         this.defaultValue = Objects.requireNonNull(defaultValue);
         this.disabledValue = Objects.requireNonNull(disabledValue);
         this.specificDataType = Objects.requireNonNull(specificDataType);
@@ -95,7 +93,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
         currentConfigure = getCurrConfigureFromValue(value);
     }
 
-    @Override public IValType getType() { return type; }
+    @Override public IValType getType() { return defaultValue.getValType(); }
     @Override
     public final V getValue() { return isDisabled() ? getDisabledValue() : getConstrainedValue(); }
     @Override public final V getDisabledValue()                              { return disabledValue; }
@@ -336,9 +334,9 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                         ConfigVal<? extends CustomType<?>> val = ((ConfigParBase<? extends CustomType<?>>) sect).getConfigVal();
                         if (constraint.getType() == Constraint.ConstraintType.DISABLED) {
                             if (constraint.hasSpecific()) {
-                                switch (constraint.getValType()) {
+                                switch (constraint.getValType().getCategory()) {
                                     case LOGICAL:
-                                        if (val.getType().getValType() == LOGICAL) {
+                                        if (val.getType().getCategory() == LOGICAL) {
                                             if (constraint.getVal() == null) {
                                                 logConstraintValNull(constraint);
                                                 continue;
@@ -366,7 +364,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                         } else logConstraintIncompatibleTargetType(constraint);
                                         continue;
                                     case NUMBER:
-                                        if (val.getType().getValType() == NUMBER) {
+                                        if (val.getType().getCategory() == NUMBER) {
                                             if (constraint.getConditionType() != IN_RANGE && constraint.getVal() == null) {
                                                 logConstraintValNull(constraint);
                                                 continue;
@@ -422,7 +420,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     continue;
                                                 case IN_RANGE:
                                                     if (val instanceof ConfigNumberValImpl) {
-                                                        if (constraint.getRange().isInRange(((ConfigNumberVal<? extends ru.mousecray.mousecore.api.customtype.NumberType<?>>) val).getValue())) {
+                                                        if (constraint.getRange().isInRange(((ConfigNumberVal<? extends NumberType<?>>) val).getValue())) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
@@ -435,8 +433,31 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                             }
                                         } else logConstraintIncompatibleTargetType(constraint);
                                         continue;
+                                    case STRING:
+                                        if (val.getType().getCategory() == STRING) {
+                                            switch (constraint.getConditionType()) {
+                                                case EQUAL:
+                                                    if (val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
+                                                        constrainedValue = disabledValue;
+                                                        logConstraintDisabledEnd(constraint);
+                                                        return;
+                                                    }
+                                                    continue;
+                                                case NOT_EQUAL:
+                                                    if (!val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
+                                                        constrainedValue = disabledValue;
+                                                        logConstraintDisabledEnd(constraint);
+                                                        return;
+                                                    }
+                                                    continue;
+                                                default:
+                                                    logConstraintConditionNotValid(constraint);
+                                                    continue;
+                                            }
+                                        } else logConstraintIncompatibleTargetType(constraint);
+                                        continue;
                                     case OTHER:
-                                        if (val.getType().getValType() == OTHER) {
+                                        if (val.getType().getCategory() == OTHER) {
                                             switch (constraint.getConditionType()) {
                                                 case EQUAL:
                                                     if (val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
@@ -462,10 +483,10 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                         logConstraintConditionNotSupport(constraint);
                                 }
                             } else {
-                                switch (constraint.getValType()) {
+                                switch (constraint.getValType().getCategory()) {
                                     case LOGICAL:
-                                        if (val.getType().getValType() == LOGICAL) {
-                                            if (type.getValType() == LOGICAL) {
+                                        if (val.getType().getCategory() == LOGICAL) {
+                                            if (getType().getCategory() == LOGICAL) {
                                                 switch (constraint.getConditionType()) {
                                                     case EQUAL:
                                                         if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
@@ -489,8 +510,8 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                         } else logConstraintIncompatibleTargetType(constraint);
                                         continue;
                                     case NUMBER:
-                                        if (val.getType().getValType() == NUMBER) {
-                                            if (type.getValType() == NUMBER) {
+                                        if (val.getType().getCategory() == NUMBER) {
+                                            if (getType().getCategory() == NUMBER) {
                                                 switch (constraint.getConditionType()) {
                                                     case LESS:
                                                         if (constrainedValue.getLogicPipeline().isLess(val.getValue()).asBoolean()) {
@@ -542,8 +563,33 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                         } else logConstraintIncompatibleTargetType(constraint);
                                         continue;
                                     case OTHER:
-                                        if (val.getType().getValType() == OTHER) {
-                                            if (type.getValType() == OTHER) {
+                                        if (val.getType().getCategory() == OTHER) {
+                                            if (getType().getCategory() == OTHER) {
+                                                switch (constraint.getConditionType()) {
+                                                    case EQUAL:
+                                                        if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
+                                                            constrainedValue = disabledValue;
+                                                            logConstraintDisabledEnd(constraint);
+                                                            return;
+                                                        }
+                                                        continue;
+                                                    case NOT_EQUAL:
+                                                        if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
+                                                            constrainedValue = disabledValue;
+                                                            logConstraintDisabledEnd(constraint);
+                                                            return;
+                                                        }
+                                                        continue;
+                                                    default:
+                                                        logConstraintConditionNotValid(constraint);
+                                                        continue;
+                                                }
+                                            } else logConstraintIncompatibleOwnerType(constraint);
+                                        } else logConstraintIncompatibleTargetType(constraint);
+                                        continue;
+                                    case STRING:
+                                        if (val.getType().getCategory() == STRING) {
+                                            if (getType().getCategory() == STRING) {
                                                 switch (constraint.getConditionType()) {
                                                     case EQUAL:
                                                         if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
@@ -571,10 +617,10 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                 }
                             }
                         } else {
-                            switch (constraint.getValType()) {
+                            switch (constraint.getValType().getCategory()) {
                                 case LOGICAL:
-                                    if (val.getType().getValType() == LOGICAL) {
-                                        if (type.getValType() == LOGICAL) {
+                                    if (val.getType().getCategory() == LOGICAL) {
+                                        if (getType().getCategory() == LOGICAL) {
                                             switch (constraint.getConditionType()) {
                                                 case EQUAL:
                                                     if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
@@ -598,8 +644,8 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                     } else logConstraintIncompatibleTargetType(constraint);
                                     continue;
                                 case NUMBER:
-                                    if (val.getType().getValType() == NUMBER) {
-                                        if (type.getValType() == NUMBER) {
+                                    if (val.getType().getCategory() == NUMBER) {
+                                        if (getType().getCategory() == NUMBER) {
                                             switch (constraint.getConditionType()) {
                                                 case LESS:
                                                     if (!constrainedValue.getLogicPipeline().isLess(val.getValue()).asBoolean()) {
@@ -661,8 +707,33 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                     } else logConstraintIncompatibleTargetType(constraint);
                                     continue;
                                 case OTHER:
-                                    if (val.getType().getValType() == OTHER) {
-                                        if (type.getValType() == OTHER) {
+                                    if (val.getType().getCategory() == OTHER) {
+                                        if (getType().getCategory() == OTHER) {
+                                            switch (constraint.getConditionType()) {
+                                                case EQUAL:
+                                                    if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
+                                                        //noinspection unchecked
+                                                        constrainedValue = (V) constrainedValue.asOtherType()
+                                                                .createType(val.getValue().asOtherType().getValue());
+                                                        logConstraintRelationEnd(constraint);
+                                                    }
+                                                    continue;
+                                                case NOT_EQUAL:
+                                                    if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
+                                                        constrainedValue = processValueIfNotEqualConstraint(constrainedValue);
+                                                        logConstraintRelationEnd(constraint);
+                                                    }
+                                                    continue;
+                                                default:
+                                                    logConstraintConditionNotValid(constraint);
+                                                    continue;
+                                            }
+                                        } else logConstraintIncompatibleOwnerType(constraint);
+                                    } else logConstraintIncompatibleTargetType(constraint);
+                                    continue;
+                                case STRING:
+                                    if (val.getType().getCategory() == STRING) {
+                                        if (getType().getCategory() == STRING) {
                                             switch (constraint.getConditionType()) {
                                                 case EQUAL:
                                                     if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {

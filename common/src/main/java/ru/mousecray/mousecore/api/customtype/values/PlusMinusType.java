@@ -6,6 +6,8 @@
 package ru.mousecray.mousecore.api.customtype.values;
 
 import ru.mousecray.mousecore.api.customtype.LogicalType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
 import javax.annotation.Nonnull;
@@ -29,6 +31,8 @@ public final class PlusMinusType extends LogicalType<String> {
 
     private PlusMinusType(boolean isYes)              { super("+", "-", isYes); }
     public static PlusMinusType create(boolean isYes) { return isYes ? TRUE : FALSE; }
+
+    @Nonnull @Override public IValType getValType()   { return ValType.PLUS_MINUS; }
 
     @SuppressWarnings("unchecked") @Nonnull @Override
     public PlusMinusType createType(boolean isYes) {

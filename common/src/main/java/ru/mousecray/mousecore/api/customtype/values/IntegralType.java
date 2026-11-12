@@ -5,13 +5,18 @@
 
 package ru.mousecray.mousecore.api.customtype.values;
 
+import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.NumberType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.utils.MouseNumbers;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
-import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
+@ParametersAreNonnullByDefault
+@MethodReturnsNonnullByDefault
 public final class IntegralType extends NumberType<Long> {
     public static final IntegralType MIN  = new IntegralType(Long.MIN_VALUE);
     public static final IntegralType MAX  = new IntegralType(Long.MAX_VALUE);
@@ -36,22 +41,13 @@ public final class IntegralType extends NumberType<Long> {
         else return new IntegralType(value);
     }
 
-    public static IntegralType calcMedium(@Nonnull IntegralType min, @Nonnull IntegralType max) {
-        return create((long) (min.value + max.value / 2D));
-    }
+    @Override public IValType getValType()                                                { return ValType.INTEGRAL; }
 
-    public static IntegralType calcLow(@Nonnull IntegralType min, @Nonnull IntegralType max) {
-        return create((long) ((min.value + (min.value + max.value) / 2D) / 2D));
-    }
+    public static IntegralType calcMedium(IntegralType min, IntegralType max)             { return create((long) (min.value + max.value / 2D)); }
+    public static IntegralType calcLow(IntegralType min, IntegralType max)                { return create((long) ((min.value + (min.value + max.value) / 2D) / 2D)); }
+    public static IntegralType calcHigh(IntegralType min, IntegralType max)               { return create((long) ((max.value + (min.value + max.value) / 2D) / 2D)); }
 
-    public static IntegralType calcHigh(@Nonnull IntegralType min, @Nonnull IntegralType max) {
-        return create((long) ((max.value + (min.value + max.value) / 2D) / 2D));
-    }
+    @Override public Long asNumber()                                                      { return value; }
 
-    @Nonnull @Override public Long asNumber() { return value; }
-
-    @SuppressWarnings("unchecked") @Nonnull @Override
-    public IntegralType createType(@Nonnull Number value) {
-        return create(value.longValue());
-    }
+    @SuppressWarnings("unchecked") @Override public IntegralType createType(Number value) { return create(value.longValue()); }
 }

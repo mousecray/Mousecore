@@ -8,7 +8,6 @@ package ru.mousecray.mousecore.core.config.val;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import ru.mousecray.mousecore.api.VariableValue;
-import ru.mousecray.mousecore.api.config.utils.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.ConfigValIntegral;
@@ -41,7 +40,7 @@ public class ConfigValIntegralImpl extends ConfigNumberValImpl<IntegralType> imp
             @Nullable PredefinedValue<IntegralType>... configureValues
     ) {
         super(
-                ConfigValType.INTEGRAL, defaultValue, disabledValue,
+                defaultValue, disabledValue,
                 range == null ? range = new RangeContainer<>(Range.of(IntegralType.MIN, IntegralType.MAX)) : range,
                 null, actionIfNotEqualConstraint, constraints,
                 genValues(

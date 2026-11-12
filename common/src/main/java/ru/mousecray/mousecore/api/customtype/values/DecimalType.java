@@ -5,13 +5,18 @@
 
 package ru.mousecray.mousecore.api.customtype.values;
 
+import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.NumberType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.utils.MouseNumbers;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
-import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
+@MethodReturnsNonnullByDefault
+@ParametersAreNonnullByDefault
 public final class DecimalType extends NumberType<Double> {
     public static final DecimalType MIN  = new DecimalType(Double.MIN_VALUE);
     public static final DecimalType MAX  = new DecimalType(Double.MAX_VALUE);
@@ -36,22 +41,13 @@ public final class DecimalType extends NumberType<Double> {
         else return new DecimalType(value);
     }
 
-    public static DecimalType calcMedium(@Nonnull DecimalType min, @Nonnull DecimalType max) {
-        return create(min.value + max.value / 2D);
-    }
+    @Override public IValType getValType()                                               { return ValType.DECIMAL; }
 
-    public static DecimalType calcLow(@Nonnull DecimalType min, @Nonnull DecimalType max) {
-        return create((min.value + (min.value + max.value) / 2D) / 2D);
-    }
+    public static DecimalType calcMedium(DecimalType min, DecimalType max)               { return create(min.value + max.value / 2D); }
+    public static DecimalType calcLow(DecimalType min, DecimalType max)                  { return create((min.value + (min.value + max.value) / 2D) / 2D); }
+    public static DecimalType calcHigh(DecimalType min, DecimalType max)                 { return create((max.value + (min.value + max.value) / 2D) / 2D); }
 
-    public static DecimalType calcHigh(@Nonnull DecimalType min, @Nonnull DecimalType max) {
-        return create((max.value + (min.value + max.value) / 2D) / 2D);
-    }
+    @Override public Double asNumber()                                                   { return value; }
 
-    @Nonnull @Override public Double asNumber() { return value; }
-
-    @SuppressWarnings("unchecked") @Nonnull @Override
-    public DecimalType createType(@Nonnull Number value) {
-        return create(value.doubleValue());
-    }
+    @SuppressWarnings("unchecked") @Override public DecimalType createType(Number value) { return create(value.doubleValue()); }
 }

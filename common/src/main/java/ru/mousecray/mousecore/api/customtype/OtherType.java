@@ -8,7 +8,6 @@ package ru.mousecray.mousecore.api.customtype;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.utils.MouseUtils;
 
-import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Comparator;
 import java.util.Objects;
@@ -16,12 +15,11 @@ import java.util.Objects;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 public abstract class OtherType<T extends Comparable<T>> extends CustomType<OtherType<?>> {
+    private static final MouseUtils.Equator<OtherType<?>> EQUATOR = MouseUtils.Equator.equaling(OtherType::getValue);
+
     protected final T value;
 
-    protected OtherType(T value) {
-        super(CustomValType.OTHER);
-        this.value = value;
-    }
+    protected OtherType(T value)       { this.value = value; }
 
     public T getValue()                { return value; }
 
@@ -30,14 +28,10 @@ public abstract class OtherType<T extends Comparable<T>> extends CustomType<Othe
     @Override public String toString() { return value.toString(); }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass") @Override
-    public boolean equals(Object o) {
-        return MouseUtils.Equator
-                .<OtherType<T>, T>equaling(OtherType::getValue)
-                .equals(getClass(), this, o);
-    }
+    public boolean equals(Object o) { return EQUATOR.test(this, o); }
 
     @Override
-    public int compareTo(@Nonnull OtherType<?> o) {
+    public int compareTo(OtherType<?> o) {
         return Comparator
                 .<OtherType<?>, Comparable>comparing(OtherType::getValue)
                 .compare(this, o);

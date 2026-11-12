@@ -10,15 +10,20 @@ package ru.mousecray.mousecore.core.config.build;
 import org.apache.commons.lang3.StringUtils;
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mousecore.api.config.par.ConfigParBase;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.config.utils.ConfigLang;
-import ru.mousecray.mousecore.api.config.val.IValType;
+import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.log.MouseLogger;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.core.config.MouseConfigImpl;
-import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;
+import ru.mousecray.mousecore.core.config.build.par.ConfigParameterBuilder;
+import ru.mousecray.mousecore.core.config.build.par.group.ConfigParameterGroupBuilder;
+import ru.mousecray.mousecore.core.config.build.struct.ConfigDictionaryBuilder;
+import ru.mousecray.mousecore.core.config.build.struct.ConfigSectionBuilder;
 import ru.mousecray.mousecore.core.config.utils.ConfigDictionaryImpl;
 
 import javax.annotation.Nullable;
@@ -28,18 +33,18 @@ import java.util.*;
 @MethodReturnsNonnullByDefault
 @ParametersAreNonnullByDefault
 public final class MouseConfigBuilder {
-    private final   String      name;
-    private final   String      folderName;
-    @Nullable final MouseLogger logger;
-    ConfigDictionary                        dictionary;
-    SortedMap<String, List<ConfigSectBase>> sections    = new TreeMap<>(
+    private final          String                                  name;
+    private final          String                                  folderName;
+    @Nullable public final MouseLogger                             logger;
+    public                 ConfigDictionary                        dictionary;
+    public                 SortedMap<String, List<ConfigSectBase>> sections        = new TreeMap<>(
             Comparator
                     .<String, Integer>comparing(k -> StringUtils.countMatches(k, "."))
                     .thenComparing(k -> k)
     );
-    boolean                                 autoDisable = false;
-    private int syncSecInterval = 0;
-    private int saveSecInterval = 0;
+    public                 boolean                                 autoDisable     = false;
+    private                int                                     syncSecInterval = 0;
+    private                int                                     saveSecInterval = 0;
 
     private MouseConfigBuilder(String name, String folderName, @Nullable MouseLogger logger) {
         this.name = name;
@@ -87,7 +92,7 @@ public final class MouseConfigBuilder {
     }
 
     @SuppressWarnings("DataFlowIssue")
-    public <T extends Comparable<T>> ConfigParameterBuilder<T> createParameter(@Nullable String path, String name, String displayName) {
+    public ConfigParameterBuilder createParameter(@Nullable String path, String name, String displayName) {
         if (path == null) path = ".";
         else {
             String trim = MouseStrings.trimWith(path, true, '\t');
@@ -102,7 +107,7 @@ public final class MouseConfigBuilder {
     }
 
     @SuppressWarnings("DataFlowIssue")
-    public <T extends Comparable<T>> ConfigParameterGroupBuilder<T> createParameterGroup(
+    public <T extends CustomType<?>> ConfigParameterGroupBuilder<T> createParameterGroup(
             @Nullable String path, String name, String displayName, IValType valType, Class<T> typeClass
     ) {
         if (path == null) path = ".";
@@ -118,11 +123,11 @@ public final class MouseConfigBuilder {
         return ConfigParameterGroupBuilder.create(this, path, new DisplayName(name, displayName), valType, typeClass);
     }
 
-    void putSection(String path, ConfigSect section) {
+    public void putSection(String path, ConfigSect section) {
         sections.computeIfAbsent(path, k -> new ArrayList<>()).add(section);
     }
 
-    <T extends ConfigParBaseImpl<?>> void putParameter(String path, T par) {
+    public void putParameter(String path, ConfigParBase<?> par) {
         sections.computeIfAbsent(path, k -> new ArrayList<>()).add(par);
     }
 

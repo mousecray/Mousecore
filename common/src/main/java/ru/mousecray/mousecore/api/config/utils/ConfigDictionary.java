@@ -9,7 +9,7 @@ import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import ru.mousecray.mousecore.api.config.val.ILocaleType;
-import ru.mousecray.mousecore.api.config.val.IValType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

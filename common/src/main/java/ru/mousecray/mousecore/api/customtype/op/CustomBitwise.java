@@ -16,4 +16,9 @@ public interface CustomBitwise<T extends CustomType<?>> {
     T leftShift(int other);
     T rightShift(int other);
     T uRightShift(int other);
+
+    boolean isSupport(BitwiseOperator.Unary op);
+    boolean isSupport(BitwiseOperator.Binary op, CustomType<?> other);
+    boolean isSupport(BitwiseOperator.Binary op, Class<? extends CustomType<?>> otherClass);
+    boolean isSupport(BitwiseOperator.Shift op);
 }

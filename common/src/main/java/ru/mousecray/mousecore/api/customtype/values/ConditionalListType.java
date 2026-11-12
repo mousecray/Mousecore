@@ -9,8 +9,12 @@ import org.apache.commons.lang3.StringUtils;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
+import ru.mousecray.mousecore.api.customtype.type.ValTypeCategory;
 import ru.mousecray.mousecore.api.error.UnsupportedValException;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
+import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.log.MouseLogger;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseLambdas;
@@ -24,96 +28,51 @@ import java.util.function.Function;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 public final class ConditionalListType<T extends CustomType<?>> extends ListType<ConditionalValType<T>, T> {
-    private ConditionalListType(Class<T> valClass, @Nullable Function<String, T> valCreator) {
-        super(checkValClass(valClass), valCreator);
+    private ConditionalListType(IValType listComponentType, @Nullable Function<String, T> valCreator) {
+        super(checkValType(listComponentType), valCreator);
     }
 
-    private ConditionalListType(
-            Class<T> valClass, @Nullable Function<String, T> valCreator, List<ConditionalValType<T>> values
-    ) {
-        super(checkValClass(valClass), valCreator, values);
+    private ConditionalListType(IValType listComponentType, @Nullable Function<String, T> valCreator, List<ConditionalValType<T>> values) {
+        super(checkValType(listComponentType), valCreator, values);
     }
 
-    private static <T extends CustomType<?>> Class<T> checkValClass(Class<T> valClass) {
-        if (ListType.class.isAssignableFrom(valClass)) {
-            throw new UnsupportedValException("Enclosing ListTypes is not support");
-        }
-        return valClass;
+    private static IValType checkValType(IValType listComponentType) {
+        if (listComponentType == ValType.UNDEFINED) throw new UnsupportedValException("ListTypes with undefined value is not support");
+        if (listComponentType.getCategory() == ValTypeCategory.LIST) throw new UnsupportedValException("Enclosing ListTypes is not support");
+        return listComponentType;
     }
 
     @SafeVarargs
-    public static <T extends CustomType<?>> ConditionalListType<T> createFrom(
-            Class<T> valClass,
-            @Nullable Function<String, T> valCreator,
-            T... values
-    ) {
+    public static <T extends CustomType<?>> ConditionalListType<T> create(IValType listComponentType, @Nullable Function<String, T> valCreator, ConditionalValType<T>... values) {
         return new ConditionalListType<>(
-                valClass, valCreator,
-                MouseCollections.mapAsList(ConditionalValType::create, true, values)
+                listComponentType, valCreator, MouseCollections.mapAsList(MouseLambdas::THIS, true, values)
         );
     }
 
     @SafeVarargs
-    public static <T extends CustomType<?>> ConditionalListType<T> createFrom(Class<T> valClass, T... values) {
-        return createFrom(valClass, null, values);
+    public static <T extends CustomType<?>> ConditionalListType<T> create(IValType listComponentType, ConditionalValType<T>... values) {
+        return create(listComponentType, null, values);
     }
 
-    public static <T extends CustomType<?>> ConditionalListType<T> createFrom(
-            Class<T> valClass,
-            @Nullable Function<String, T> valCreator,
-            List<T> values
-    ) {
+    public static <T extends CustomType<?>> ConditionalListType<T> create(IValType listComponentType, @Nullable Function<String, T> valCreator, List<ConditionalValType<T>> values) {
         return new ConditionalListType<>(
-                valClass, valCreator,
-                MouseCollections.map(ConditionalValType::create, true, values)
+                listComponentType, valCreator, MouseCollections.map(MouseLambdas::THIS, true, values)
         );
     }
 
-    public static <T extends CustomType<?>> ConditionalListType<T> createFrom(Class<T> valClass, List<T> values) {
-        return createFrom(valClass, null, values);
+    public static <T extends CustomType<?>> ConditionalListType<T> create(IValType listComponentType, List<ConditionalValType<T>> values) {
+        return create(listComponentType, null, values);
     }
 
-    @SafeVarargs
-    public static <T extends CustomType<?>> ConditionalListType<T> create(
-            Class<T> valClass,
-            @Nullable Function<String, T> valCreator,
-            ConditionalValType<T>... values
-    ) {
-        return new ConditionalListType<>(
-                valClass, valCreator,
-                MouseCollections.mapAsList(MouseLambdas::THIS, true, values)
-        );
-    }
-
-    @SafeVarargs
-    public static <T extends CustomType<?>> ConditionalListType<T> create(Class<T> valClass, ConditionalValType<T>... values) {
-        return create(valClass, null, values);
-    }
-
-    public static <T extends CustomType<?>> ConditionalListType<T> create(
-            Class<T> valClass,
-            @Nullable Function<String, T> valCreator,
-            List<ConditionalValType<T>> values
-    ) {
-        return new ConditionalListType<>(
-                valClass, valCreator,
-                MouseCollections.map(MouseLambdas::THIS, true, values)
-        );
-    }
-
-    public static <T extends CustomType<?>> ConditionalListType<T> create(Class<T> valClass, List<ConditionalValType<T>> values) {
-        return create(valClass, null, values);
-    }
+    @Override public IValType getValType() { return ValType.CONDITIONAL_LIST; }
 
     @SuppressWarnings("unchecked") @Override
     protected <TYPE extends ListType<ConditionalValType<T>, T>> TYPE createType(List<ConditionalValType<T>> list) {
-        return (TYPE) create(getValClass(), getValCreator(), list);
+        return (TYPE) create(getListComponentValType(), getValCreator(), list);
     }
 
-    public static <T extends CustomType<T>> ConditionalListType<T> copyExcludeValCreator(
-            ConditionalListType<T> list, Function<String, T> valCreator
-    ) {
-        return new ConditionalListType<>(list.getValClass(), valCreator, list.getList());
+    public static <T extends CustomType<T>> ConditionalListType<T> copyExcludeValCreator(ConditionalListType<T> list, Function<String, T> valCreator) {
+        return new ConditionalListType<>(list.getListComponentValType(), valCreator, list.getList());
     }
 
     @Override
@@ -127,15 +86,16 @@ public final class ConditionalListType<T extends CustomType<?>> extends ListType
         return flag;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends CustomType<?>> ConditionalListType<T> fromString(
-            Class<T> valClass,
+            IValType listComponentType,
             @Nullable String rawString,
             @Nullable Function<String, T> valCreator,
             @Nullable MouseLogger logger
     ) {
-        if (rawString == null) return createFrom(valClass, valCreator);
+        if (rawString == null) return create(listComponentType, valCreator);
 
-        ConditionalListType<T> list  = createFrom(valClass, valCreator);
+        ConditionalListType<T> list  = create(listComponentType, valCreator);
         String[]               split = rawString.split(",");
         for (String s : split) {
             String str = MouseStrings.trimWith(s, true, '\t');
@@ -143,14 +103,31 @@ public final class ConditionalListType<T extends CustomType<?>> extends ListType
                 if (!str.contains("\t")) {
                     try {
                         ConditionalValType<T> val;
-                        if (valCreator != null) val = ConditionalValType.create(valCreator.apply(str));
-                        else val = ConditionalValType.fromString(valClass, str);
+                        if (valCreator != null) {
+                            boolean anti = false;
+                            if (str.startsWith("!")) {
+                                anti = true;
+                                str = MouseStrings.trimWith(str.substring(1), true, '\t');
+                            }
+                            T innerVal = valCreator.apply(str);
+                            val = innerVal != null ? ConditionalValType.create(innerVal, PlusMinusType.create(anti)) : null;
+                        } else {
+                            //noinspection DataFlowIssue
+                            val = (ConditionalValType<T>) ConditionalValType.fromString(listComponentType.getTypeClass(), str);
+                        }
 
-                        list.addValue(val);
+                        if (val != null) {
+                            list.addValue(val);
+                        } else if (logger != null) {
+                            logger.atWarn()
+                                    .withPrefix(LogPrefixes.CUSTOMTYPE)
+                                    .withStyle(ConsoleColor.YELLOW_BG)
+                                    .log("ConditionalListType skipped null value '{0}'", str);
+                        }
                     } catch (NumberFormatException e) {
                         if (logger != null) {
                             logger.atWarn()
-                                    .withPrefix("Customtype")
+                                    .withPrefix(LogPrefixes.CUSTOMTYPE)
                                     .withStyle(ConsoleColor.YELLOW_BG)
                                     .log("ConditionalListType skipped broken or unsupported value '{0}'", str);
                         }

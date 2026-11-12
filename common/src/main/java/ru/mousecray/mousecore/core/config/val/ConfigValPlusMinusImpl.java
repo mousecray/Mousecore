@@ -7,7 +7,6 @@ package ru.mousecray.mousecore.core.config.val;
 
 import org.apache.commons.lang3.tuple.Pair;
 import ru.mousecray.mousecore.api.VariableValue;
-import ru.mousecray.mousecore.api.config.utils.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.ConfigValPlusMinus;
@@ -32,7 +31,7 @@ public class ConfigValPlusMinusImpl extends ConfigLogicalValImpl<PlusMinusType> 
             @Nullable PredefinedValue<PlusMinusType>... configureValues
     ) {
         super(
-                ConfigValType.LOGICAL, defaultValue, disabledValue,
+                defaultValue, disabledValue,
                 "+/-", constraints,
                 genValues(additionalThreshold, configureValues)
         );

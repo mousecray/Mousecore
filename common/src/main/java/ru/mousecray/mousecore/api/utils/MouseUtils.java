@@ -6,7 +6,6 @@
 package ru.mousecray.mousecore.api.utils;
 
 import javax.annotation.Nullable;
-import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -28,25 +27,52 @@ public final class MouseUtils {
     public static boolean tryParseBoolean(@Nullable Boolean value)          { return value != null && value; }
     @Nullable public static Character tryParseChar(@Nullable String value)  { return tryParseChar(value, null); }
 
-    @FunctionalInterface
-    public interface Equator<T> {
-        boolean equals(Class<?> clazz, Object o1, Object o2);
+    public static final class Equator<T> {
+        private final Function<T, ?>[] extractors;
+
+        @SafeVarargs
+        private Equator(Function<T, ?>... extractors) {
+            this.extractors = extractors;
+        }
+
+        public static <T> Equator<T> equaling(Function<T, ?> keyExtractor) {
+            Objects.requireNonNull(keyExtractor);
+            Function<T, ?>[] array = new Function[]{ keyExtractor };
+            return new Equator<>(array);
+        }
+
+        public Equator<T> thenEqualing(Function<T, ?> keyExtractor) {
+            Objects.requireNonNull(keyExtractor);
+            Function<T, ?>[] newArray = new Function[extractors.length + 1];
+            System.arraycopy(extractors, 0, newArray, 0, extractors.length);
+            newArray[extractors.length] = keyExtractor;
+            return new Equator<>(newArray);
+        }
 
         @SuppressWarnings("unchecked")
-        static <T, U> Equator<T> equaling(Function<T, U> keyExtractor) {
-            Objects.requireNonNull(keyExtractor);
-            return (Equator<T> & Serializable) (clazz, c1, c2) ->
-                    c1.getClass() == clazz && c2.getClass() == clazz
-                            && Objects.equals(keyExtractor.apply((T) c1), keyExtractor.apply((T) c2));
+        public boolean test(@Nullable Object o1, @Nullable Object o2) {
+            if (o1 == o2) return true;
+            if (o1 == null || o2 == null) return false;
+            if (o1.getClass() != o2.getClass()) return false;
+
+            T first  = (T) o1;
+            T second = (T) o2;
+
+            for (Function<T, ?> extractor : extractors) if (!Objects.equals(extractor.apply(first), extractor.apply(second))) return false;
+            return true;
         }
 
-        default <U> Equator<T> thenEqualing(Function<T, U> keyExtractor) {
-            return thenEqualing(equaling(keyExtractor));
-        }
+        @SuppressWarnings("unchecked")
+        public boolean equals(Class<?> clazz, @Nullable Object o1, @Nullable Object o2) {
+            if (o1 == o2) return true;
+            if (o1 == null || o2 == null) return false;
+            if (o1.getClass() != clazz || o2.getClass() != clazz) return false;
 
-        default Equator<T> thenEqualing(Equator<T> other) {
-            Objects.requireNonNull(other);
-            return (Equator<T> & Serializable) (clazz, c1, c2) -> equals(clazz, c1, c2) && other.equals(clazz, c1, c2);
+            T first  = (T) o1;
+            T second = (T) o2;
+
+            for (Function<T, ?> extractor : extractors) if (!Objects.equals(extractor.apply(first), extractor.apply(second))) return false;
+            return true;
         }
     }
 }

@@ -17,4 +17,8 @@ public interface CustomArithmetic<T extends CustomType<?>> {
     T divide(CustomType<?> other);
     T multiply(CustomType<?> other);
     T modulo(CustomType<?> other);
+
+    boolean isSupport(ArithmeticOperator.Unary op);
+    boolean isSupport(ArithmeticOperator.Binary op, CustomType<?> other);
+    boolean isSupport(ArithmeticOperator.Binary op, Class<? extends CustomType<?>> otherClass);
 }

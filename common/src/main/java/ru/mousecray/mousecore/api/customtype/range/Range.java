@@ -39,20 +39,24 @@ public class Range<T extends NumberType<?>> implements Comparable<Range<T>> {
     public boolean isIncludeMax() { return includeMax; }
 
     public boolean isLess(T value) {
-        return includeMin ? value.getLogicPipeline().isLessOrEqual(minValue) : value.getLogicPipeline().isLess(minValue);
+        return includeMin
+                ? value.getLogicPipeline().isLessOrEqual(minValue).asBoolean()
+                : value.getLogicPipeline().isLess(minValue).asBoolean();
     }
 
     public boolean isMore(T value) {
-        return includeMax ? value.getLogicPipeline().isMoreOrEqual(maxValue) : value.getLogicPipeline().isMore(maxValue);
+        return includeMax
+                ? value.getLogicPipeline().isMoreOrEqual(maxValue).asBoolean()
+                : value.getLogicPipeline().isMore(maxValue).asBoolean();
     }
 
     public boolean isInRange(T value) {
         boolean minOk = includeMin
-                ? minValue.getLogicPipeline().isLessOrEqual(value)
-                : minValue.getLogicPipeline().isLess(value);
+                ? minValue.getLogicPipeline().isLessOrEqual(value).asBoolean()
+                : minValue.getLogicPipeline().isLess(value).asBoolean();
         boolean maxOk = includeMax
-                ? maxValue.getLogicPipeline().isMoreOrEqual(value)
-                : maxValue.getLogicPipeline().isMore(value);
+                ? maxValue.getLogicPipeline().isMoreOrEqual(value).asBoolean()
+                : maxValue.getLogicPipeline().isMore(value).asBoolean();
         return minOk && maxOk;
     }
 

@@ -10,6 +10,7 @@ package ru.mousecray.mousecore.api.config.val;
 import ru.mousecray.mousecore.api.config.MouseConfig;
 import ru.mousecray.mousecore.api.config.par.ConfigParBase;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
 
 import javax.annotation.Nullable;
 

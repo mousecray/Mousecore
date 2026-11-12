@@ -7,13 +7,13 @@ package ru.mousecray.mousecore.core.config.val.list.simple;
 
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.utils.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.list.simple.ConfigValRandomQuantityList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.range.Range;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.customtype.values.RandomQuantityType;
 import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
 import ru.mousecray.mousecore.core.config.val.base.list.simple.ConfigSimpleListNumberValImpl;
@@ -34,12 +34,12 @@ public class ConfigValRandomQuantityListImpl extends ConfigSimpleListNumberValIm
             @Nullable PredefinedValue<SimpleListType<RandomQuantityType>>... configureValues
     ) {
         super(
-                ConfigValType.RANDOM_QUANTITY, RandomQuantityType.class, createValCreator(),
+                createValCreator(),
                 defaultValue == null
-                        ? SimpleListType.create(RandomQuantityType.class, createValCreator())
+                        ? SimpleListType.create(ValType.RANDOM_QUANTITY, createValCreator())
                         : defaultValue,
                 disabledValue == null
-                        ? SimpleListType.create(RandomQuantityType.class, createValCreator())
+                        ? SimpleListType.create(ValType.RANDOM_QUANTITY, createValCreator())
                         : disabledValue,
                 range == null
                         ? new RangeContainer<>(Range.of(RandomQuantityType.MIN, RandomQuantityType.MAX))

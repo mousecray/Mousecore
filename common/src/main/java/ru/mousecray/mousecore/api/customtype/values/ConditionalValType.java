@@ -7,6 +7,9 @@ package ru.mousecray.mousecore.api.customtype.values;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
+import ru.mousecray.mousecore.api.customtype.type.ValTypeMetaCategory;
 import ru.mousecray.mousecore.api.error.UnsupportedValException;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
@@ -20,9 +23,11 @@ import java.util.Objects;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 public final class ConditionalValType<T extends CustomType<?>> extends CustomType<ConditionalValType<T>> {
-    public static <T extends CustomType<?>> ConditionalValType<T> NULL() {
-        return new ConditionalValType<>(null, false);
-    }
+    private static final MouseUtils.Equator<ConditionalValType<?>> EQUATOR = MouseUtils.Equator
+            .<ConditionalValType<?>>equaling(ConditionalValType::getValue)
+            .thenEqualing(ConditionalValType::isAnti);
+
+    public static <T extends CustomType<?>> ConditionalValType<T> NULL() { return new ConditionalValType<>(null, false); }
 
     private final T       value;
     private final boolean anti;
@@ -41,9 +46,10 @@ public final class ConditionalValType<T extends CustomType<?>> extends CustomTyp
         return new ConditionalValType<>(Objects.requireNonNull(value), isAnti);
     }
 
-    public static <T extends CustomType<?>> ConditionalValType<T> create(T value) {
-        return create(value, PlusMinusType.FALSE);
-    }
+    public static <T extends CustomType<?>> ConditionalValType<T> create(T value) { return create(value, PlusMinusType.FALSE); }
+
+    @Override public IValType getValType()                                        { return value != null ? value.getValType() : ValType.UNDEFINED; }
+    @Override public ValTypeMetaCategory getValTypeMetaCategory()                 { return ValTypeMetaCategory.CONDITIONAL; }
 
     @Nullable
     private static <T extends CustomType<?>> T checkValue(@Nullable T value) {
@@ -62,10 +68,12 @@ public final class ConditionalValType<T extends CustomType<?>> extends CustomTyp
         boolean anti = false;
         int     i    = raw.indexOf('!');
         if (i > -1) {
-            raw = raw.substring(i);
+            raw = raw.substring(i + 1);
             anti = true;
         }
-        return create(CustomType.parse(valClass, raw), PlusMinusType.create(anti));
+        T parsed = CustomType.parse(valClass, raw);
+        if (parsed == null) throw new ValueFormatException("Cannot parse value: " + raw);
+        return create(parsed, PlusMinusType.create(anti));
     }
 
     public ConditionalValType<T> createType(CustomType<?> value, PlusMinusType isAnti) {
@@ -79,13 +87,8 @@ public final class ConditionalValType<T extends CustomType<?>> extends CustomTyp
     @Override public String toString() { return anti ? '!' + value.toString() : value.toString(); }
     @Override public int hashCode()    { return Objects.hash(super.hashCode(), anti); }
 
-    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass") @Override
-    public boolean equals(Object o) {
-        return MouseUtils.Equator
-                .<ConditionalValType<T>, T>equaling(ConditionalValType::getValue)
-                .thenEqualing(ConditionalValType::isAnti)
-                .equals(getClass(), this, o);
-    }
+    @SuppressWarnings("EqualsDoesntCheckParameterClass") @Override
+    public boolean equals(Object o) { return EQUATOR.test(this, o); }
 
     @Override
     public int compareTo(ConditionalValType<T> o) {

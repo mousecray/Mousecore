@@ -8,7 +8,6 @@ package ru.mousecray.mousecore.core.config.val;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import ru.mousecray.mousecore.api.VariableValue;
-import ru.mousecray.mousecore.api.config.utils.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.ConfigValDecimal;
@@ -41,7 +40,7 @@ public class ConfigValDecimalImpl extends ConfigNumberValImpl<DecimalType> imple
             @Nullable PredefinedValue<DecimalType>... configureValues
     ) {
         super(
-                ConfigValType.DECIMAL, defaultValue, disabledValue,
+                defaultValue, disabledValue,
                 range == null ? range = new RangeContainer<>(Range.of(DecimalType.MIN, DecimalType.MAX)) : range,
                 null, actionIfNotEqualConstraint, constraints,
                 genValues(

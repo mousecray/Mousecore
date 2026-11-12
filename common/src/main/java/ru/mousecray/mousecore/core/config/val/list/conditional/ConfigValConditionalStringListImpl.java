@@ -7,11 +7,11 @@ package ru.mousecray.mousecore.core.config.val.list.conditional;
 
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.utils.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.list.conditional.ConfigValConditionalStringList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.customtype.values.ConditionalListType;
 import ru.mousecray.mousecore.api.customtype.values.StringType;
 import ru.mousecray.mousecore.core.config.val.base.list.conditional.ConfigConditionalListOtherValImpl;
@@ -31,12 +31,12 @@ public class ConfigValConditionalStringListImpl extends ConfigConditionalListOth
             @Nullable PredefinedValue<ConditionalListType<StringType>>... configureValues
     ) {
         super(
-                ConfigValType.STRING, StringType.class, createValCreator(),
+                createValCreator(),
                 defaultValue == null
-                        ? ConditionalListType.create(StringType.class, createValCreator())
+                        ? ConditionalListType.create(ValType.SIMPLE_STRING, createValCreator())
                         : defaultValue,
                 disabledValue == null
-                        ? ConditionalListType.create(StringType.class, createValCreator())
+                        ? ConditionalListType.create(ValType.SIMPLE_STRING, createValCreator())
                         : disabledValue,
                 constraints, configureValues
         );

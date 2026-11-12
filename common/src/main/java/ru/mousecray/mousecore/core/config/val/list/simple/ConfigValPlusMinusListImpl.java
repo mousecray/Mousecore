@@ -11,6 +11,7 @@ import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.list.simple.ConfigValPlusMinusList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
 import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
 import ru.mousecray.mousecore.core.config.val.base.list.simple.ConfigSimpleListLogicalValImpl;
@@ -30,12 +31,12 @@ public class ConfigValPlusMinusListImpl extends ConfigSimpleListLogicalValImpl<P
             @Nullable PredefinedValue<SimpleListType<PlusMinusType>>... configureValues
     ) {
         super(
-                PlusMinusType.class, createValCreator(),
+                createValCreator(),
                 defaultValue == null
-                        ? SimpleListType.create(PlusMinusType.class, createValCreator())
+                        ? SimpleListType.create(ValType.PLUS_MINUS, createValCreator())
                         : defaultValue,
                 disabledValue == null
-                        ? SimpleListType.create(PlusMinusType.class, createValCreator())
+                        ? SimpleListType.create(ValType.PLUS_MINUS, createValCreator())
                         : disabledValue,
                 constraints, configureValues
         );

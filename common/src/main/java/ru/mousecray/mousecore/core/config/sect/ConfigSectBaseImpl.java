@@ -91,21 +91,22 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         else return children.getByInternalName(name);
     }
 
-    public void addChild(ConfigSectBaseImpl section) {
+    public void addChild(ConfigSectBase section) {
+        ConfigSectBaseImpl sectionImpl = (ConfigSectBaseImpl) section;
         Objects.requireNonNull(section);
         checkChildren();
         if (!isSupportChild(section)) {
             throw new UnsupportedOperationException("This ConfigSection cannot support child '" + section.getName().getInternalName() + "'");
         }
-        ImmutableDisplayNameMap.Entry<ConfigSectBaseImpl> prev = children.put(section.getName(), section);
+        ImmutableDisplayNameMap.Entry<ConfigSectBaseImpl> prev = children.put(section.getName(), sectionImpl);
         if (prev != null && hasLogger()) {
             assert getLogger() != null;
             getLogger().atDebug().log("ConfigSectBaseImpl '{0}' was overwritten by ConfigSectBaseImpl '{1}'",
                     prev.getValue().getFullInternalName(), section.getName().getInternalName());
         }
-        section.parent = this;
-        section.setDeep(deep + 1);
-        section.setConfig(config);
+        sectionImpl.parent = this;
+        sectionImpl.setDeep(deep + 1);
+        sectionImpl.setConfig(config);
 
         if (hasConfig()) {
             assert getConfig() != null;

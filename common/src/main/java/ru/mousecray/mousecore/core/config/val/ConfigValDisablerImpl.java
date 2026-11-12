@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.ConfigValDisabler;
+import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
 
 import javax.annotation.Nullable;
@@ -18,8 +19,8 @@ public class ConfigValDisablerImpl extends ConfigValPlusMinusImpl implements Con
     @SafeVarargs
     public ConfigValDisablerImpl(
             PlusMinusType defaultValue, PlusMinusType disabledValue,
-            @Nullable Constraint<? extends ru.mousecray.mousecore.api.customtype.CustomType<?>>[] constraints,
             @Nullable List<Pair<String, String>> additionalThreshold,
+            @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<PlusMinusType>... configureValues
     ) {
         super(

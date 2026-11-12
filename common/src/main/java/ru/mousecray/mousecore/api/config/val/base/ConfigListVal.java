@@ -8,9 +8,9 @@
 package ru.mousecray.mousecore.api.config.val.base;
 
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
-import ru.mousecray.mousecore.api.config.val.IValType;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
 
 import java.util.function.Consumer;
 

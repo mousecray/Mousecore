@@ -8,10 +8,8 @@ package ru.mousecray.mousecore.core.config.val.base.list.simple;
 import ru.mousecray.mousecore.api.VariableValue;
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.utils.ConfigValType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.val.IValType;
 import ru.mousecray.mousecore.api.config.val.base.list.simple.ConfigSimpleListVal;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
@@ -28,15 +26,13 @@ import java.util.function.Function;
 public abstract class ConfigSimpleListValImpl<T extends CustomType<?>> extends ConfigListValImpl<T, T, SimpleListType<T>> implements ConfigSimpleListVal<T> {
     @SafeVarargs
     public ConfigSimpleListValImpl(
-            IValType listComponentType, Class<T> listTypeClass,
             @Nullable Function<String, T> valCreator,
             SimpleListType<T> defaultValue, SimpleListType<T> disabledValue,
             @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<SimpleListType<T>>... configureValues
     ) {
         super(
-                ConfigValType.LIST, defaultValue, disabledValue, listComponentType,
-                listTypeClass, valCreator, constraints, configureValues
+                defaultValue, disabledValue, valCreator, constraints, configureValues
         );
     }
 
@@ -45,7 +41,7 @@ public abstract class ConfigSimpleListValImpl<T extends CustomType<?>> extends C
         try {
             return VariableValue.create(
                     SimpleListType.fromString(
-                            listComponentClass, value, valCreator,
+                            getListComponentType(), value, valCreator,
                             hasLogger() ? getLogger() : null
                     )
             );

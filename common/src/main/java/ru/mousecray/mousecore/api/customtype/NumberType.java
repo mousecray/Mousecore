@@ -16,10 +16,11 @@ import java.util.Objects;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 public abstract class NumberType<T extends Comparable<T>> extends CustomType<NumberType<?>> {
+    private static final MouseUtils.Equator<NumberType<?>> EQUATOR = MouseUtils.Equator.equaling(NumberType::getValue);
+
     protected final T value;
 
     protected NumberType(T value) {
-        super(CustomValType.NUMBER);
         this.value = value;
     }
 
@@ -41,11 +42,7 @@ public abstract class NumberType<T extends Comparable<T>> extends CustomType<Num
     @Override public int hashCode()    { return Objects.hash(value); }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass") @Override
-    public boolean equals(Object o) {
-        return MouseUtils.Equator
-                .<NumberType<T>, T>equaling(NumberType::getValue)
-                .equals(getClass(), this, o);
-    }
+    public boolean equals(Object o) { return EQUATOR.test(this, o); }
 
     @Override
     public int compareTo(NumberType<?> o) {
