@@ -16,7 +16,7 @@ import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.customtype.values.ConditionalListType;
 import ru.mousecray.mousecore.api.customtype.values.RandomQuantityType;
-import ru.mousecray.mousecore.core.config.val.base.list.conditional.ConfigConditionalListNumberValImpl;
+import ru.mousecray.mousecore.core.config.val.base.list.conditional.ConfigValConditionalListNumberImpl;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -25,7 +25,7 @@ import java.util.function.Function;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
-public class ConfigValRandomQuantityConditionalListImpl extends ConfigConditionalListNumberValImpl<RandomQuantityType> implements ConfigValRandomQuantityConditionalList {
+public class ConfigValRandomQuantityConditionalListImpl extends ConfigValConditionalListNumberImpl<RandomQuantityType> implements ConfigValRandomQuantityConditionalList {
     @SafeVarargs
     public ConfigValRandomQuantityConditionalListImpl(
             @Nullable ConditionalListType<RandomQuantityType> defaultValue, @Nullable ConditionalListType<RandomQuantityType> disabledValue,

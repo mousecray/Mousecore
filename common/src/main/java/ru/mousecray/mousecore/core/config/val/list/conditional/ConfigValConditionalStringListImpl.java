@@ -14,7 +14,7 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.customtype.values.ConditionalListType;
 import ru.mousecray.mousecore.api.customtype.values.StringType;
-import ru.mousecray.mousecore.core.config.val.base.list.conditional.ConfigConditionalListOtherValImpl;
+import ru.mousecray.mousecore.core.config.val.base.list.conditional.ConfigValConditionalListOtherImpl;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -23,7 +23,7 @@ import java.util.function.Function;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
-public class ConfigValConditionalStringListImpl extends ConfigConditionalListOtherValImpl<StringType> implements ConfigValConditionalStringList {
+public class ConfigValConditionalStringListImpl extends ConfigValConditionalListOtherImpl<StringType> implements ConfigValConditionalStringList {
     @SafeVarargs
     public ConfigValConditionalStringListImpl(
             @Nullable ConditionalListType<StringType> defaultValue, @Nullable ConditionalListType<StringType> disabledValue,

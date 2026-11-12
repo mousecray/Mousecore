@@ -21,9 +21,9 @@ import java.util.function.Function;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
-public abstract class ConfigConditionalListOtherValImpl<T extends OtherType<?>> extends ConfigConditionalListValImpl<T> implements ConfigConditionalListOtherVal<T> {
+public abstract class ConfigValConditionalListOtherImpl<T extends OtherType<?>> extends ConfigValConditionalListImpl<T> implements ConfigConditionalListOtherVal<T> {
     @SafeVarargs
-    public ConfigConditionalListOtherValImpl(
+    public ConfigValConditionalListOtherImpl(
             @Nullable Function<String, T> valCreator,
             ConditionalListType<T> defaultValue, ConditionalListType<T> disabledValue,
             @Nullable Constraint<? extends CustomType<?>>[] constraints,

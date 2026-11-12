@@ -22,8 +22,8 @@ import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.core.config.utils.PredefinedValueImpl;
-import ru.mousecray.mousecore.core.config.val.base.ConfigListValImpl;
-import ru.mousecray.mousecore.core.config.val.base.ConfigOtherValImpl;
+import ru.mousecray.mousecore.core.config.val.base.ConfigValListImpl;
+import ru.mousecray.mousecore.core.config.val.base.ConfigValOtherImpl;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -35,7 +35,7 @@ import java.util.function.Supplier;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
-public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigOtherValImpl<ConditionType<ListType<?, V>, V>> implements ConfigValCondition<V> {
+public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigValOtherImpl<ConditionType<ListType<?, V>, V>> implements ConfigValCondition<V> {
     @Nullable protected final String                   pathToParList;
     @Nullable protected       Supplier<ListType<?, V>> listSupplier;
     @Nullable private         ListType<?, V>           cachedList;
@@ -205,7 +205,7 @@ public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigOther
         if (cachedList != null) cachedList = null;
 
         if (pathToParList != null) {
-            ConfigListValImpl<? extends CustomType<?>, ? extends CustomType<?>, ? extends ListType<?, ?>> list = getConfig().getListVal(pathToParList);
+            ConfigValListImpl<? extends CustomType<?>, ? extends CustomType<?>, ? extends ListType<?, ?>> list = getConfig().getListVal(pathToParList);
             if (list != null) {
                 if (listComponentType == list.getListComponentType()) {
                     ListType var = list.getList();

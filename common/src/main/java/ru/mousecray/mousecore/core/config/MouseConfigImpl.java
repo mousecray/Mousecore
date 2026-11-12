@@ -31,7 +31,7 @@ import ru.mousecray.mousecore.core.config.par.group.ConfigParGroupImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectBaseImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectImpl;
 import ru.mousecray.mousecore.core.config.val.*;
-import ru.mousecray.mousecore.core.config.val.base.ConfigListValImpl;
+import ru.mousecray.mousecore.core.config.val.base.ConfigValListImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -243,7 +243,7 @@ public class MouseConfigImpl implements MouseConfig {
     public <LIST_VAL extends CustomType<?>,
             VAL extends CustomType<?>,
             TYPE extends ListType<LIST_VAL, VAL>
-            > ConfigListValImpl<LIST_VAL, VAL, TYPE> getListVal(@Nullable String fullName) {
+            > ConfigValListImpl<LIST_VAL, VAL, TYPE> getListVal(@Nullable String fullName) {
         return getValue(fullName);
     }
 

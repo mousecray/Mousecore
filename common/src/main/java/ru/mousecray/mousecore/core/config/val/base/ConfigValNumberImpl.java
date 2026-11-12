@@ -27,14 +27,14 @@ import static ru.mousecray.mousecore.api.VariableValue.create;
 @FieldsAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @ParametersAreNonnullByDefault
-public abstract class ConfigNumberValImpl<
+public abstract class ConfigValNumberImpl<
         T extends NumberType<?>
         > extends ConfigValImpl<T> implements ConfigNumberVal<T> {
     private final RangeContainer<T>                range;
     private final Function<CustomArithmetic<T>, T> actionIfNotEqualConstraint;
 
     @SafeVarargs
-    public ConfigNumberValImpl(
+    public ConfigValNumberImpl(
             T defaultValue, T disabledValue, RangeContainer<T> range, @Nullable String specificDataType,
             @Nullable Function<CustomArithmetic<T>, T> actionIfNotEqualConstraint,
             @Nullable Constraint<? extends CustomType<?>>[] constraints, @Nullable PredefinedValue<T>... configureValues
@@ -53,7 +53,7 @@ public abstract class ConfigNumberValImpl<
             RangeContainer<T> range, T value, String valueName
     ) {
         if (!range.isInRange(value)) {
-            throw new IllegalStateException("ConfigNumberValImpl got " + valueName + " that not in valid range");
+            throw new IllegalStateException("ConfigValNumberImpl got " + valueName + " that not in valid range");
         }
         return value;
     }

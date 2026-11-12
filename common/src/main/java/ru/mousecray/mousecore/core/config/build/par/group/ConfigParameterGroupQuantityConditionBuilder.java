@@ -24,7 +24,6 @@ import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseLogic;
 import ru.mousecray.mousecore.core.config.build.struct.ConfigDisablerBuilder;
-import ru.mousecray.mousecore.core.config.build.val.list.ConfigListBuilder0;
 import ru.mousecray.mousecore.core.config.build.val.number.ConfigRandomQuantityBuilder;
 import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;
 import ru.mousecray.mousecore.core.config.par.group.ConfigParGroupQuantityConditionImpl;
@@ -32,7 +31,7 @@ import ru.mousecray.mousecore.core.config.utils.ConstraintImpl;
 import ru.mousecray.mousecore.core.config.utils.PredefinedValueImpl;
 import ru.mousecray.mousecore.core.config.val.ConfigValConditionImpl;
 import ru.mousecray.mousecore.core.config.val.ConfigValRandomQuantityImpl;
-import ru.mousecray.mousecore.core.config.val.base.list.simple.ConfigSimpleListValImpl;
+import ru.mousecray.mousecore.core.config.val.base.list.simple.ConfigValSimpleListImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -48,7 +47,7 @@ public final class ConfigParameterGroupQuantityConditionBuilder<T extends Custom
     @Nonnull private final ConfigParameterGroupBuilder<T>             parBuilder;
     private                DisplayName                                randomName;
     private                Pair<DisplayName, ConfigValRandomQuantity> randomPar;
-    private                Pair<DisplayName, ConfigSimpleListValImpl> listPar;
+    private                Pair<DisplayName, ConfigValSimpleListImpl> listPar;
     private                DisplayName                                listName;
     private                ConfigParDisablerImpl                      disablePar;
 
@@ -112,9 +111,9 @@ public final class ConfigParameterGroupQuantityConditionBuilder<T extends Custom
     @SuppressWarnings("unchecked") @Override
     protected void setValue(ConfigVal value) {
         boolean logVal = false;
-        if (value instanceof ConfigSimpleListValImpl) {
+        if (value instanceof ConfigValSimpleListImpl) {
             if (listPar != null) logVal = true;
-            listPar = Pair.of(listName, (ConfigSimpleListValImpl) value);
+            listPar = Pair.of(listName, (ConfigValSimpleListImpl) value);
         } else if (value instanceof ConfigValRandomQuantityImpl) {
             if (randomPar != null) logVal = true;
             randomPar = Pair.of(randomName, (ConfigValRandomQuantity) value);

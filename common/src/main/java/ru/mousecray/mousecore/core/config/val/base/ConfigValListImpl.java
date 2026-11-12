@@ -23,7 +23,7 @@ import java.util.function.Function;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
-public abstract class ConfigListValImpl<
+public abstract class ConfigValListImpl<
         LIST_VAL extends CustomType<?>,
         VAL extends CustomType<?>,
         T extends ListType<LIST_VAL, VAL>
@@ -31,7 +31,7 @@ public abstract class ConfigListValImpl<
     @Nullable protected final Function<String, VAL> valCreator;
 
     @SafeVarargs
-    public ConfigListValImpl(
+    public ConfigValListImpl(
             T defaultValue, T disabledValue,
             @Nullable Function<String, VAL> valCreator,
             @Nullable Constraint<? extends CustomType<?>>[] constraints, @Nullable PredefinedValue<T>... configureValues

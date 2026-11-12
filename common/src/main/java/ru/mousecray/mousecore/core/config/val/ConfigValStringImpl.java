@@ -13,12 +13,12 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.customtype.values.StringType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
-import ru.mousecray.mousecore.core.config.val.base.ConfigOtherValImpl;
+import ru.mousecray.mousecore.core.config.val.base.ConfigValOtherImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ConfigValStringImpl extends ConfigOtherValImpl<StringType> implements ConfigValString {
+public class ConfigValStringImpl extends ConfigValOtherImpl<StringType> implements ConfigValString {
     @SafeVarargs
     public ConfigValStringImpl(
             @Nullable StringType defaultValue, @Nullable StringType disabledValue,

@@ -30,12 +30,12 @@ import static ru.mousecray.mousecore.api.VariableValue.create;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
-public abstract class ConfigConditionalListNumberValImpl<
+public abstract class ConfigValConditionalListNumberImpl<
         T extends NumberType<?>
-        > extends ConfigConditionalListValImpl<T> implements ConfigConditionalListNumberVal<T> {
+        > extends ConfigValConditionalListImpl<T> implements ConfigConditionalListNumberVal<T> {
     private final RangeContainer<T> range;
     @SafeVarargs
-    public ConfigConditionalListNumberValImpl(
+    public ConfigValConditionalListNumberImpl(
             @Nullable Function<String, T> valCreator,
             ConditionalListType<T> defaultValue, ConditionalListType<T> disabledValue,
             RangeContainer<T> range,

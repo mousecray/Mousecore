@@ -9,9 +9,8 @@ import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.val.base.list.simple.ConfigSimpleListOtherVal;
-import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.OtherType;
+import ru.mousecray.mousecore.api.config.val.base.list.simple.ConfigSimpleListLogicalVal;
+import ru.mousecray.mousecore.api.customtype.LogicalType;
 import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
 
 import javax.annotation.Nullable;
@@ -21,12 +20,12 @@ import java.util.function.Function;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
-public abstract class ConfigSimpleListOtherValImpl<T extends OtherType<?>> extends ConfigSimpleListValImpl<T> implements ConfigSimpleListOtherVal<T> {
+public abstract class ConfigValSimpleListLogicalImpl<T extends LogicalType<?>> extends ConfigValSimpleListImpl<T> implements ConfigSimpleListLogicalVal<T> {
     @SafeVarargs
-    public ConfigSimpleListOtherValImpl(
+    public ConfigValSimpleListLogicalImpl(
             @Nullable Function<String, T> valCreator,
             SimpleListType<T> defaultValue, SimpleListType<T> disabledValue,
-            @Nullable Constraint<? extends CustomType<?>>[] constraints,
+            @Nullable Constraint<? extends ru.mousecray.mousecore.api.customtype.CustomType<?>>[] constraints,
             @Nullable PredefinedValue<SimpleListType<T>>... configureValues
     ) {
         super(valCreator, defaultValue, disabledValue, constraints, configureValues);

@@ -19,7 +19,7 @@ import ru.mousecray.mousecore.api.customtype.values.IntegralType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.core.config.utils.PredefinedValueImpl;
-import ru.mousecray.mousecore.core.config.val.base.ConfigNumberValImpl;
+import ru.mousecray.mousecore.core.config.val.base.ConfigValNumberImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class ConfigValIntegralImpl extends ConfigNumberValImpl<IntegralType> implements ConfigValIntegral {
+public class ConfigValIntegralImpl extends ConfigValNumberImpl<IntegralType> implements ConfigValIntegral {
     @SafeVarargs
     public ConfigValIntegralImpl(
             IntegralType defaultValue, IntegralType disabledValue,

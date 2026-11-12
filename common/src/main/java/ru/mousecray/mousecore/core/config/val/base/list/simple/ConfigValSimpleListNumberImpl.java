@@ -28,12 +28,12 @@ import static ru.mousecray.mousecore.api.VariableValue.create;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
-public abstract class ConfigSimpleListNumberValImpl<
+public abstract class ConfigValSimpleListNumberImpl<
         T extends NumberType<?>
-        > extends ConfigSimpleListValImpl<T> implements ConfigSimpleListNumberVal<T> {
+        > extends ConfigValSimpleListImpl<T> implements ConfigSimpleListNumberVal<T> {
     private final RangeContainer<T> range;
     @SafeVarargs
-    public ConfigSimpleListNumberValImpl(
+    public ConfigValSimpleListNumberImpl(
             @Nullable Function<String, T> valCreator,
             SimpleListType<T> defaultValue, SimpleListType<T> disabledValue,
             RangeContainer<T> range,

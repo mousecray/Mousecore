@@ -19,7 +19,7 @@ import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;
 import ru.mousecray.mousecore.core.config.val.ConfigValConditionImpl;
 import ru.mousecray.mousecore.core.config.val.ConfigValRandomQuantityImpl;
-import ru.mousecray.mousecore.core.config.val.base.ConfigListValImpl;
+import ru.mousecray.mousecore.core.config.val.base.ConfigValListImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,7 +39,7 @@ public class ConfigParGroupQuantityConditionImpl<T extends CustomType<?>> extend
             Pair<DisplayName, ConfigValRandomQuantityImpl> mainPar,
             @Nullable String comment,
             Pair<DisplayName, ConfigValConditionImpl<T>> conditionPar,
-            @Nullable Pair<DisplayName, ConfigListValImpl<? extends CustomType<?>, T, ? extends ListType<?, T>>> listPar
+            @Nullable Pair<DisplayName, ConfigValListImpl<? extends CustomType<?>, T, ? extends ListType<?, T>>> listPar
     ) {
         super(
                 name, disablePar, mainPar, comment,
@@ -59,14 +59,14 @@ public class ConfigParGroupQuantityConditionImpl<T extends CustomType<?>> extend
 
     private static <T extends CustomType<?>> Pair<DisplayName, ConfigValConditionImpl<T>> checkConditionAndList(
             Pair<DisplayName, ConfigValConditionImpl<T>> conditionPar,
-            @Nullable Pair<DisplayName, ? extends ConfigListValImpl<? extends CustomType<?>, T, ? extends ListType<?, T>>> listPar
+            @Nullable Pair<DisplayName, ? extends ConfigValListImpl<? extends CustomType<?>, T, ? extends ListType<?, T>>> listPar
     ) {
         if (listPar != null) {
             if (conditionPar.getValue().getListComponentType() != listPar.getValue().getListComponentType()) {
                 throw new UnsupportedValException("ConfigValConditionImpl type '" + conditionPar.getKey().getInternalName() +
-                        "' is not equal with type of ConfigListValImpl '" + listPar.getKey().getInternalName() +
+                        "' is not equal with type of ConfigValListImpl '" + listPar.getKey().getInternalName() +
                         "'. ConfigValConditionImpl type = " + conditionPar.getValue().getListComponentType() +
-                        "; ConfigListValImpl type = " + listPar.getValue().getListComponentType());
+                        "; ConfigValListImpl type = " + listPar.getValue().getListComponentType());
             }
 
             Supplier<ListType<?, T>> sup = conditionPar.getValue().getListSupplier();
@@ -74,7 +74,7 @@ public class ConfigParGroupQuantityConditionImpl<T extends CustomType<?>> extend
                 return conditionPar;
             }
             throw new UnsupportedValException("ConfigValConditionImpl '" + conditionPar.getKey().getInternalName() +
-                    "' doesn't has relation with ConfigListValImpl '" + listPar.getKey().getInternalName());
+                    "' doesn't has relation with ConfigValListImpl '" + listPar.getKey().getInternalName());
         }
         return conditionPar;
     }

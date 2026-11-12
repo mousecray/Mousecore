@@ -15,14 +15,14 @@ import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.core.config.utils.PredefinedValueImpl;
-import ru.mousecray.mousecore.core.config.val.base.ConfigLogicalValImpl;
+import ru.mousecray.mousecore.core.config.val.base.ConfigValLogicalImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConfigValPlusMinusImpl extends ConfigLogicalValImpl<PlusMinusType> implements ConfigValPlusMinus {
+public class ConfigValPlusMinusImpl extends ConfigValLogicalImpl<PlusMinusType> implements ConfigValPlusMinus {
     @SafeVarargs
     public ConfigValPlusMinusImpl(
             PlusMinusType defaultValue, PlusMinusType disabledValue,

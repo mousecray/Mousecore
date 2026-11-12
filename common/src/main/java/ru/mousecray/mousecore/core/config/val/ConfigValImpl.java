@@ -30,7 +30,7 @@ import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.core.config.MouseConfigImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;
-import ru.mousecray.mousecore.core.config.val.base.ConfigNumberValImpl;
+import ru.mousecray.mousecore.core.config.val.base.ConfigValNumberImpl;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -419,7 +419,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     }
                                                     continue;
                                                 case IN_RANGE:
-                                                    if (val instanceof ConfigNumberValImpl) {
+                                                    if (val instanceof ConfigValNumberImpl) {
                                                         if (constraint.getRange().isInRange(((ConfigNumberVal<? extends NumberType<?>>) val).getValue())) {
                                                             constrainedValue = disabledValue;
                                                             logConstraintDisabledEnd(constraint);

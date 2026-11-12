@@ -15,9 +15,9 @@ import ru.mousecray.mousecore.core.config.val.ConfigValImpl;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class ConfigLogicalValImpl<T extends LogicalType<?>> extends ConfigValImpl<T> implements ConfigLogicalVal<T> {
+public abstract class ConfigValLogicalImpl<T extends LogicalType<?>> extends ConfigValImpl<T> implements ConfigLogicalVal<T> {
     @SafeVarargs
-    public ConfigLogicalValImpl(
+    public ConfigValLogicalImpl(
             T defaultValue, T disabledValue, @Nullable String specificDataType,
             @Nullable Constraint<? extends CustomType<?>>[] constraints, @Nullable PredefinedValue<T>... configureValues
     ) {

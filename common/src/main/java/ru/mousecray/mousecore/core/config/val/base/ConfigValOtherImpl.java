@@ -14,9 +14,9 @@ import ru.mousecray.mousecore.core.config.val.ConfigValImpl;
 
 import javax.annotation.Nullable;
 
-public abstract class ConfigOtherValImpl<T extends OtherType<?>> extends ConfigValImpl<T> implements ConfigOtherVal<T> {
+public abstract class ConfigValOtherImpl<T extends OtherType<?>> extends ConfigValImpl<T> implements ConfigOtherVal<T> {
     @SafeVarargs
-    public ConfigOtherValImpl(
+    public ConfigValOtherImpl(
             T defaultValue, T disabledValue, @Nullable String specificDataType,
             @Nullable Constraint<? extends CustomType<?>>[] constraints, @Nullable PredefinedValue<T>... configureValues
     ) {

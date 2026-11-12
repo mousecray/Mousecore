@@ -14,7 +14,7 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
 import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
-import ru.mousecray.mousecore.core.config.val.base.list.simple.ConfigSimpleListLogicalValImpl;
+import ru.mousecray.mousecore.core.config.val.base.list.simple.ConfigValSimpleListLogicalImpl;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -23,7 +23,7 @@ import java.util.function.Function;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
-public class ConfigValPlusMinusListImpl extends ConfigSimpleListLogicalValImpl<PlusMinusType> implements ConfigValPlusMinusList {
+public class ConfigValPlusMinusListImpl extends ConfigValSimpleListLogicalImpl<PlusMinusType> implements ConfigValPlusMinusList {
     @SafeVarargs
     public ConfigValPlusMinusListImpl(
             @Nullable SimpleListType<PlusMinusType> defaultValue, @Nullable SimpleListType<PlusMinusType> disabledValue,
