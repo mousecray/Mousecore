@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 
 public interface ConfigListVal<LIST_VAL extends CustomType<?>, VAL extends CustomType<?>, T extends ListType<LIST_VAL, VAL>> extends ConfigVal<T> {
     IValType getListComponentType();
+    T getList();
     void forEachList(Consumer<LIST_VAL> func);
     void clearList();
     boolean isEmptyList();

@@ -1,8 +1,3 @@
-/*******************************************************************************
- * Copyright © 2026 mousecray
- * Licensed under the GNU Lesser General Public License, Version 3.0
- ******************************************************************************/
-
 package ru.mousecray.mousecore.core.config.val.base;
 
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
@@ -28,28 +23,30 @@ public abstract class ConfigValListImpl<
         VAL extends CustomType<?>,
         T extends ListType<LIST_VAL, VAL>
         > extends ConfigValImpl<T> implements ConfigListVal<LIST_VAL, VAL, T> {
+
     @Nullable protected final Function<String, VAL> valCreator;
 
     @SafeVarargs
     public ConfigValListImpl(
             T defaultValue, T disabledValue,
             @Nullable Function<String, VAL> valCreator,
-            @Nullable Constraint<? extends CustomType<?>>[] constraints, @Nullable PredefinedValue<T>... configureValues
+            @Nullable Constraint<? extends CustomType<?>>[] constraints,
+            @Nullable PredefinedValue<T>... configureValues
     ) {
         super(defaultValue, disabledValue,
                 val -> val.hasConfig()
                         ? val.getConfig().getDictionary().getLocaleForType(defaultValue.getListComponentValType())
-                        : defaultValue.getValType().getDisplayName(),
+                        : defaultValue.getListComponentValType().getDisplayName(),
                 constraints, configureValues
         );
         this.valCreator = valCreator;
     }
 
-    @Override public IValType getListComponentType()           { return defaultValue.getValType(); }
+    @Override public IValType getListComponentType()           { return defaultValue.getListComponentValType(); }
 
     @Nullable protected Function<String, VAL> getValCreator()  { return valCreator; }
 
-    public T getList()                                         { return getValue(); }
+    @Override public T getList()                               { return getValue(); }
     @Override public void forEachList(Consumer<LIST_VAL> func) { getList().forEach(func); }
     @Override public void clearList()                          { getList().clear(); }
     @Override public boolean isEmptyList()                     { return getList().isEmpty(); }

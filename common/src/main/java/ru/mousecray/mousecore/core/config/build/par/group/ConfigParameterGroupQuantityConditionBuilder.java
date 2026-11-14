@@ -31,7 +31,7 @@ import ru.mousecray.mousecore.core.config.utils.ConstraintImpl;
 import ru.mousecray.mousecore.core.config.utils.PredefinedValueImpl;
 import ru.mousecray.mousecore.core.config.val.ConfigValConditionImpl;
 import ru.mousecray.mousecore.core.config.val.ConfigValRandomQuantityImpl;
-import ru.mousecray.mousecore.core.config.val.base.list.simple.ConfigValSimpleListImpl;
+import ru.mousecray.mousecore.core.config.val.base.list.ConfigValSimpleListImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -51,7 +51,7 @@ public final class ConfigParameterGroupQuantityConditionBuilder<T extends Custom
     private                DisplayName                                listName;
     private                ConfigParDisablerImpl                      disablePar;
 
-    //For condition
+    //For conditional
     private boolean                                                        hasCondition;
     private DisplayName                                                    conditionName;
     private String                                                         noneVar;
@@ -129,7 +129,7 @@ public final class ConfigParameterGroupQuantityConditionBuilder<T extends Custom
 
     public ConfigParameterGroupBuilder<T> buildConditionGroup() {
         if (randomPar == null) throw new IllegalStateException("ConfigParameterGroupCondition doesn't contain main parameter");
-        if (!hasCondition) throw new IllegalStateException("ConfigParameterGroupCondition doesn't contain condition parameter");
+        if (!hasCondition) throw new IllegalStateException("ConfigParameterGroupCondition doesn't contain conditional parameter");
 
         String               parentPath = path.substring(0, path.length() - 1);
         List<ConfigSectBase> list       = configBuilder.sections.get(parentPath.substring(0, parentPath.lastIndexOf('.') + 1));

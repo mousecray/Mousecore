@@ -24,7 +24,6 @@ public enum ValType implements IValType {
     RANDOM_QUANTITY(ValTypeCategory.NUMBER, "Random Quantity", RandomQuantityType.class),
     SIMPLE_CONDITION(ValTypeCategory.CONDITION, "Condition", ConditionType.class),
     SIMPLE_LIST(ValTypeCategory.LIST, "Simple List", SimpleListType.class),
-    CONDITIONAL_LIST(ValTypeCategory.LIST, "Conditional List", ConditionalListType.class),
     SIMPLE_STRING(ValTypeCategory.STRING, "String", StringType.class),
     MINECRAFT_BLOCK(ValTypeCategory.OTHER, "Minecraft Block", MinecraftBlock.class),
     MINECRAFT_ITEM(ValTypeCategory.OTHER, "Minecraft Item", MinecraftItem.class),

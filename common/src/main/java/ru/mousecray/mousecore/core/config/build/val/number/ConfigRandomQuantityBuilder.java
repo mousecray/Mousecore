@@ -13,6 +13,7 @@ import ru.mousecray.mousecore.api.customtype.values.IntegralType;
 import ru.mousecray.mousecore.api.customtype.values.PercentType;
 import ru.mousecray.mousecore.api.customtype.values.RandomQuantityType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
+import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigNumberValueBuilder;
 import ru.mousecray.mousecore.core.config.val.ConfigValRandomQuantityImpl;
 
 import javax.annotation.ParametersAreNonnullByDefault;

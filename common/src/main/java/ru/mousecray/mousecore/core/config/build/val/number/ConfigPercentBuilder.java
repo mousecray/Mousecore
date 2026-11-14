@@ -11,6 +11,7 @@ import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.val.ConfigValPercent;
 import ru.mousecray.mousecore.api.customtype.values.PercentType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
+import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigNumberValueBuilder;
 import ru.mousecray.mousecore.core.config.val.ConfigValPercentImpl;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -250,7 +250,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
     }
 
     private void logConstraintConditionNotValid(Constraint<? extends CustomType<?>> constraint) {
-        if (hasLogger()) logConstraintWarn(constraint, "but constraint condition isn't valid.");
+        if (hasLogger()) logConstraintWarn(constraint, "but constraint conditional isn't valid.");
     }
 
     private void logConstraintIncompatibleTargetType(Constraint<? extends CustomType<?>> constraint) {
@@ -266,7 +266,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
     }
 
     private void logConstraintConditionNotSupport(Constraint<? extends CustomType<?>> constraint) {
-        if (hasLogger()) logConstraintWarn(constraint, "but constraint condition type isn't support.");
+        if (hasLogger()) logConstraintWarn(constraint, "but constraint conditional type isn't support.");
     }
 
     private void logConstraintWarn(Constraint<? extends CustomType<?>> constraint, String uniqueMessage) {
