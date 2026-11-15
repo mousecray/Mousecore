@@ -8,6 +8,7 @@ package ru.mousecray.mousecore.core.config.utils;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.config.utils.ConfigLang;
 import ru.mousecray.mousecore.api.config.val.ILocaleType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
@@ -21,7 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @ParametersAreNonnullByDefault
-public class ConfigDictionaryImpl implements ru.mousecray.mousecore.api.config.utils.ConfigDictionary {
+public class ConfigDictionaryImpl implements ConfigDictionary {
     @Nonnull protected final  ConfigLang                                          currentLanguage;
     @Nullable protected final Map<ILocaleType, String>                            localeTypes;
     @Nullable protected final Map<IValType, List<Pair<String, String>>>           defThreshold;

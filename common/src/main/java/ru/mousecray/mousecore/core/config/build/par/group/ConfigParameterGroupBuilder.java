@@ -13,6 +13,7 @@ import ru.mousecray.mousecore.api.config.par.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.core.config.build.MouseConfigBuilder;
@@ -30,13 +31,13 @@ public final class ConfigParameterGroupBuilder<T extends CustomType<?>> {
     public final DisplayName        name;
     boolean canBeDisabled;
     @Nullable    String         comment;
-    public final IValType0      valType;
+    public final ValType        valType;
     public final Class<T>       typeClass;
     private      ConfigParGroup group;
 
     private ConfigParameterGroupBuilder(
             MouseConfigBuilder configBuilder, String path, DisplayName name,
-            IValType0 valType, Class<T> typeClass
+            ValType valType, Class<T> typeClass
     ) {
         this.configBuilder = configBuilder;
         this.path = path;
@@ -46,7 +47,7 @@ public final class ConfigParameterGroupBuilder<T extends CustomType<?>> {
     }
 
     public static <T extends CustomType<?>> ConfigParameterGroupBuilder<T> create(
-            MouseConfigBuilder configBuilder, String path, DisplayName name, IValType0 valType, Class<T> typeClass
+            MouseConfigBuilder configBuilder, String path, DisplayName name, ValType valType, Class<T> typeClass
     ) {
         return new ConfigParameterGroupBuilder<>(
                 Objects.requireNonNull(configBuilder),

@@ -24,6 +24,7 @@ import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseLogic;
 import ru.mousecray.mousecore.core.config.build.struct.ConfigDisablerBuilder;
+import ru.mousecray.mousecore.core.config.build.val.ConfigListBuilder;
 import ru.mousecray.mousecore.core.config.build.val.number.ConfigRandomQuantityBuilder;
 import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;
 import ru.mousecray.mousecore.core.config.par.group.ConfigParGroupQuantityConditionImpl;
@@ -83,9 +84,9 @@ public final class ConfigParameterGroupQuantityConditionBuilder<T extends Custom
         return new ConfigParameterGroupConditionConditionParBuilder(Objects.requireNonNull(displayName));
     }
 
-    public ConfigListBuilder0<T, ConfigParameterGroupQuantityConditionBuilder<T>> createList(String displayName) {
+    public ConfigListBuilder<T, ConfigParameterGroupQuantityConditionBuilder<T>> createList(String displayName) {
         listName = new DisplayName("internal$3", displayName);
-        return ConfigListBuilder0.create(this, parBuilder.valType, parBuilder.typeClass);
+        return ConfigListBuilder.create(this, parBuilder.valType, parBuilder.typeClass);
     }
 
     public ConfigDisablerBuilder<ConfigParameterGroupQuantityConditionBuilder<T>> createDisabler(String displayName) {

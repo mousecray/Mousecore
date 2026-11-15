@@ -28,7 +28,6 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
     private static final MouseUtils.Equator<SimpleListType<?>> EQUATOR = MouseUtils.Equator
             .<SimpleListType<?>>equaling(SimpleListType::getListComponentValType)
             .thenEqualing(SimpleListType::isConditional)
-            .thenEqualing(SimpleListType::getValCreator)
             .thenEqualing(SimpleListType::getList);
 
     private final boolean isConditional;
@@ -49,7 +48,7 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
         return listComponentType;
     }
 
-    @Override public IValType getValType() { return ValType.SIMPLE_LIST; }
+    @Override public IValType getValType() { return isConditional ? ValType.CONDITIONAL_LIST : ValType.SIMPLE_LIST; }
 
     public boolean isConditional()         { return isConditional; }
 
@@ -107,8 +106,8 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
         return new SimpleListType<>(listComponentType, valCreator, isConditional, MouseCollections.mapAsList(MouseLambdas::THIS, true, values));
     }
 
-    public static <T extends CustomType<T>> SimpleListType<T> copyExcludeValCreator(SimpleListType<T> list, Function<String, T> valCreator) {
-        return new SimpleListType<>(list.getListComponentValType(), valCreator, list.isConditional(), list.getList());
+    public static <T extends CustomType<?>> SimpleListType<T> createWithEntries(IValType listComponentType, boolean isConditional, @Nullable Function<String, T> valCreator, List<ConditionalValType<T>> values) {
+        return new SimpleListType<>(listComponentType, valCreator, isConditional, MouseCollections.map(MouseLambdas::THIS, true, values));
     }
 
     @SuppressWarnings("unchecked")

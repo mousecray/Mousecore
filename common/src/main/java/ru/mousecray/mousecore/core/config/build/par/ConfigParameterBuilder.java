@@ -14,6 +14,7 @@ import ru.mousecray.mousecore.api.config.val.ConfigVal;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.core.config.build.MouseConfigBuilder;
+import ru.mousecray.mousecore.core.config.build.val.ConfigListBuilder;
 import ru.mousecray.mousecore.core.config.build.val.ConfigPlusMinusBuilder;
 import ru.mousecray.mousecore.core.config.build.val.ConfigStringBuilder;
 import ru.mousecray.mousecore.core.config.build.val.ConfigValueBuilder;
@@ -58,21 +59,14 @@ public final class ConfigParameterBuilder extends AbstractConfigChildBuilder {
         return this;
     }
 
-    public ConfigPlusMinusBuilder<ConfigParameterBuilder> createPlusMinus() {
-        return ConfigPlusMinusBuilder.create(this, this::setValue);
-    }
-
-    public ConfigIntegralBuilder<ConfigParameterBuilder> createInteger() {
-        return ConfigIntegralBuilder.create(this, this::setValue);
-    }
-
-    public ConfigDecimalBuilder<ConfigParameterBuilder> createDecimal() {
-        return ConfigDecimalBuilder.create(this, this::setValue);
-    }
-
+    public ConfigPlusMinusBuilder<ConfigParameterBuilder> createPlusMinus()           { return ConfigPlusMinusBuilder.create(this, this::setValue); }
+    public ConfigIntegralBuilder<ConfigParameterBuilder> createInteger()              { return ConfigIntegralBuilder.create(this, this::setValue); }
+    public ConfigDecimalBuilder<ConfigParameterBuilder> createDecimal()               { return ConfigDecimalBuilder.create(this, this::setValue); }
     public ConfigRandomQuantityBuilder<ConfigParameterBuilder> createRandomQuantity() { return ConfigRandomQuantityBuilder.create(this, this::setValue); }
     public ConfigPercentBuilder<ConfigParameterBuilder> createPercent()               { return ConfigPercentBuilder.create(this, this::setValue); }
     public ConfigStringBuilder<ConfigParameterBuilder> createString()                 { return ConfigStringBuilder.create(this, this::setValue); }
+
+    public ConfigListBuilder<ConfigParameterBuilder> createList()                     { return ConfigListBuilder.create(this, this::setValue); }
 
     public <T2 extends ConfigValueBuilder<?, ConfigParameterBuilder>> T2 createValue(T2 builder) {
         Objects.requireNonNull(builder);

@@ -1,54 +1,55 @@
-/*
- * ******************************************************************************
- *  * Copyright © 2026 mousecray
- *  * Licensed under the GNU Lesser General Public License, Version 3.0
- *  *****************************************************************************
- */
-
 package ru.mousecray.mousecore.core.config.build.val.base;
 
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.val.ConfigVal;
+import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
+import ru.mousecray.mousecore.api.customtype.values.ConditionalValType;
 import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
+import ru.mousecray.mousecore.core.config.build.val.ConfigCollectionContainerBuilder;
 import ru.mousecray.mousecore.core.config.utils.PredefinedValueImpl;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
-public class AbstractConfigSimpleListBuilder<
+public abstract class AbstractConfigSimpleListBuilder<
         BUILDER extends AbstractConfigChildBuilder,
-        CONFIG_VAL_LIST extends ConfigVal,
         LIST_COMPONENT_TYPE extends CustomType<?>,
-        SELF extends AbstractConfigSimpleListBuilder<BUILDER, CONFIG_VAL_LIST, LIST_COMPONENT_TYPE, SELF>
+        SELF extends AbstractConfigSimpleListBuilder<BUILDER, LIST_COMPONENT_TYPE, SELF>
         > {
-    protected final BUILDER                   parBuilder;
-    protected final Consumer<CONFIG_VAL_LIST> onComplete;
+    protected final BUILDER                          parBuilder;
+    protected final Consumer<ConfigValSimpleList<?>> onComplete;
 
-    protected           SimpleListType<LIST_COMPONENT_TYPE>                             defaultValue;
-    protected           SimpleListType<LIST_COMPONENT_TYPE>                             disabledValue;
+    @Nullable protected List<ConditionalValType<LIST_COMPONENT_TYPE>> rawDefaultEntries;
+    @Nullable protected List<ConditionalValType<LIST_COMPONENT_TYPE>> rawDisabledEntries;
+
     @Nullable protected ArrayList<Constraint<? extends CustomType<?>>>                  constraints;
     @Nullable protected ArrayList<PredefinedValue<SimpleListType<LIST_COMPONENT_TYPE>>> configureValues;
     protected           boolean                                                         conditional;
 
-    protected AbstractConfigSimpleListBuilder(BUILDER parBuilder, Consumer<CONFIG_VAL_LIST> onComplete) {
+    protected AbstractConfigSimpleListBuilder(BUILDER parBuilder, Consumer<ConfigValSimpleList<?>> onComplete) {
         this.parBuilder = parBuilder;
         this.onComplete = onComplete;
     }
 
-    public SELF setDefaultValue(SimpleListType<LIST_COMPONENT_TYPE> defaultValue) {
-        this.defaultValue = Objects.requireNonNull(defaultValue);
-        return self();
+    public abstract IValType getComponentValType();
+    @Nullable public Function<String, LIST_COMPONENT_TYPE> getValCreator() { return null; }
+
+    public boolean isConditional()                                         { return conditional; }
+
+    public ConfigCollectionContainerBuilder<BUILDER, LIST_COMPONENT_TYPE, SELF> createDefaultValues() {
+        return ConfigCollectionContainerBuilder.create(self(), entries -> rawDefaultEntries = entries);
     }
 
-    public SELF setDisabledValue(SimpleListType<LIST_COMPONENT_TYPE> disabledValue) {
-        this.disabledValue = Objects.requireNonNull(disabledValue);
-        return self();
+    public ConfigCollectionContainerBuilder<BUILDER, LIST_COMPONENT_TYPE, SELF> createDisabledValues() {
+        return ConfigCollectionContainerBuilder.create(self(), entries -> rawDisabledEntries = entries);
     }
 
     public SELF addConfigureValue(String name, SimpleListType<LIST_COMPONENT_TYPE> value) {
@@ -71,6 +72,14 @@ public class AbstractConfigSimpleListBuilder<
         return self();
     }
 
+    @Nullable
+    protected SimpleListType<LIST_COMPONENT_TYPE> resolveValue(@Nullable List<ConditionalValType<LIST_COMPONENT_TYPE>> entries, String valueName) {
+        if (entries == null) return null;
+        validateEntries(entries, valueName);
+        return SimpleListType.createWithEntries(getComponentValType(), conditional, getValCreator(), entries);
+    }
+
+    protected void validateEntries(List<ConditionalValType<LIST_COMPONENT_TYPE>> entries, String valueName) { }
     @Nullable
     protected Constraint<? extends CustomType<?>>[] genConstraints() { return MouseCollections.toArray(constraints, Constraint.class); }
 

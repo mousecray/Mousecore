@@ -14,6 +14,7 @@ import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
 import ru.mousecray.mousecore.api.container.ImmutableDisplayNameMap;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectBaseImpl;
 import ru.mousecray.mousecore.core.config.val.ConfigValImpl;
 
@@ -85,5 +86,5 @@ public abstract class ConfigParBaseImpl<T extends CustomType<?>> extends ConfigS
     }
 
     @Override
-    public IValType0 getType() { return getConfigVal().getType(); }
+    public IValType getType() { return getConfigVal().getType(); }
 }

@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class AbstractConfigNumberValueBuilder<
+public abstract class AbstractConfigNumberValueBuilder<
         BUILDER extends AbstractConfigChildBuilder,
         CONFIG_VAL_TYPE extends ConfigVal,
         VAL_TYPE extends NumberType<?>,
