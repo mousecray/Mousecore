@@ -11,7 +11,7 @@ import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.error.UnsupportedValException;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
-import ru.mousecray.mousecore.api.minecraft.MouseBlockState;
+import ru.mousecray.mousecore.api.minecraft.MouseItemState;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
 import javax.annotation.Nonnull;
@@ -21,22 +21,22 @@ import java.util.Objects;
 
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
-public class MinecraftBlock extends OtherType<MouseBlockState> {
-    public static final MinecraftBlock AIR = MinecraftBlock.create("air");
+public final class MinecraftItemType extends OtherType<MouseItemState> {
+    public static final MinecraftItemType AIR = MinecraftItemType.create("air");
 
-    static { storage.put(MinecraftBlock.class, MinecraftBlock::parse); }
+    static { storage.put(MinecraftItemType.class, MinecraftItemType::parse); }
 
-    @Nonnull protected final String prefix;
-    @Nonnull protected final String name;
+    @Nonnull private final String prefix;
+    @Nonnull private final String name;
 
-    protected MinecraftBlock(String prefix, String name) {
-        super(MouseBlockState.create(prefix, name));
+    private MinecraftItemType(String prefix, String name) {
+        super(MouseItemState.create(prefix, name));
         this.prefix = prefix;
         this.name = name;
     }
 
     @SuppressWarnings("DataFlowIssue")
-    public static MinecraftBlock create(String prefix, String name) {
+    public static MinecraftItemType create(String prefix, String name) {
         prefix = MouseStrings.trimWith(Objects.requireNonNull(prefix), true, '\t');
         if (prefix.isEmpty()) throw new ValueFormatException("prefix cannot be empty");
         if (prefix.contains("\t")) throw new ValueFormatException("prefix cannot contains tabs");
@@ -45,26 +45,26 @@ public class MinecraftBlock extends OtherType<MouseBlockState> {
         if (name.isEmpty()) throw new ValueFormatException("name cannot be empty");
         if (name.contains("\t")) throw new ValueFormatException("name cannot contains tabs");
         if (name.contains(" ")) throw new ValueFormatException("name cannot contains space");
-        return new MinecraftBlock(prefix, name);
+        return new MinecraftItemType(prefix, name);
     }
 
-    public static MinecraftBlock create(String name) { return create("minecraft", name); }
+    public static MinecraftItemType create(String name) { return create("minecraft", name); }
 
-    @Override public IValType getValType()           { return ValType.MINECRAFT_BLOCK; }
+    @Override public IValType getValType()              { return ValType.MINECRAFT_ITEM; }
 
-    @Nullable public MouseBlockState asBlockState()  { return value; }
+    @Nullable public MouseItemState asItemState()       { return value; }
 
-    public String getPrefix()                        { return prefix; }
-    public String getName()                          { return name; }
+    public String getPrefix()                           { return prefix; }
+    public String getName()                             { return name; }
 
-    public static MinecraftBlock parse(@Nullable Object value) throws UnsupportedValException, ValueFormatException {
-        if (value instanceof MinecraftBlock) return ((MinecraftBlock) value);
+    public static MinecraftItemType parse(@Nullable Object value) throws UnsupportedValException, ValueFormatException {
+        if (value instanceof MinecraftItemType) return ((MinecraftItemType) value);
         else if (value instanceof String) return parse((String) null, (String) value);
         throw new UnsupportedValException();
     }
 
     @SuppressWarnings({ "DataFlowIssue" })
-    public static MinecraftBlock parse(@Nullable String expectedPrefix, @Nullable String value) throws ValueFormatException {
+    public static MinecraftItemType parse(@Nullable String expectedPrefix, @Nullable String value) throws ValueFormatException {
         if (value == null) throw new ValueFormatException();
 
         String[] split = value.split(":");
@@ -91,5 +91,8 @@ public class MinecraftBlock extends OtherType<MouseBlockState> {
         throw new ValueFormatException();
     }
 
-    @SuppressWarnings("unchecked") @Override public MinecraftBlock createType(Object value) { return create(value.toString()); }
+    @SuppressWarnings("unchecked") @Override
+    public MinecraftItemType createType(Object value) {
+        return create(value.toString());
+    }
 }

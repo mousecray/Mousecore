@@ -33,6 +33,7 @@ public abstract class AbstractConfigSimpleListBuilder<
     @Nullable protected ArrayList<Constraint<? extends CustomType<?>>>                  constraints;
     @Nullable protected ArrayList<PredefinedValue<SimpleListType<LIST_COMPONENT_TYPE>>> configureValues;
     protected           boolean                                                         conditional;
+    protected           boolean                                                         unique;
 
     protected AbstractConfigSimpleListBuilder(BUILDER parBuilder, Consumer<ConfigValSimpleList<?>> onComplete) {
         this.parBuilder = parBuilder;
@@ -72,11 +73,16 @@ public abstract class AbstractConfigSimpleListBuilder<
         return self();
     }
 
+    public SELF setUnique() {
+        unique = true;
+        return self();
+    }
+
     @Nullable
     protected SimpleListType<LIST_COMPONENT_TYPE> resolveValue(@Nullable List<ConditionalValType<LIST_COMPONENT_TYPE>> entries, String valueName) {
         if (entries == null) return null;
         validateEntries(entries, valueName);
-        return SimpleListType.createWithEntries(getComponentValType(), conditional, getValCreator(), entries);
+        return SimpleListType.createWithEntries(getComponentValType(), conditional, unique, getValCreator(), entries);
     }
 
     protected void validateEntries(List<ConditionalValType<LIST_COMPONENT_TYPE>> entries, String valueName) { }

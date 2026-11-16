@@ -75,8 +75,6 @@ public final class ConfigDictionaryBuilder {
                 setLocaleForValType(ValType.SIMPLE_CONDITION, "Условие");
                 setLocaleForValType(ValType.SIMPLE_LIST, "Список",
                         "Разделитель значений - [,]. В начале новой строки - [│] как в секции");
-                setLocaleForValType(ValType.CONDITIONAL_LIST, "Условный список",
-                        "Разделитель значений - [,]. [!] перед значением - противоположное. В начале новой строки - [│] как в секции");
                 return this;
 
             case EN_US:
@@ -108,8 +106,6 @@ public final class ConfigDictionaryBuilder {
                 setLocaleForValType(ValType.SIMPLE_CONDITION, "Condition");
                 setLocaleForValType(ValType.SIMPLE_LIST, "List",
                         "Value delimiter - [,]. Before start new line - [│] like a section");
-                setLocaleForValType(ValType.CONDITIONAL_LIST, "Conditional List",
-                        "Value delimiter - [,]. [!] before value - opposite. Before start new line - [│] like a section");
                 return this;
         }
     }

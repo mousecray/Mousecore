@@ -37,11 +37,11 @@ public class StandardOperations {
         OperationRegistry.registerCast(StringType.class, PlusMinusType.class,
                 source -> CustomType.parse(PlusMinusType.class, source.toString()));
 
-        OperationRegistry.registerCast(StringType.class, MinecraftItem.class,
-                source -> MinecraftItem.create(source.toString()));
+        OperationRegistry.registerCast(StringType.class, MinecraftItemType.class,
+                source -> MinecraftItemType.create(source.toString()));
 
-        OperationRegistry.registerCast(StringType.class, MinecraftBlock.class,
-                source -> MinecraftBlock.create(source.toString()));
+        OperationRegistry.registerCast(StringType.class, MinecraftBlockType.class,
+                source -> MinecraftBlockType.create(source.toString()));
 
         OperationRegistry.registerCast(NumberType.class, DecimalType.class,
                 source -> DecimalType.create(source.asDouble()));

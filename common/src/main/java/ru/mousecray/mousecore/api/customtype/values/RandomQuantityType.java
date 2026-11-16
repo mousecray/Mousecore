@@ -119,63 +119,26 @@ public final class RandomQuantityType extends NumberType<Double> {
 
     @Override public Double asNumber() { return value; }
 
-    public int roll(Random random)     { return roll(random, QuantityDistribution.CHANCE_OR_ZERO); }
-    public int roll()                  { return roll(ThreadLocalRandom.current(), QuantityDistribution.CHANCE_OR_ZERO); }
-
     public int roll(Random random, QuantityDistribution distribution) {
-        int low  = Math.min(min, max);
-        int high = Math.max(min, max);
-        if (low == high) return low;
-
-        double p = Math.max(0.0, Math.min(100.0, getChance().asDouble())) / 100.0;
-
-        switch (distribution) {
-            case SMOOTH_BIAS: {
-                if (p <= 0.0) return low;
-                if (p >= 1.0) return high;
-
-                double u      = random.nextDouble();
-                double factor = Math.pow(u, (1.0 - p) / p);
-                return low + (int) Math.round((high - low) * factor);
-            }
-
-            case PEAK_AT_PERCENT: {
-                if (p <= 0.0) return low;
-                if (p >= 1.0) return high;
-
-                double u = random.nextDouble();
-                double factor = (u < p)
-                        ? Math.sqrt(u * p)
-                        : 1.0 - Math.sqrt((1.0 - u) * (1.0 - p));
-                return low + (int) Math.round((high - low) * factor);
-            }
-
-            case BELL_CLUSTER: {
-                if (p <= 0.0) return low;
-                if (p >= 1.0) return high;
-
-                double target = low + (high - low) * p;
-                double spread = (high - low) / 6.0;
-                double value  = target + random.nextGaussian() * spread;
-                return (int) Math.round(Math.max(low, Math.min(high, value)));
-            }
-
-            case CHANCE_OR_ZERO: {
-                if (p <= 0.0) return 0;
-                if (p < 1.0 && (random.nextDouble() > p)) return 0;
-                return low + random.nextInt(high - low + 1);
-            }
-
-            case FLAT_RANDOM:
-            default:
-                return low + random.nextInt(high - low + 1);
-        }
+        return distribution.rollInt(random, min, max, value);
     }
 
-    public int roll(QuantityDistribution distribution) { return roll(ThreadLocalRandom.current(), distribution); }
+    public int roll(Random random) {
+        return roll(random, QuantityDistribution.CHANCE_OR_ZERO);
+    }
 
-    @SuppressWarnings("unchecked") @Override
-    public RandomQuantityType createType(Number value) { return create(PercentType.create(value.doubleValue()), IntegralType.NULL, IntegralType.NULL); }
+    public int roll(QuantityDistribution distribution) {
+        return roll(ThreadLocalRandom.current(), distribution);
+    }
+
+    public int roll() {
+        return roll(ThreadLocalRandom.current(), QuantityDistribution.CHANCE_OR_ZERO);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override public RandomQuantityType createType(Number value) {
+        return create(PercentType.create(value.doubleValue()), IntegralType.NULL, IntegralType.NULL);
+    }
 
     @Override
     public String toString() {
@@ -184,8 +147,8 @@ public final class RandomQuantityType extends NumberType<Double> {
         return result;
     }
 
-    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass") @Override
-    public boolean equals(Object obj) { return EQUATOR.test(this, obj); }
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+    @Override public boolean equals(Object obj) { return EQUATOR.test(this, obj); }
 
     @Override public int hashCode() { return Objects.hash(value, min, max); }
 }

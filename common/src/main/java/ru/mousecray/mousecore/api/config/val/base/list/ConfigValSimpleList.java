@@ -14,4 +14,5 @@ import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
 
 public interface ConfigValSimpleList<T extends CustomType<?>> extends ConfigListVal<ConditionalValType<T>, T, SimpleListType<T>> {
     boolean isConditional();
+    boolean isUnique();
 }

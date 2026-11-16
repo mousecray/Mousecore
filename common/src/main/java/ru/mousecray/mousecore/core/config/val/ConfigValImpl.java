@@ -13,10 +13,7 @@ import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.par.ConfigParBase;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
-import ru.mousecray.mousecore.api.config.utils.ConfigLocaleType;
-import ru.mousecray.mousecore.api.config.utils.Constraint;
-import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.utils.ValueParseResult;
+import ru.mousecray.mousecore.api.config.utils.*;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
 import ru.mousecray.mousecore.api.config.val.ILocaleType;
 import ru.mousecray.mousecore.api.config.val.base.ConfigNumberVal;
@@ -191,7 +188,9 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                 : null;
     }
 
-    protected V processValueIfNotEqualConstraint(V value) { return disabledValue; }
+    protected V processValueIfNotEqualConstraint(V value)         { return disabledValue; }
+
+    @Nullable public String getRules(ConfigDictionary dictionary) { return dictionary.getRulesForType(getType()); }
 
     private void logConstraintsConstrainingDisabled() {
         if (hasLogger()) {

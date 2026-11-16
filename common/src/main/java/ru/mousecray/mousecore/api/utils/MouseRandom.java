@@ -5,118 +5,90 @@
 
 package ru.mousecray.mousecore.api.utils;
 
+import ru.mousecray.mousecore.api.customtype.type.QuantityDistribution;
+import ru.mousecray.mousecore.api.customtype.values.PercentType;
+import ru.mousecray.mousecore.api.customtype.values.RandomQuantityType;
+import ru.mousecray.mousecore.api.customtype.values.RangeType;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
+@ParametersAreNonnullByDefault
 public final class MouseRandom {
-    public static boolean normalChance(Random random, int chance) {
-        chance = Math.abs(chance);
-        if (chance > 100) chance = 100;
-        return random.nextInt(100) + 1 <= chance;
+
+    private MouseRandom() { throw new UnsupportedOperationException("Cannot instantiate utility class MouseRandom"); }
+
+    public static boolean chance(Random random, double percent) {
+        if (percent <= 0.0) return false;
+        if (percent >= 100.0) return true;
+        return random.nextDouble() * 100.0 < percent;
     }
 
-    public static boolean accurateChance(Random random, float chance) {
-        chance = Math.abs(chance);
-        if (chance > 100) chance = 100;
-        return random.nextInt(1000) + 1 <= chance * 10;
+    public static boolean chance(double percent)                     { return chance(ThreadLocalRandom.current(), percent); }
+    public static boolean chance(Random random, PercentType percent) { return chance(random, percent.asDouble()); }
+    public static boolean chance(PercentType percent)                { return chance(ThreadLocalRandom.current(), percent.asDouble()); }
+
+    public static double deviation(Random random, double baseValue, double maxDeviationPercent) {
+        if (maxDeviationPercent <= 0.0) return baseValue;
+        double spread = (random.nextDouble() * 2.0 - 1.0) * (maxDeviationPercent / 100.0);
+        return baseValue * (1.0 + spread);
     }
 
-    public static boolean ultraPreciseChance(Random random, float chance) {
-        chance = Math.abs(chance);
-        if (chance > 100) chance = 100;
-        return random.nextInt(10000) + 1 <= chance * 100;
+    public static double deviation(double baseValue, double maxDeviationPercent) {
+        return deviation(ThreadLocalRandom.current(), baseValue, maxDeviationPercent);
     }
 
-    public static long normalPercentFrom(Random random, long fromNumber, int percent, int maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        percent += random.nextInt(maxDeviationPercent * 2) + 1 - maxDeviationPercent;
-        return percent * fromNumber / 100;
+    public static long deviationLong(Random random, long baseValue, double maxDeviationPercent) {
+        return Math.round(deviation(random, (double) baseValue, maxDeviationPercent));
     }
 
-    public static int normalPercentFrom(Random random, int fromNumber, int percent, int maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        percent += random.nextInt(maxDeviationPercent * 2) + 1 - maxDeviationPercent;
-        return percent * fromNumber / 100;
+    public static long deviationLong(long baseValue, double maxDeviationPercent) {
+        return deviationLong(ThreadLocalRandom.current(), baseValue, maxDeviationPercent);
     }
 
-    public static double normalPercentFrom(Random random, double fromNumber, int percent, int maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        percent += random.nextInt(maxDeviationPercent * 2) + 1 - maxDeviationPercent;
-        return percent * fromNumber / 100;
+    public static double roll(Random random, double min, double max, double biasPercent, QuantityDistribution distribution) {
+        return distribution.roll(random, min, max, biasPercent);
     }
 
-    public static float normalPercentFrom(Random random, float fromNumber, int percent, int maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        percent += random.nextInt(maxDeviationPercent * 2) + 1 - maxDeviationPercent;
-        return percent * fromNumber / 100;
+    public static double roll(double min, double max, double biasPercent, QuantityDistribution distribution) {
+        return roll(ThreadLocalRandom.current(), min, max, biasPercent, distribution);
     }
 
-    public static long accuratePercentFrom(Random random, long fromNumber, float percent, float maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        int maxDeviationPercentI = (int) (maxDeviationPercent * 10);
-        percent += (random.nextInt(maxDeviationPercentI * 2) + 1 - maxDeviationPercentI) / 10f;
-        return (long) (percent * fromNumber / 100);
+    public static double roll(double min, double max) {
+        return roll(ThreadLocalRandom.current(), min, max, 50.0, QuantityDistribution.FLAT_RANDOM);
     }
 
-    public static int accuratePercentFrom(Random random, int fromNumber, float percent, float maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        int maxDeviationPercentI = (int) (maxDeviationPercent * 10);
-        percent += (random.nextInt(maxDeviationPercentI * 2) + 1 - maxDeviationPercentI) / 10f;
-        return (int) (percent * fromNumber / 100);
+    public static int rollInt(Random random, int min, int max, double biasPercent, QuantityDistribution distribution) {
+        return distribution.rollInt(random, min, max, biasPercent);
     }
 
-    public static double accuratePercentFrom(Random random, double fromNumber, float percent, float maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        int maxDeviationPercentI = (int) (maxDeviationPercent * 10);
-        percent += (random.nextInt(maxDeviationPercentI * 2) + 1 - maxDeviationPercentI) / 10f;
-        return percent * fromNumber / 100;
+    public static int rollInt(int min, int max, double biasPercent, QuantityDistribution distribution) {
+        return rollInt(ThreadLocalRandom.current(), min, max, biasPercent, distribution);
     }
 
-    public static float accuratePercentFrom(Random random, float fromNumber, float percent, float maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        int maxDeviationPercentI = (int) (maxDeviationPercent * 10);
-        percent += (random.nextInt(maxDeviationPercentI * 2) + 1 - maxDeviationPercentI) / 10f;
-        return percent * fromNumber / 100;
+    public static int rollInt(int min, int max) {
+        return rollInt(ThreadLocalRandom.current(), min, max, 50.0, QuantityDistribution.FLAT_RANDOM);
     }
 
-    public static long ultraPrecisePercentFrom(Random random, long fromNumber, float percent, float maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        int maxDeviationPercentI = (int) (maxDeviationPercent * 100);
-        percent += (random.nextInt(maxDeviationPercentI * 2) + 1 - maxDeviationPercentI) / 100f;
-        return (long) (percent * fromNumber / 100);
+    public static long rollLong(Random random, long min, long max, double biasPercent, QuantityDistribution distribution) {
+        return distribution.rollLong(random, min, max, biasPercent);
     }
 
-    public static int ultraPrecisePercentFrom(Random random, int fromNumber, float percent, float maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        int maxDeviationPercentI = (int) (maxDeviationPercent * 100);
-        percent += (random.nextInt(maxDeviationPercentI * 2) + 1 - maxDeviationPercentI) / 100f;
-        return (int) (percent * fromNumber / 100);
+    public static long rollLong(long min, long max, double biasPercent, QuantityDistribution distribution) {
+        return rollLong(ThreadLocalRandom.current(), min, max, biasPercent, distribution);
     }
 
-    public static double ultraPrecisePercentFrom(Random random, double fromNumber, float percent, float maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        int maxDeviationPercentI = (int) (maxDeviationPercent * 100);
-        percent += (random.nextInt(maxDeviationPercentI * 2) + 1 - maxDeviationPercentI) / 100f;
-        return percent * fromNumber / 100;
+    public static long rollLong(long min, long max) {
+        return rollLong(ThreadLocalRandom.current(), min, max, 50.0, QuantityDistribution.FLAT_RANDOM);
     }
 
-    public static float ultraPrecisePercentFrom(Random random, float fromNumber, float percent, float maxDeviationPercent) {
-        percent = Math.abs(percent);
-        if (percent > 100) percent = 100;
-        int maxDeviationPercentI = (int) (maxDeviationPercent * 100);
-        percent += (random.nextInt(maxDeviationPercentI * 2) + 1 - maxDeviationPercentI) / 100f;
-        return percent * fromNumber / 100;
-    }
+    public static int roll(RandomQuantityType quantity, Random random, QuantityDistribution distribution) { return quantity.roll(random, distribution); }
+    public static int roll(RandomQuantityType quantity, QuantityDistribution distribution)                { return quantity.roll(distribution); }
+    public static int roll(RandomQuantityType quantity)                                                   { return quantity.roll(); }
+    public static double roll(RangeType range)                                                            { return range.rollDouble(); }
 
-    private MouseRandom() { throw new UnsupportedOperationException("Cannot create utility class"); }
+    public static double roll(RangeType range, Random random, QuantityDistribution distribution, double biasPercent) {
+        return range.rollDouble(random, distribution, biasPercent);
+    }
 }

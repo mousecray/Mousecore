@@ -6,7 +6,6 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
-import ru.mousecray.mousecore.api.customtype.type.ValTypeCategory;
 import ru.mousecray.mousecore.api.error.UnsupportedValException;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
@@ -28,34 +27,41 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
     private static final MouseUtils.Equator<SimpleListType<?>> EQUATOR = MouseUtils.Equator
             .<SimpleListType<?>>equaling(SimpleListType::getListComponentValType)
             .thenEqualing(SimpleListType::isConditional)
+            .thenEqualing(SimpleListType::isUnique)
             .thenEqualing(SimpleListType::getList);
 
     private final boolean isConditional;
+    private final boolean isUnique;
 
-    private SimpleListType(IValType listComponentType, @Nullable Function<String, T> valCreator, boolean isConditional) {
+    private SimpleListType(IValType listComponentType, @Nullable Function<String, T> valCreator, boolean isConditional, boolean isUnique) {
         super(checkValType(listComponentType), valCreator);
         this.isConditional = isConditional;
+        this.isUnique = isUnique;
     }
 
-    private SimpleListType(IValType listComponentType, @Nullable Function<String, T> valCreator, boolean isConditional, List<ConditionalValType<T>> values) {
+    private SimpleListType(
+            IValType listComponentType, @Nullable Function<String, T> valCreator, boolean isConditional, boolean isUnique,
+            List<ConditionalValType<T>> values
+    ) {
         super(checkValType(listComponentType), valCreator, values);
         this.isConditional = isConditional;
+        this.isUnique = isUnique;
     }
 
     private static IValType checkValType(IValType listComponentType) {
         if (listComponentType == ValType.UNDEFINED) throw new UnsupportedValException("SimpleListTypes with undefined value is not supported");
-        if (listComponentType.getCategory() == ValTypeCategory.LIST) throw new UnsupportedValException("Enclosing SimpleListTypes is not supported");
+        if (!listComponentType.getCategory().canBeContained())
+            throw new UnsupportedValException("Containers cannot be stored inside SimpleListType: " + listComponentType.getDisplayName());
         return listComponentType;
     }
 
-    @Override public IValType getValType() { return isConditional ? ValType.CONDITIONAL_LIST : ValType.SIMPLE_LIST; }
-
+    @Override public IValType getValType() { return ValType.SIMPLE_LIST; }
     public boolean isConditional()         { return isConditional; }
+    public boolean isUnique()              { return isUnique; }
 
-    @SuppressWarnings("unchecked")
-    @Override
+    @SuppressWarnings("unchecked") @Override
     protected <TYPE extends ListType<ConditionalValType<T>, T>> TYPE createType(List<ConditionalValType<T>> list) {
-        return (TYPE) new SimpleListType<>(getListComponentValType(), getValCreator(), isConditional, list);
+        return (TYPE) new SimpleListType<>(getListComponentValType(), getValCreator(), isConditional, isUnique, list);
     }
 
     public boolean addOriginalValue(T value) {
@@ -64,9 +70,8 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
 
     @Override
     public boolean addValue(ConditionalValType<T> value) {
-        if (!isConditional && value.isAnti().asBoolean()) {
-            return super.addValue(ConditionalValType.create(value.getValue(), PlusMinusType.FALSE));
-        }
+        if (!isConditional && value.isAnti().asBoolean()) value = ConditionalValType.create(value.getValue(), PlusMinusType.FALSE);
+        if (isUnique && containsValue(value)) return false;
         return super.addValue(value);
     }
 
@@ -84,41 +89,42 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
     }
 
     @SafeVarargs
-    public static <T extends CustomType<?>> SimpleListType<T> create(IValType listComponentType, boolean isConditional, @Nullable Function<String, T> valCreator, T... values) {
-        return new SimpleListType<>(listComponentType, valCreator, isConditional, MouseCollections.mapAsList(ConditionalValType::create, true, values));
+    public static <T extends CustomType<?>> SimpleListType<T> create(
+            IValType listComponentType, boolean isConditional, boolean isUnique,
+            @Nullable Function<String, T> valCreator, T... values
+    ) {
+        return new SimpleListType<>(listComponentType, valCreator, isConditional, isUnique,
+                MouseCollections.mapAsList(ConditionalValType::create, true, values));
     }
 
-    @SafeVarargs
-    public static <T extends CustomType<?>> SimpleListType<T> create(IValType listComponentType, boolean isConditional, T... values) {
-        return create(listComponentType, isConditional, null, values);
+    public static <T extends CustomType<?>> SimpleListType<T> create(
+            IValType listComponentType, boolean isConditional, boolean isUnique,
+            @Nullable Function<String, T> valCreator, List<T> values
+    ) {
+        return new SimpleListType<>(listComponentType, valCreator, isConditional, isUnique,
+                MouseCollections.map(ConditionalValType::create, true, values));
     }
 
-    public static <T extends CustomType<?>> SimpleListType<T> create(IValType listComponentType, boolean isConditional, @Nullable Function<String, T> valCreator, List<T> values) {
-        return new SimpleListType<>(listComponentType, valCreator, isConditional, MouseCollections.map(ConditionalValType::create, true, values));
+    public static <T extends CustomType<?>> SimpleListType<T> create(
+            IValType listComponentType, boolean isConditional, boolean isUnique, List<T> values
+    ) {
+        return create(listComponentType, isConditional, isUnique, null, values);
     }
 
-    public static <T extends CustomType<?>> SimpleListType<T> create(IValType listComponentType, boolean isConditional, List<T> values) {
-        return create(listComponentType, isConditional, null, values);
-    }
-
-    @SafeVarargs
-    public static <T extends CustomType<?>> SimpleListType<T> createWithEntries(IValType listComponentType, boolean isConditional, @Nullable Function<String, T> valCreator, ConditionalValType<T>... values) {
-        return new SimpleListType<>(listComponentType, valCreator, isConditional, MouseCollections.mapAsList(MouseLambdas::THIS, true, values));
-    }
-
-    public static <T extends CustomType<?>> SimpleListType<T> createWithEntries(IValType listComponentType, boolean isConditional, @Nullable Function<String, T> valCreator, List<ConditionalValType<T>> values) {
-        return new SimpleListType<>(listComponentType, valCreator, isConditional, MouseCollections.map(MouseLambdas::THIS, true, values));
+    public static <T extends CustomType<?>> SimpleListType<T> createWithEntries(
+            IValType listComponentType, boolean isConditional, boolean isUnique,
+            @Nullable Function<String, T> valCreator, List<ConditionalValType<T>> values) {
+        return new SimpleListType<>(
+                listComponentType, valCreator, isConditional, isUnique, MouseCollections.map(MouseLambdas::THIS, true, values)
+        );
     }
 
     @SuppressWarnings("unchecked")
     public static <T extends CustomType<?>> SimpleListType<T> fromString(
-            IValType listComponentType,
-            boolean isConditional,
-            @Nullable String rawString,
-            @Nullable Function<String, T> valCreator,
-            @Nullable MouseLogger logger
+            IValType listComponentType, boolean isConditional, boolean isUnique,
+            @Nullable String rawString, @Nullable Function<String, T> valCreator, @Nullable MouseLogger logger
     ) {
-        SimpleListType<T> list = new SimpleListType<>(listComponentType, valCreator, isConditional);
+        SimpleListType<T> list = new SimpleListType<>(listComponentType, valCreator, isConditional, isUnique);
         if (rawString == null) return list;
 
         String[] split = rawString.split(",");
@@ -148,8 +154,16 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
                     innerVal = (T) CustomType.parse(listComponentType.getTypeClass(), str);
                 }
 
-                if (innerVal != null) list.addValue(ConditionalValType.create(innerVal, PlusMinusType.create(anti)));
-                else if (logger != null) {
+                if (innerVal != null) {
+                    ConditionalValType<T> entry = ConditionalValType.create(innerVal, PlusMinusType.create(anti));
+                    boolean               added = list.addValue(entry);
+                    if (!added && isUnique && logger != null) {
+                        logger.atWarn()
+                                .withPrefix(LogPrefixes.CUSTOMTYPE)
+                                .withStyle(ConsoleColor.YELLOW_BG)
+                                .log("Duplicate element '{0}' ignored in unique list", str);
+                    }
+                } else if (logger != null) {
                     logger.atWarn()
                             .withPrefix(LogPrefixes.CUSTOMTYPE)
                             .withStyle(ConsoleColor.YELLOW_BG)
@@ -170,5 +184,5 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
 
     @Override @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     public boolean equals(Object obj) { return EQUATOR.equals(getClass(), this, obj); }
-    @Override public int hashCode() { return Objects.hash(super.hashCode(), isConditional); }
+    @Override public int hashCode() { return Objects.hash(super.hashCode(), isConditional, isUnique); }
 }
