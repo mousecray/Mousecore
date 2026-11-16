@@ -10,7 +10,7 @@ import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.ConfigValString;
 import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.values.StringType;
+import ru.mousecray.mousecore.api.customtype.values.other.StringType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.core.config.val.base.ConfigValOtherImpl;
 

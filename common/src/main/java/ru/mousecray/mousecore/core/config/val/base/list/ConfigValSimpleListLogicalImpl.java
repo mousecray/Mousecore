@@ -14,7 +14,7 @@ import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleListLogical;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.LogicalType;
-import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
+import ru.mousecray.mousecore.api.customtype.values.collection.SimpleListType;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;

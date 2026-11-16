@@ -8,7 +8,7 @@
 package ru.mousecray.mousecore.api.config.par;
 
 import ru.mousecray.mousecore.api.config.val.ConfigValDisabler;
-import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 
 public interface ConfigParDisabler extends ConfigPar<PlusMinusType> {
     ConfigValDisabler getValue();

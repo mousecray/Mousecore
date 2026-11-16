@@ -10,7 +10,7 @@ import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.ConfigValDisabler;
 import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 
 import javax.annotation.Nullable;
 import java.util.List;

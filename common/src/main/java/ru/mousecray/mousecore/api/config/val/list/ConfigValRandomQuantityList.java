@@ -8,6 +8,6 @@
 package ru.mousecray.mousecore.api.config.val.list;
 
 import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleListNumber;
-import ru.mousecray.mousecore.api.customtype.values.RandomQuantityType;
+import ru.mousecray.mousecore.api.customtype.values.number.RandomQuantityType;
 
 public interface ConfigValRandomQuantityList extends ConfigValSimpleListNumber<RandomQuantityType> { }

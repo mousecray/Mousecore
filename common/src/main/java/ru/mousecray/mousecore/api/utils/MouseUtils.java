@@ -58,7 +58,7 @@ public final class MouseUtils {
             T first  = (T) o1;
             T second = (T) o2;
 
-            for (Function<T, ?> extractor : extractors) if (!Objects.equals(extractor.apply(first), extractor.apply(second))) return false;
+            for (Function<T, ?> extractor : extractors) if (!Objects.deepEquals(extractor.apply(first), extractor.apply(second))) return false;
             return true;
         }
 
@@ -71,7 +71,7 @@ public final class MouseUtils {
             T first  = (T) o1;
             T second = (T) o2;
 
-            for (Function<T, ?> extractor : extractors) if (!Objects.equals(extractor.apply(first), extractor.apply(second))) return false;
+            for (Function<T, ?> extractor : extractors) if (!Objects.deepEquals(extractor.apply(first), extractor.apply(second))) return false;
             return true;
         }
     }

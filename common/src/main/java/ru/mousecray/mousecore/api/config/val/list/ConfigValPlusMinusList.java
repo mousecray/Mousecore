@@ -8,6 +8,6 @@
 package ru.mousecray.mousecore.api.config.val.list;
 
 import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleListLogical;
-import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 
 public interface ConfigValPlusMinusList extends ConfigValSimpleListLogical<PlusMinusType> { }

@@ -11,7 +11,7 @@ import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.config.par.ConfigParDisabler;
 import ru.mousecray.mousecore.api.config.utils.ConfigLocaleType;
 import ru.mousecray.mousecore.api.config.utils.ValueParseResult;
-import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 import ru.mousecray.mousecore.core.config.val.ConfigValDisablerImpl;
 
 import javax.annotation.Nonnull;

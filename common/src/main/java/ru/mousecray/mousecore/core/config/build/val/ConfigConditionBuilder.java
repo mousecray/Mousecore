@@ -16,7 +16,7 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
-import ru.mousecray.mousecore.api.customtype.values.ConditionType;
+import ru.mousecray.mousecore.api.customtype.values.logic.ConditionType;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseLogic;
 import ru.mousecray.mousecore.api.utils.MouseStrings;

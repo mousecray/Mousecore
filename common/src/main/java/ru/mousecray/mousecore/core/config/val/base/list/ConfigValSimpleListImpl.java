@@ -9,8 +9,8 @@ import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.values.ConditionalValType;
-import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
+import ru.mousecray.mousecore.api.customtype.values.collection.SimpleListType;
+import ru.mousecray.mousecore.api.customtype.values.logic.ConditionalValType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.core.config.val.base.ConfigValListImpl;
 

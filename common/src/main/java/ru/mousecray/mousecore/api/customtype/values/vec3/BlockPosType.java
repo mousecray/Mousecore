@@ -1,14 +1,15 @@
 /*******************************************************************************
- * Copyright © 2026 mousecray
- * Licensed under the GNU Lesser General Public License, Version 3.0
- ******************************************************************************/
+ *  Copyright © 2026 mousecray
+ *  Licensed under the GNU Lesser General Public License, Version 3.0
+ ****************************************************************************** */
 
-package ru.mousecray.mousecore.api.customtype.values;
+package ru.mousecray.mousecore.api.customtype.values.vec3;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.Vector3Type;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
+import ru.mousecray.mousecore.api.customtype.values.number.IntegralType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.utils.MouseNumbers;
 import ru.mousecray.mousecore.api.utils.MouseStrings;

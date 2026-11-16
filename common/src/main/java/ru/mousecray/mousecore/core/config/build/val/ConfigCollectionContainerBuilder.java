@@ -1,8 +1,8 @@
 package ru.mousecray.mousecore.core.config.build.val;
 
 import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.values.ConditionalValType;
-import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
+import ru.mousecray.mousecore.api.customtype.values.logic.ConditionalValType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigSimpleListBuilder;
 

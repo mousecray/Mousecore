@@ -12,7 +12,7 @@ import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
-import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;

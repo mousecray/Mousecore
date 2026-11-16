@@ -7,7 +7,18 @@ package ru.mousecray.mousecore.api.customtype.type;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.values.*;
+import ru.mousecray.mousecore.api.customtype.values.collection.*;
+import ru.mousecray.mousecore.api.customtype.values.logic.ConditionType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
+import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftBlockType;
+import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftItemType;
+import ru.mousecray.mousecore.api.customtype.values.number.*;
+import ru.mousecray.mousecore.api.customtype.values.other.ColorType;
+import ru.mousecray.mousecore.api.customtype.values.other.EnumType;
+import ru.mousecray.mousecore.api.customtype.values.other.RegexType;
+import ru.mousecray.mousecore.api.customtype.values.other.StringType;
+import ru.mousecray.mousecore.api.customtype.values.vec3.BlockPosType;
+import ru.mousecray.mousecore.api.customtype.values.vec3.Vector3dType;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;

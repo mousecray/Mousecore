@@ -6,7 +6,7 @@
 package ru.mousecray.mousecore.api.customtype.op;
 
 import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 
 public interface CustomLogic<T extends CustomType<?>> {
     PlusMinusType isLess(CustomType<?> other);

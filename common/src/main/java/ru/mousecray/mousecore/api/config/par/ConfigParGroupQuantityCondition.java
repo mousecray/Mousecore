@@ -8,7 +8,7 @@
 package ru.mousecray.mousecore.api.config.par;
 
 import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.values.RandomQuantityType;
+import ru.mousecray.mousecore.api.customtype.values.number.RandomQuantityType;
 
 public interface ConfigParGroupQuantityCondition<T extends CustomType<?>> extends ConfigParGroup<RandomQuantityType> {
     RandomQuantityType getValue(T conditionTarget);

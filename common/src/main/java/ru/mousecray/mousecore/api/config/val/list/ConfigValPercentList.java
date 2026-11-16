@@ -8,6 +8,6 @@
 package ru.mousecray.mousecore.api.config.val.list;
 
 import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleListNumber;
-import ru.mousecray.mousecore.api.customtype.values.PercentType;
+import ru.mousecray.mousecore.api.customtype.values.number.PercentType;
 
 public interface ConfigValPercentList extends ConfigValSimpleListNumber<PercentType> { }

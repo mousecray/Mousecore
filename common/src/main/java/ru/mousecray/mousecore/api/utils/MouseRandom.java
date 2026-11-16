@@ -6,9 +6,9 @@
 package ru.mousecray.mousecore.api.utils;
 
 import ru.mousecray.mousecore.api.customtype.type.QuantityDistribution;
-import ru.mousecray.mousecore.api.customtype.values.PercentType;
-import ru.mousecray.mousecore.api.customtype.values.RandomQuantityType;
-import ru.mousecray.mousecore.api.customtype.values.RangeType;
+import ru.mousecray.mousecore.api.customtype.values.number.PercentType;
+import ru.mousecray.mousecore.api.customtype.values.number.RandomQuantityType;
+import ru.mousecray.mousecore.api.customtype.values.number.RangeType;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Random;

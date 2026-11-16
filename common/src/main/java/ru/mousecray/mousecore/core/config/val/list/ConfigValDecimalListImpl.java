@@ -16,8 +16,8 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.range.Range;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
-import ru.mousecray.mousecore.api.customtype.values.DecimalType;
-import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
+import ru.mousecray.mousecore.api.customtype.values.collection.SimpleListType;
+import ru.mousecray.mousecore.api.customtype.values.number.DecimalType;
 import ru.mousecray.mousecore.core.config.val.base.list.ConfigValSimpleListNumberImpl;
 
 import javax.annotation.Nullable;

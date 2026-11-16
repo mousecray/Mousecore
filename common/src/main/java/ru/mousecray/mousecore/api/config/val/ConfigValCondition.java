@@ -11,7 +11,7 @@ import ru.mousecray.mousecore.api.config.val.base.ConfigOtherVal;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
-import ru.mousecray.mousecore.api.customtype.values.ConditionType;
+import ru.mousecray.mousecore.api.customtype.values.logic.ConditionType;
 
 import javax.annotation.Nullable;
 

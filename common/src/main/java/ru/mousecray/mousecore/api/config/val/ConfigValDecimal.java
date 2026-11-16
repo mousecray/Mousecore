@@ -8,6 +8,6 @@
 package ru.mousecray.mousecore.api.config.val;
 
 import ru.mousecray.mousecore.api.config.val.base.ConfigNumberVal;
-import ru.mousecray.mousecore.api.customtype.values.DecimalType;
+import ru.mousecray.mousecore.api.customtype.values.number.DecimalType;
 
 public interface ConfigValDecimal extends ConfigNumberVal<DecimalType> { }

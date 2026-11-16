@@ -9,9 +9,9 @@ package ru.mousecray.mousecore.core.config.build.val.number;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.val.ConfigValRandomQuantity;
-import ru.mousecray.mousecore.api.customtype.values.IntegralType;
-import ru.mousecray.mousecore.api.customtype.values.PercentType;
-import ru.mousecray.mousecore.api.customtype.values.RandomQuantityType;
+import ru.mousecray.mousecore.api.customtype.values.number.IntegralType;
+import ru.mousecray.mousecore.api.customtype.values.number.PercentType;
+import ru.mousecray.mousecore.api.customtype.values.number.RandomQuantityType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigNumberValueBuilder;
 import ru.mousecray.mousecore.core.config.val.ConfigValRandomQuantityImpl;

@@ -10,7 +10,7 @@ import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.op.*;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.customtype.type.ValTypeMetaCategory;
-import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -49,6 +49,10 @@ public abstract class CustomType<T extends CustomType<T>> implements Comparable<
     public ValTypeMetaCategory getValTypeMetaCategory()              { return ValTypeMetaCategory.UNDEFINED; }
     @SuppressWarnings("unchecked") protected T self()                { return (T) this; }
 
+    public TableType<?> asTableType()                                { return getCastPipeline().asValue(TableType.class); }
+    public MapType<?, ?, ?> asMapType()                              { return getCastPipeline().asValue(MapType.class); }
+    public TupleType<?> asTupleType()                                { return getCastPipeline().asValue(TupleType.class); }
+    public Vector3Type<?, ?> asVector3Type()                         { return getCastPipeline().asValue(Vector3Type.class); }
     public ListType<?, ?> asListType()                               { return getCastPipeline().asValue(ListType.class); }
     public NumberType<?> asNumberType()                              { return getCastPipeline().asValue(NumberType.class); }
     public LogicalType<?> asLogicalType()                            { return getCastPipeline().asValue(LogicalType.class); }

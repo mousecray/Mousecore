@@ -1,4 +1,9 @@
-package ru.mousecray.mousecore.api.customtype.values;
+/*******************************************************************************
+ *  Copyright © 2026 mousecray
+ *  Licensed under the GNU Lesser General Public License, Version 3.0
+ ****************************************************************************** */
+
+package ru.mousecray.mousecore.api.customtype.values.collection;
 
 import org.apache.commons.lang3.StringUtils;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
@@ -6,6 +11,8 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
+import ru.mousecray.mousecore.api.customtype.values.logic.ConditionalValType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 import ru.mousecray.mousecore.api.error.UnsupportedValException;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;

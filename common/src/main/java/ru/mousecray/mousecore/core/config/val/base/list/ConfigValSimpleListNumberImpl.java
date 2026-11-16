@@ -9,8 +9,8 @@ import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleListNumber
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.NumberType;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
-import ru.mousecray.mousecore.api.customtype.values.ConditionalValType;
-import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
+import ru.mousecray.mousecore.api.customtype.values.collection.SimpleListType;
+import ru.mousecray.mousecore.api.customtype.values.logic.ConditionalValType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
 

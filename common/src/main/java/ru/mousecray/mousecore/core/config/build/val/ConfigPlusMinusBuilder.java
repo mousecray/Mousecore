@@ -10,7 +10,7 @@ package ru.mousecray.mousecore.core.config.build.val;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.val.ConfigValPlusMinus;
 import ru.mousecray.mousecore.api.customtype.op.LogicalOperator;
-import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigValueBuilder;
 import ru.mousecray.mousecore.core.config.val.ConfigValPlusMinusImpl;

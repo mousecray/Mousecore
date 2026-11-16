@@ -8,6 +8,6 @@
 package ru.mousecray.mousecore.api.config.val.list;
 
 import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleListOther;
-import ru.mousecray.mousecore.api.customtype.values.StringType;
+import ru.mousecray.mousecore.api.customtype.values.other.StringType;
 
 public interface ConfigValStringList extends ConfigValSimpleListOther<StringType> { }

@@ -14,8 +14,8 @@ import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.list.ConfigValPlusMinusList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
-import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
-import ru.mousecray.mousecore.api.customtype.values.SimpleListType;
+import ru.mousecray.mousecore.api.customtype.values.collection.SimpleListType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 import ru.mousecray.mousecore.core.config.val.base.list.ConfigValSimpleListLogicalImpl;
 
 import javax.annotation.Nullable;

@@ -8,6 +8,6 @@
 package ru.mousecray.mousecore.api.config.val.list;
 
 import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleListNumber;
-import ru.mousecray.mousecore.api.customtype.values.IntegralType;
+import ru.mousecray.mousecore.api.customtype.values.number.IntegralType;
 
 public interface ConfigValIntegralList extends ConfigValSimpleListNumber<IntegralType> { }

@@ -18,7 +18,7 @@ import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
 import ru.mousecray.mousecore.api.config.val.ConfigValRandomQuantity;
 import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.values.ConditionType;
+import ru.mousecray.mousecore.api.customtype.values.logic.ConditionType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.utils.MouseCollections;

@@ -13,7 +13,7 @@ import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.par.ConfigParGroupQuantityCondition;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
-import ru.mousecray.mousecore.api.customtype.values.RandomQuantityType;
+import ru.mousecray.mousecore.api.customtype.values.number.RandomQuantityType;
 import ru.mousecray.mousecore.api.error.UnsupportedValException;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;

@@ -15,7 +15,7 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.op.CustomArithmetic;
 import ru.mousecray.mousecore.api.customtype.range.Range;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
-import ru.mousecray.mousecore.api.customtype.values.PercentType;
+import ru.mousecray.mousecore.api.customtype.values.number.PercentType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.core.config.utils.PredefinedValueImpl;

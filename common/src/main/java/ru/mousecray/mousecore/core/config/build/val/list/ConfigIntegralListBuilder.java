@@ -11,7 +11,7 @@ import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
-import ru.mousecray.mousecore.api.customtype.values.IntegralType;
+import ru.mousecray.mousecore.api.customtype.values.number.IntegralType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigSimpleListNumberBuilder;
 import ru.mousecray.mousecore.core.config.val.list.ConfigValIntegralListImpl;

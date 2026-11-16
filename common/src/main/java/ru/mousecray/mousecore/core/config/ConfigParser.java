@@ -25,7 +25,7 @@ import ru.mousecray.mousecore.api.config.val.base.list.simple.ConfigSimpleListVa
 import ru.mousecray.mousecore.api.container.ImmutableDisplayNameMap;
 import ru.mousecray.mousecore.api.customtype.range.Range;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
-import ru.mousecray.mousecore.api.customtype.values.PlusMinusType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.log.MouseLogger;
