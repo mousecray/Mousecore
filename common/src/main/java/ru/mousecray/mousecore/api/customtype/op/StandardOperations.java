@@ -187,5 +187,46 @@ public class StandardOperations {
 
         OperationRegistry.registerBinary(ListType.class, ListType.class, LogicalOperator.Binary.EQUAL,
                 (left, right) -> PlusMinusType.create(left.equals(right)));
+
+        // === Векторная арифметика в StandardOperations.java ===
+        OperationRegistry.registerBinary(Vector3dType.class, Vector3dType.class, ArithmeticOperator.Binary.PLUS,
+                (l, r) -> Vector3dType.create(l.asDoubleX() + r.asDoubleX(), l.asDoubleY() + r.asDoubleY(), l.asDoubleZ() + r.asDoubleZ()));
+
+        OperationRegistry.registerBinary(Vector3dType.class, Vector3dType.class, ArithmeticOperator.Binary.MINUS,
+                (l, r) -> Vector3dType.create(l.asDoubleX() - r.asDoubleX(), l.asDoubleY() - r.asDoubleY(), l.asDoubleZ() - r.asDoubleZ()));
+
+        OperationRegistry.registerBinary(Vector3dType.class, NumberType.class, ArithmeticOperator.Binary.MULTIPLY,
+                (v, n) -> Vector3dType.create(v.asDoubleX() * n.asDouble(), v.asDoubleY() * n.asDouble(), v.asDoubleZ() * n.asDouble()));
+
+        OperationRegistry.registerBinary(BlockPosType.class, BlockPosType.class, ArithmeticOperator.Binary.PLUS,
+                (l, r) -> BlockPosType.create(l.asLongX() + r.asLongX(), l.asLongY() + r.asLongY(), l.asLongZ() + r.asLongZ()));
+
+        OperationRegistry.registerBinary(BlockPosType.class, BlockPosType.class, ArithmeticOperator.Binary.MINUS,
+                (l, r) -> BlockPosType.create(l.asLongX() - r.asLongX(), l.asLongY() - r.asLongY(), l.asLongZ() - r.asLongZ()));
+
+        OperationRegistry.registerBinary(BlockPosType.class, Vector3dType.class, ArithmeticOperator.Binary.PLUS,
+                (pos, vec) -> Vector3dType.create(pos.asLongX() + vec.asDoubleX(), pos.asLongY() + vec.asDoubleY(), pos.asLongZ() + vec.asDoubleZ()));
+
+        OperationRegistry.registerBinary(ColorType.class, ColorType.class, ArithmeticOperator.Binary.PLUS,
+                (l, r) -> ColorType.create(
+                        l.asRed() + r.asRed(),
+                        l.asGreen() + r.asGreen(),
+                        l.asBlue() + r.asBlue(),
+                        MouseNumbers.clamp(l.asAlpha() + r.asAlpha(), 0, 255)
+                ));
+
+        OperationRegistry.registerBinary(ColorType.class, NumberType.class, ArithmeticOperator.Binary.MULTIPLY,
+                (c, n) -> ColorType.create(
+                        (int) MouseNumbers.round(c.asRed() * n.asDouble()),
+                        (int) MouseNumbers.round(c.asGreen() * n.asDouble()),
+                        (int) MouseNumbers.round(c.asBlue() * n.asDouble()),
+                        c.asAlpha()
+                ));
+
+        OperationRegistry.registerCast(Vector3dType.class, BlockPosType.class, Vector3dType::asBlockPos);
+        OperationRegistry.registerCast(BlockPosType.class, Vector3dType.class, BlockPosType::asVector3d);
+        OperationRegistry.registerCast(ColorType.class, IntegralType.class, c -> IntegralType.create(c.asArgb()));
+        OperationRegistry.registerCast(IntegralType.class, ColorType.class, n -> ColorType.create(n.asInt()));
+        OperationRegistry.registerCast(ColorType.class, StringType.class, c -> StringType.create(c.asHex()));
     }
 }

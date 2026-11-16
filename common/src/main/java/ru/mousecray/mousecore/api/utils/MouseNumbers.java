@@ -176,6 +176,34 @@ public final class MouseNumbers {
         return Double.longBitsToDouble(Double.doubleToRawLongBits(val1.doubleValue()) >>> val2);
     }
 
+    public static long round(double number) {
+        return floor(number + 0.5D);
+    }
+
+    @SuppressWarnings("ManualMinMaxCalculation")
+    public static int clamp(int value, int min, int max) { return value < min ? min : (value > max ? max : value); }
+
+    @SuppressWarnings("ManualMinMaxCalculation")
+    public static long clamp(long value, long min, long max) { return value < min ? min : (value > max ? max : value); }
+
+    @SuppressWarnings("ManualMinMaxCalculation")
+    public static double clamp(double value, double min, double max) { return value < min ? min : (value > max ? max : value); }
+
+    @Nullable
+    public static Long tryParseLong(@Nullable String value, int radix, @Nullable Long def) {
+        if (value == null) return def;
+        try { return Long.parseLong(value, radix); } catch (NumberFormatException ignore) { return def; }
+    }
+
+    @Nullable
+    public static Integer tryParseInt(@Nullable String value, int radix, @Nullable Integer def) {
+        if (value == null) return def;
+        try { return Integer.parseInt(value, radix); } catch (NumberFormatException ignore) { return def; }
+    }
+
+    @Nullable public static Long tryParseLong(@Nullable String value, int radix)   { return tryParseLong(value, radix, null); }
+    @Nullable public static Integer tryParseInt(@Nullable String value, int radix) { return tryParseInt(value, radix, null); }
+
     public static final Boolean   NULL_BOOLEAN = false;
     public static final Character NULL_CHAR    = 0;
     public static final Long      NULL_LONG    = 0L;
