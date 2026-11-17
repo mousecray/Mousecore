@@ -1,12 +1,11 @@
-/*
- * ******************************************************************************
- *  * Copyright © 2026 mousecray
- *  * Licensed under the GNU Lesser General Public License, Version 3.0
- *  *****************************************************************************
- */
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
 
 package ru.mousecray.mousecore.api.customtype.values.minecraft;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.OtherType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
@@ -16,7 +15,6 @@ import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.minecraft.MouseItemState;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
@@ -28,13 +26,8 @@ public final class MinecraftItemType extends OtherType<MouseItemState> {
 
     static { storage.put(MinecraftItemType.class, MinecraftItemType::parse); }
 
-    @Nonnull private final String prefix;
-    @Nonnull private final String name;
-
-    private MinecraftItemType(String prefix, String name) {
-        super(MouseItemState.create(prefix, name));
-        this.prefix = prefix;
-        this.name = name;
+    private MinecraftItemType(MouseItemState state) {
+        super(Objects.requireNonNull(state, "MouseItemState cannot be null"));
     }
 
     @SuppressWarnings("DataFlowIssue")
@@ -43,58 +36,55 @@ public final class MinecraftItemType extends OtherType<MouseItemState> {
         if (prefix.isEmpty()) throw new ValueFormatException("prefix cannot be empty");
         if (prefix.contains("\t")) throw new ValueFormatException("prefix cannot contains tabs");
         if (prefix.contains(" ")) throw new ValueFormatException("prefix cannot contains space");
+
         name = MouseStrings.trimWith(Objects.requireNonNull(name), true, '\t');
         if (name.isEmpty()) throw new ValueFormatException("name cannot be empty");
         if (name.contains("\t")) throw new ValueFormatException("name cannot contains tabs");
         if (name.contains(" ")) throw new ValueFormatException("name cannot contains space");
-        return new MinecraftItemType(prefix, name);
+
+        MouseItemState state = MouseItemState.create(prefix, name);
+        if (state == null) throw new ValueFormatException("Unknown item: " + prefix + ":" + name);
+        return new MinecraftItemType(state);
     }
 
-    public static MinecraftItemType create(String name) { return create("minecraft", name); }
+    public static MinecraftItemType create(String name)          { return create("minecraft", name); }
+    public static MinecraftItemType create(MouseItemState state) { return new MinecraftItemType(state); }
 
-    @Override public IValType getValType()              { return ValType.MINECRAFT_ITEM; }
+    @Override public IValType getValType()                       { return ValType.MINECRAFT_ITEM; }
+    public MouseItemState asItemState()                          { return value; }
 
-    @Nullable public MouseItemState asItemState()       { return value; }
-
-    public String getPrefix()                           { return prefix; }
-    public String getName()                             { return name; }
+    @SuppressWarnings("deprecation") public String getPrefix()   { return BuiltInRegistries.ITEM.getKey(value.getItem()).getNamespace(); }
+    @SuppressWarnings("deprecation") public String getName()     { return BuiltInRegistries.ITEM.getKey(value.getItem()).getPath(); }
 
     public static MinecraftItemType parse(@Nullable Object value) throws UnsupportedValException, ValueFormatException {
-        if (value instanceof MinecraftItemType) return ((MinecraftItemType) value);
-        else if (value instanceof String) return parse((String) null, (String) value);
-        throw new UnsupportedValException();
+        if (value instanceof MinecraftItemType itemType) return itemType;
+        else if (value instanceof MouseItemState state) return create(state);
+        else if (value instanceof String str) return parse((String) null, str);
+        throw new UnsupportedValException("Cannot parse MinecraftItemType from " + value);
     }
 
-    @SuppressWarnings({ "DataFlowIssue" })
     public static MinecraftItemType parse(@Nullable String expectedPrefix, @Nullable String value) throws ValueFormatException {
-        if (value == null) throw new ValueFormatException();
+        String clean = MouseStrings.trimWith(value, true, '\t');
+        if (clean == null || clean.isEmpty()) throw new ValueFormatException("Cannot parse empty item string");
 
-        String[] split = value.split(":");
-        String   name  = null;
+        String defaultNamespace = expectedPrefix != null ? expectedPrefix : "minecraft";
+        int    colonIdx         = clean.indexOf(':');
 
-        if (split.length > 0) {
-            String prefixCandidate = MouseStrings.trimWith(split[0], true, '\t');
-            if (!prefixCandidate.isEmpty() && !prefixCandidate.contains(" ") && !prefixCandidate.contains("\t")) {
-                if (expectedPrefix != null) {
-                    if (!prefixCandidate.equals(expectedPrefix)) {
-                        name = prefixCandidate;
-                        return create(expectedPrefix, name);
-                    }
-                } else expectedPrefix = prefixCandidate;
-            }
-
-            if (split.length > 1) {
-                String rawName = MouseStrings.trimWith(split[1], true, '\t');
-                if (!rawName.isEmpty() && !rawName.contains(" ") && !rawName.contains("\t")) name = rawName;
-            }
+        if (colonIdx == -1) {
+            return create(defaultNamespace, clean);
+        } else {
+            String prefixPart = MouseStrings.trimWith(clean.substring(0, colonIdx), true, '\t');
+            String namePart   = MouseStrings.trimWith(clean.substring(colonIdx + 1), true, '\t');
+            if (prefixPart == null || prefixPart.isEmpty()) prefixPart = defaultNamespace;
+            if (namePart == null || namePart.isEmpty()) throw new ValueFormatException("Item name is missing in: '" + clean + "'");
+            return create(prefixPart, namePart);
         }
-
-        if (name != null && expectedPrefix != null) return create(expectedPrefix, name);
-        throw new ValueFormatException();
     }
 
-    @SuppressWarnings("unchecked") @Override
-    public MinecraftItemType createType(Object value) {
-        return create(value.toString());
-    }
+    public static MinecraftItemType fromString(@Nullable String value)                         { return parse((String) null, value); }
+
+    @Override @SuppressWarnings("unchecked") public MinecraftItemType createType(Object value) { return parse(value); }
+
+    @Override @SuppressWarnings("deprecation")
+    public String toString() { return BuiltInRegistries.ITEM.getKey(value.getItem()).toString(); }
 }

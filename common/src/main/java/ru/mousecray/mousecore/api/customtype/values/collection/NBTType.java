@@ -25,42 +25,42 @@ import java.util.Set;
 
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
-public final class NbtType extends CustomType<NbtType> {
-    private static final MouseUtils.Equator<NbtType> EQUATOR = MouseUtils.Equator
-            .equaling(NbtType::getRawCompoundTag);
+public final class NBTType extends CustomType<NBTType> {
+    private static final MouseUtils.Equator<NBTType> EQUATOR = MouseUtils.Equator
+            .equaling(NBTType::getRawCompoundTag);
 
-    public static final NbtType EMPTY = new NbtType(new CompoundTag());
+    public static final NBTType EMPTY = new NBTType(new CompoundTag());
 
     static {
-        storage.put(NbtType.class, NbtType::parse);
+        storage.put(NBTType.class, NBTType::parse);
     }
 
     private final CompoundTag tag;
 
-    private NbtType(CompoundTag tag) {
+    private NBTType(CompoundTag tag) {
         super();
         this.tag = Objects.requireNonNull(tag, "CompoundTag cannot be null");
     }
 
-    public static NbtType create(CompoundTag tag) {
-        return new NbtType(tag.copy());
+    public static NBTType create(CompoundTag tag) {
+        return new NBTType(tag.copy());
     }
 
-    public static NbtType create() {
+    public static NBTType create() {
         return EMPTY;
     }
 
-    public static NbtType parse(@Nullable String raw) {
+    public static NBTType parse(@Nullable String raw) {
         String clean = MouseStrings.trimWith(raw, true, '\t');
         if (clean == null || clean.isEmpty()) return EMPTY;
 
         try {
             CompoundTag parsed = TagParser.parseTag(clean);
-            return new NbtType(parsed);
+            return new NBTType(parsed);
         } catch (Exception e) { throw new ValueFormatException("Invalid SNBT format in '" + raw + "': " + e.getMessage(), e); }
     }
 
-    public static NbtType fromString(@Nullable String raw) {
+    public static NBTType fromString(@Nullable String raw) {
         return parse(raw);
     }
 
@@ -92,16 +92,16 @@ public final class NbtType extends CustomType<NbtType> {
         return tag.getAllKeys();
     }
 
-    public NbtType merge(NbtType other) {
+    public NBTType merge(NBTType other) {
         CompoundTag copy = tag.copy();
         copy.merge(other.getRawCompoundTag());
-        return new NbtType(copy);
+        return new NBTType(copy);
     }
 
-    public NbtType remove(String key) {
+    public NBTType remove(String key) {
         CompoundTag copy = tag.copy();
         copy.remove(key);
-        return new NbtType(copy);
+        return new NBTType(copy);
     }
 
     @Override public IValType getValType() { return ValType.NBT; }
@@ -116,7 +116,7 @@ public final class NbtType extends CustomType<NbtType> {
     @Override public int hashCode() { return tag.hashCode(); }
 
     @Override
-    public int compareTo(NbtType o) {
-        return Comparator.comparing(NbtType::asString).compare(this, o);
+    public int compareTo(NBTType o) {
+        return Comparator.comparing(NBTType::asString).compare(this, o);
     }
 }

@@ -6,12 +6,14 @@
 package ru.mousecray.mousecore.api.customtype.op;
 
 import ru.mousecray.mousecore.api.customtype.*;
-import ru.mousecray.mousecore.api.customtype.values.collection.NbtType;
+import ru.mousecray.mousecore.api.customtype.values.collection.NBTType;
 import ru.mousecray.mousecore.api.customtype.values.collection.SimpleMatrixType;
 import ru.mousecray.mousecore.api.customtype.values.logic.ConditionalValType;
 import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftBlockType;
+import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftItemStackType;
 import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftItemType;
+import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftTagType;
 import ru.mousecray.mousecore.api.customtype.values.number.*;
 import ru.mousecray.mousecore.api.customtype.values.other.ColorType;
 import ru.mousecray.mousecore.api.customtype.values.other.EnumType;
@@ -327,7 +329,7 @@ public class StandardOperations {
 
         OperationRegistry.registerBinary(RangeType.class, RangeType.class, BitwiseOperator.Binary.AND,
                 (r1, r2) -> {
-                    double min1                                                       = r1.getMinDouble(), min2                             = r2.getMinDouble();
+                    double min1                                                       = r1.getMinDouble(), min2 = r2.getMinDouble();
                     double                             max1 = r1.getMaxDouble(), max2 = r2.getMaxDouble();
                     double                             newMin                         = Math.max(min1, min2);
                     double                             newMax                         = Math.min(max1, max2);
@@ -517,19 +519,109 @@ public class StandardOperations {
         OperationRegistry.registerCast(MatrixType.class, StringType.class,
                 m -> StringType.create(m.toString()));
 
-        OperationRegistry.registerBinary(NbtType.class, NbtType.class, ArithmeticOperator.Binary.PLUS,
-                NbtType::merge);
+        OperationRegistry.registerBinary(NBTType.class, NBTType.class, ArithmeticOperator.Binary.PLUS,
+                NBTType::merge);
 
-        OperationRegistry.registerBinary(NbtType.class, StringType.class, ArithmeticOperator.Binary.MINUS,
+        OperationRegistry.registerBinary(NBTType.class, StringType.class, ArithmeticOperator.Binary.MINUS,
                 (n, key) -> n.remove(key.asString()));
 
-        OperationRegistry.registerBinary(NbtType.class, NbtType.class, LogicalOperator.Binary.EQUAL,
+        OperationRegistry.registerBinary(NBTType.class, NBTType.class, LogicalOperator.Binary.EQUAL,
                 (l, r) -> PlusMinusType.create(l.equals(r)));
 
-        OperationRegistry.registerCast(NbtType.class, StringType.class,
+        OperationRegistry.registerCast(NBTType.class, StringType.class,
                 n -> StringType.create(n.asString()));
 
-        OperationRegistry.registerCast(StringType.class, NbtType.class,
-                s -> NbtType.parse(s.asString()));
+        OperationRegistry.registerCast(StringType.class, NBTType.class,
+                s -> NBTType.parse(s.asString()));
+
+        OperationRegistry.registerBinary(MinecraftItemStackType.class, NumberType.class, ArithmeticOperator.Binary.PLUS,
+                (stack, n) -> {
+                    long               add = n.asLong();
+                    RandomQuantityType q   = stack.getQuantity();
+                    RandomQuantityType newQ = RandomQuantityType.create(
+                            q.getChance(),
+                            IntegralType.create(Math.max(0L, q.getMin().asLong() + add)),
+                            IntegralType.create(Math.max(0L, q.getMax().asLong() + add))
+                    );
+                    return stack.withQuantity(newQ);
+                });
+
+        OperationRegistry.registerBinary(MinecraftItemStackType.class, NumberType.class, ArithmeticOperator.Binary.MINUS,
+                (stack, n) -> {
+                    long               sub = n.asLong();
+                    RandomQuantityType q   = stack.getQuantity();
+                    RandomQuantityType newQ = RandomQuantityType.create(
+                            q.getChance(),
+                            IntegralType.create(Math.max(0L, q.getMin().asLong() - sub)),
+                            IntegralType.create(Math.max(0L, q.getMax().asLong() - sub))
+                    );
+                    return stack.withQuantity(newQ);
+                });
+
+        OperationRegistry.registerBinary(MinecraftItemStackType.class, NumberType.class, ArithmeticOperator.Binary.MULTIPLY,
+                (stack, n) -> {
+                    double             scalar = n.asDouble();
+                    RandomQuantityType q      = stack.getQuantity();
+                    RandomQuantityType newQ = RandomQuantityType.create(
+                            q.getChance(),
+                            IntegralType.create(Math.max(0L, MouseNumbers.round(q.getMin().asLong() * scalar))),
+                            IntegralType.create(Math.max(0L, MouseNumbers.round(q.getMax().asLong() * scalar)))
+                    );
+                    return stack.withQuantity(newQ);
+                });
+
+        OperationRegistry.registerBinary(MinecraftItemStackType.class, NBTType.class, ArithmeticOperator.Binary.PLUS,
+                (stack, nbt) -> stack.withNbt(stack.getNbt().merge(nbt)));
+
+        OperationRegistry.registerBinary(MinecraftItemType.class, NBTType.class, ArithmeticOperator.Binary.PLUS,
+                (item, nbt) -> MinecraftItemStackType.create(item, 1L).withNbt(nbt));
+
+        OperationRegistry.registerBinary(MinecraftItemType.class, NumberType.class, ArithmeticOperator.Binary.PLUS,
+                (item, n) -> MinecraftItemStackType.create(item, n.asLong()));
+
+        OperationRegistry.registerBinary(MinecraftItemType.class, RandomQuantityType.class, ArithmeticOperator.Binary.PLUS,
+                MinecraftItemStackType::create);
+
+        OperationRegistry.registerCast(MinecraftItemType.class, MinecraftItemStackType.class,
+                MinecraftItemStackType::create);
+
+        OperationRegistry.registerCast(MinecraftBlockType.class, MinecraftItemStackType.class,
+                MinecraftItemStackType::create);
+
+        OperationRegistry.registerCast(MinecraftItemStackType.class, StringType.class,
+                s -> StringType.create(s.toString()));
+        OperationRegistry.registerCast(StringType.class, MinecraftItemStackType.class,
+                s -> MinecraftItemStackType.parse(s.asString()));
+
+        OperationRegistry.registerBinary(MinecraftItemStackType.class, MinecraftItemStackType.class, LogicalOperator.Binary.EQUAL,
+                (l, r) -> PlusMinusType.create(l.equals(r)));
+
+        OperationRegistry.registerBinary(MinecraftItemStackType.class, MinecraftItemType.class, LogicalOperator.Binary.EQUAL,
+                (stack, item) -> PlusMinusType.create(stack.getItem().equals(item)));
+        OperationRegistry.registerBinary(MinecraftItemType.class, MinecraftItemStackType.class, LogicalOperator.Binary.EQUAL,
+                (item, stack) -> PlusMinusType.create(stack.getItem().equals(item)));
+
+        OperationRegistry.registerBinary(MinecraftTagType.class, MinecraftTagType.class, LogicalOperator.Binary.EQUAL,
+                (l, r) -> PlusMinusType.create(l.equals(r)));
+
+        OperationRegistry.registerBinary(MinecraftItemType.class, MinecraftTagType.class, LogicalOperator.Binary.EQUAL,
+                (item, tag) -> PlusMinusType.create(tag.contains(item)));
+        OperationRegistry.registerBinary(MinecraftTagType.class, MinecraftItemType.class, LogicalOperator.Binary.EQUAL,
+                (tag, item) -> PlusMinusType.create(tag.contains(item)));
+
+        OperationRegistry.registerBinary(MinecraftBlockType.class, MinecraftTagType.class, LogicalOperator.Binary.EQUAL,
+                (block, tag) -> PlusMinusType.create(tag.contains(block)));
+        OperationRegistry.registerBinary(MinecraftTagType.class, MinecraftBlockType.class, LogicalOperator.Binary.EQUAL,
+                (tag, block) -> PlusMinusType.create(tag.contains(block)));
+
+        OperationRegistry.registerBinary(MinecraftItemStackType.class, MinecraftTagType.class, LogicalOperator.Binary.EQUAL,
+                (stack, tag) -> PlusMinusType.create(tag.contains(stack)));
+        OperationRegistry.registerBinary(MinecraftTagType.class, MinecraftItemStackType.class, LogicalOperator.Binary.EQUAL,
+                (tag, stack) -> PlusMinusType.create(tag.contains(stack)));
+
+        OperationRegistry.registerCast(MinecraftTagType.class, StringType.class,
+                t -> StringType.create(t.toString()));
+        OperationRegistry.registerCast(StringType.class, MinecraftTagType.class,
+                s -> MinecraftTagType.parse(s.asString()));
     }
 }
