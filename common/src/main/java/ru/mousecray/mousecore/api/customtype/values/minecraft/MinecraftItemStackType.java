@@ -1,79 +1,72 @@
 /*******************************************************************************
  * Copyright © 2026 mousecray
  * Licensed under the GNU Lesser General Public License, Version 3.0
- *******************************************************************************/
+ ******************************************************************************/
 
 package ru.mousecray.mousecore.api.customtype.values.minecraft;
 
 import net.minecraft.world.item.ItemStack;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.CustomType;
+import ru.mousecray.mousecore.api.customtype.OtherType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
-import ru.mousecray.mousecore.api.customtype.type.QuantityDistribution;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.customtype.values.collection.NBTType;
 import ru.mousecray.mousecore.api.customtype.values.number.IntegralType;
 import ru.mousecray.mousecore.api.customtype.values.number.PercentType;
 import ru.mousecray.mousecore.api.customtype.values.number.RandomQuantityType;
+import ru.mousecray.mousecore.api.error.UnsupportedValException;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
+import ru.mousecray.mousecore.api.minecraft.MouseItemStack;
 import ru.mousecray.mousecore.api.minecraft.MouseItemState;
 import ru.mousecray.mousecore.api.utils.MouseNumbers;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
-import ru.mousecray.mousecore.api.utils.MouseUtils;
+import ru.mousecray.mousecore.api.utils.QuantityDistribution;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
-public final class MinecraftItemStackType extends CustomType<MinecraftItemStackType> {
-    private static final MouseUtils.Equator<MinecraftItemStackType> EQUATOR = MouseUtils.Equator
-            .<MinecraftItemStackType>equaling(MinecraftItemStackType::getItem)
-            .thenEqualing(MinecraftItemStackType::getQuantity)
-            .thenEqualing(MinecraftItemStackType::getNbt);
-
-    public static final MinecraftItemStackType EMPTY = new MinecraftItemStackType(
-            MinecraftItemType.AIR,
-            RandomQuantityType.create(PercentType.MIN, IntegralType.NULL, IntegralType.NULL),
-            NBTType.EMPTY
-    );
+public final class MinecraftItemStackType extends OtherType<MouseItemStack> {
+    public static final MinecraftItemStackType EMPTY = new MinecraftItemStackType(MouseItemStack.EMPTY);
 
     static { storage.put(MinecraftItemStackType.class, MinecraftItemStackType::parse); }
 
-    private final MinecraftItemType  item;
-    private final RandomQuantityType quantity;
-    private final NBTType            nbt;
+    private MinecraftItemStackType(MouseItemStack stack) {
+        super(Objects.requireNonNull(stack, "MouseItemStack cannot be null"));
+    }
 
-    private MinecraftItemStackType(MinecraftItemType item, RandomQuantityType quantity, NBTType nbt) {
-        super();
-        this.item = Objects.requireNonNull(item, "MinecraftItemType cannot be null");
-        this.quantity = Objects.requireNonNull(quantity, "RandomQuantityType cannot be null");
-        this.nbt = Objects.requireNonNull(nbt, "NbtType cannot be null");
+    public static MinecraftItemStackType create(MouseItemStack stack) {
+        return new MinecraftItemStackType(stack);
+    }
+
+    public static MinecraftItemStackType create(ItemStack vanillaStack) {
+        return create(MouseItemStack.create(vanillaStack));
     }
 
     public static MinecraftItemStackType create(MinecraftItemType item, RandomQuantityType quantity, NBTType nbt) {
-        return new MinecraftItemStackType(item, quantity, nbt);
+        return create(MouseItemStack.create(
+                item.asItemState(),
+                quantity.getMin().asInt(),
+                quantity.getMax().asInt(),
+                quantity.getChance().asDouble(),
+                nbt.isEmpty() ? null : nbt.getRawCompoundTag()
+        ));
     }
 
     public static MinecraftItemStackType create(MinecraftItemType item, RandomQuantityType quantity) {
         return create(item, quantity, NBTType.EMPTY);
     }
 
-    public static MinecraftItemStackType create(MinecraftItemType item, long count) {
-        long safeCount = Math.max(0L, count);
-        return create(item, RandomQuantityType.create(
-                PercentType.MAX,
-                IntegralType.create(safeCount),
-                IntegralType.create(safeCount)
-        ), NBTType.EMPTY);
+    public static MinecraftItemStackType create(MinecraftItemType item, int count) {
+        return create(MouseItemStack.create(item.asItemState(), count));
     }
 
     public static MinecraftItemStackType create(MinecraftItemType item) {
-        return create(item, 1L);
+        return create(item, 1);
     }
 
     public static MinecraftItemStackType create(MinecraftBlockType block, RandomQuantityType quantity, NBTType nbt) {
@@ -84,37 +77,64 @@ public final class MinecraftItemStackType extends CustomType<MinecraftItemStackT
         return create(block, quantity, NBTType.EMPTY);
     }
 
-    public static MinecraftItemStackType create(MinecraftBlockType block, long count) {
+    public static MinecraftItemStackType create(MinecraftBlockType block, int count) {
         return create(MinecraftItemType.create(block.getPrefix(), block.getName()), count);
     }
 
     public static MinecraftItemStackType create(MinecraftBlockType block) {
-        return create(block, 1L);
+        return create(block, 1);
     }
 
-    public MinecraftItemType getItem()                                         { return item; }
-    public RandomQuantityType getQuantity()                                    { return quantity; }
-    public NBTType getNbt()                                                    { return nbt; }
+    public MouseItemStack asMouseItemStack() { return value; }
+    public MouseItemState asItemState()      { return value.getItemState(); }
+    public boolean hasNbt()                  { return value.hasNbt(); }
 
-    public MouseItemState asItemState()                                        { return item.asItemState(); }
-    public boolean hasNbt()                                                    { return !nbt.isEmpty(); }
-
-    public MinecraftItemStackType withItem(MinecraftItemType newItem)          { return create(newItem, quantity, nbt); }
-    public MinecraftItemStackType withQuantity(RandomQuantityType newQuantity) { return create(item, newQuantity, nbt); }
-    public MinecraftItemStackType withNbt(NBTType newNbt)                      { return create(item, quantity, newNbt); }
-
-    public ItemStack roll(Random random, QuantityDistribution distribution) {
-        int count = quantity.roll(random, distribution);
-        if (count <= 0) return ItemStack.EMPTY;
-
-        ItemStack stack = item.asItemState().getItemStack(count);
-        if (!nbt.isEmpty()) stack.setTag(nbt.asCompoundTag());
-        return stack;
+    public MinecraftItemType getItem() {
+        return MinecraftItemType.create(value.getItemState());
     }
 
-    public ItemStack roll(Random random)                     { return roll(random, QuantityDistribution.CHANCE_OR_ZERO); }
-    public ItemStack roll(QuantityDistribution distribution) { return roll(ThreadLocalRandom.current(), distribution); }
-    public ItemStack roll()                                  { return roll(ThreadLocalRandom.current(), QuantityDistribution.CHANCE_OR_ZERO); }
+    public RandomQuantityType getQuantity() {
+        return RandomQuantityType.create(
+                PercentType.create(value.getChance()),
+                IntegralType.create(value.getMinCount()),
+                IntegralType.create(value.getMaxCount())
+        );
+    }
+
+    public NBTType getNbt() {
+        return value.hasNbt()
+                ? NBTType.create(Objects.requireNonNull(value.getRawNbt()))
+                : NBTType.EMPTY;
+    }
+
+    public MinecraftItemStackType withItem(MinecraftItemType newItem) {
+        return create(value.withItemState(newItem.asItemState()));
+    }
+
+    public MinecraftItemStackType withQuantity(RandomQuantityType newQuantity) {
+        return create(value.withQuantity(
+                newQuantity.getMin().asInt(),
+                newQuantity.getMax().asInt(),
+                newQuantity.getChance().asDouble()
+        ));
+    }
+
+    public MinecraftItemStackType withNbt(NBTType newNbt) {
+        return create(value.withNbt(newNbt.isEmpty() ? null : newNbt.getRawCompoundTag()));
+    }
+
+    public ItemStack roll(Random random, QuantityDistribution distribution) { return value.roll(random, distribution); }
+    public ItemStack roll(Random random)                                    { return value.roll(random); }
+    public ItemStack roll(QuantityDistribution distribution)                { return value.roll(distribution); }
+    public ItemStack roll()                                                 { return value.roll(); }
+
+    public static MinecraftItemStackType parse(@Nullable Object val) throws UnsupportedValException, ValueFormatException {
+        if (val instanceof MinecraftItemStackType stackType) return stackType;
+        else if (val instanceof MouseItemStack mouseStack) return create(mouseStack);
+        else if (val instanceof ItemStack vanillaStack) return create(vanillaStack);
+        else if (val instanceof String str) return parse(str);
+        throw new UnsupportedValException("Cannot parse MinecraftItemStackType from " + val);
+    }
 
     public static MinecraftItemStackType parse(@Nullable String raw) throws ValueFormatException {
         String clean = MouseStrings.trimWith(raw, true, '\t');
@@ -138,15 +158,17 @@ public final class MinecraftItemStackType extends CustomType<MinecraftItemStackT
             String qtyStr = MouseStrings.trimWith(clean.substring(starIdx + 1), true, '\t');
             if (qtyStr == null || qtyStr.isEmpty()) throw new ValueFormatException("Missing quantity after '*' in: '" + raw + "'");
 
-            Long simpleCount = MouseNumbers.tryParseLong(qtyStr);
+            Integer simpleCount = MouseNumbers.tryParseInt(qtyStr);
             if (simpleCount != null) {
                 parsedQuantity = RandomQuantityType.create(
                         PercentType.MAX,
                         IntegralType.create(simpleCount),
                         IntegralType.create(simpleCount)
                 );
-            } else parsedQuantity = CustomType.parse(RandomQuantityType.class, qtyStr);
-            if (parsedQuantity == null) parsedQuantity = RandomQuantityType.create(PercentType.MAX, IntegralType.create(1), IntegralType.create(1));
+            } else {
+                parsedQuantity = CustomType.parse(RandomQuantityType.class, qtyStr);
+                if (parsedQuantity == null) throw new ValueFormatException("Invalid quantity format in: '" + raw + "'");
+            }
         } else {
             itemStr = clean;
             parsedQuantity = RandomQuantityType.create(PercentType.MAX, IntegralType.create(1L), IntegralType.create(1L));
@@ -156,39 +178,7 @@ public final class MinecraftItemStackType extends CustomType<MinecraftItemStackT
         return create(parsedItem, parsedQuantity, parsedNbt);
     }
 
-    public static MinecraftItemStackType fromString(@Nullable String raw) { return parse(raw); }
-
-    @Override public IValType getValType()                                { return ValType.MINECRAFT_ITEM_STACK; }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder(item.toString());
-
-        boolean isFixedOne = quantity.getMin().asLong() == 1L
-                && quantity.getMax().asLong() == 1L
-                && quantity.getChance().asDouble() >= 100.0D;
-
-        if (!isFixedOne) {
-            boolean isSimpleCount = quantity.getMin().asLong() == quantity.getMax().asLong()
-                    && quantity.getChance().asDouble() >= 100.0D;
-            sb.append('*').append(isSimpleCount ? quantity.getMin().asLong() : quantity.toString());
-        }
-
-        if (!nbt.isEmpty()) sb.append(nbt);
-
-        return sb.toString();
-    }
-
-    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-    @Override public boolean equals(Object o) { return EQUATOR.test(this, o); }
-    @Override public int hashCode() { return Objects.hash(item, quantity, nbt); }
-
-    @Override
-    public int compareTo(MinecraftItemStackType o) {
-        return Comparator
-                .comparing(MinecraftItemStackType::getItem)
-                .thenComparing(MinecraftItemStackType::getQuantity)
-                .thenComparing(MinecraftItemStackType::getNbt)
-                .compare(this, o);
-    }
+    public static MinecraftItemStackType fromString(@Nullable String raw)                           { return parse(raw); }
+    @Override public IValType getValType()                                                          { return ValType.MINECRAFT_ITEM_STACK; }
+    @Override @SuppressWarnings("unchecked") public MinecraftItemStackType createType(Object value) { return parse(value); }
 }

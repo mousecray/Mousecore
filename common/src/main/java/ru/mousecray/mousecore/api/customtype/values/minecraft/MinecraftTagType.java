@@ -99,6 +99,7 @@ public final class MinecraftTagType extends OtherType<ResourceLocation> {
     }
 
     public boolean contains(@Nullable MinecraftItemStackType stack) { return stack != null && contains(stack.getItem()); }
+    public boolean contains(@Nullable MinecraftEntityType entity)   { return entity != null && entity.asEntityState().is(asEntityTag()); }
 
     public static MinecraftTagType parse(@Nullable String raw, IValType targetValType) throws ValueFormatException {
         String clean = MouseStrings.trimWith(raw, true, '\t');

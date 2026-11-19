@@ -1,11 +1,11 @@
 /*
- * ******************************************************************************
- *  * Copyright © 2026 mousecray
- *  * Licensed under the GNU Lesser General Public License, Version 3.0
- *  *****************************************************************************
+ * ***************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ * **************************************************************************
  */
 
-package ru.mousecray.mousecore.api.customtype.type;
+package ru.mousecray.mousecore.api.utils;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;

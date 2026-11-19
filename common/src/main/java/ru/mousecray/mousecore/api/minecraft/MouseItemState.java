@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public class MouseItemState implements Comparable<MouseItemState> {
-    private static final Map<Item, MouseItemState> cache = new SoftHashMap<>();
-    @Nonnull private final Item item;
+    private static final   Map<Item, MouseItemState> cache = new SoftHashMap<>();
+    @Nonnull private final Item                      item;
 
     private Boolean    hasBlock        = null;
     private Block      block           = null;
@@ -54,7 +54,9 @@ public class MouseItemState implements Comparable<MouseItemState> {
     @SuppressWarnings("deprecation")
     public static MouseItemState create(ResourceLocation location) { return create(BuiltInRegistries.ITEM.get(location)); }
 
-    @Nonnull public Item getItem() { return item; }
+    public static void clearCache() { cache.clear(); }
+
+    @Nonnull public Item getItem()  { return item; }
 
     public boolean hasBlock() {
         return checkCacheDisabled() || hasBlock == null

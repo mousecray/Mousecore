@@ -10,11 +10,11 @@ package ru.mousecray.mousecore.api.customtype.values.number;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.customtype.NumberType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
-import ru.mousecray.mousecore.api.customtype.type.QuantityDistribution;
 import ru.mousecray.mousecore.api.customtype.type.ValType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.api.utils.MouseUtils;
+import ru.mousecray.mousecore.api.utils.QuantityDistribution;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;

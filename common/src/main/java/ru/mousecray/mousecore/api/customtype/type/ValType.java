@@ -10,15 +10,9 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.values.collection.*;
 import ru.mousecray.mousecore.api.customtype.values.logic.ConditionType;
 import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
-import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftBlockType;
-import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftItemStackType;
-import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftItemType;
-import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftTagType;
+import ru.mousecray.mousecore.api.customtype.values.minecraft.*;
 import ru.mousecray.mousecore.api.customtype.values.number.*;
-import ru.mousecray.mousecore.api.customtype.values.other.ColorType;
-import ru.mousecray.mousecore.api.customtype.values.other.EnumType;
-import ru.mousecray.mousecore.api.customtype.values.other.RegexType;
-import ru.mousecray.mousecore.api.customtype.values.other.StringType;
+import ru.mousecray.mousecore.api.customtype.values.other.*;
 import ru.mousecray.mousecore.api.customtype.values.vec3.BlockPosType;
 import ru.mousecray.mousecore.api.customtype.values.vec3.Vector3dType;
 
@@ -51,7 +45,7 @@ public enum ValType implements IValType {
     SIMPLE_MAP(ValTypeCategory.CONTAINER, "Map", SimpleMapType.class),
     SIMPLE_TABLE(ValTypeCategory.CONTAINER, "Table", SimpleTableType.class),
     SIMPLE_MATRIX(ValTypeCategory.CONTAINER, "Matrix", SimpleMatrixType.class),
-    NBT(ValTypeCategory.CONTAINER, "Nbt", NBTType.class),
+    NBT(ValTypeCategory.CONTAINER, "NBT", NBTType.class),
 
     SIMPLE_CONDITION(ValTypeCategory.CONDITION, "Condition", ConditionType.class),
 

@@ -5,7 +5,6 @@
 
 package ru.mousecray.mousecore.api.utils;
 
-import ru.mousecray.mousecore.api.customtype.type.QuantityDistribution;
 import ru.mousecray.mousecore.api.customtype.values.number.PercentType;
 import ru.mousecray.mousecore.api.customtype.values.number.RandomQuantityType;
 import ru.mousecray.mousecore.api.customtype.values.number.RangeType;

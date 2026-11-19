@@ -80,6 +80,8 @@ public class MouseBlockState implements Comparable<MouseBlockState> {
         return create(BuiltInRegistries.BLOCK.get(location).defaultBlockState());
     }
 
+    public static void clearCache()       { cache.clear(); }
+
     @Nonnull public BlockState getState() { return state; }
     @Nonnull public Block getBlock()      { return state.getBlock(); }
 
