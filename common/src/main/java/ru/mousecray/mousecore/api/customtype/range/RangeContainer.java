@@ -73,22 +73,21 @@ public class RangeContainer<T extends NumberType<?>> implements Comparable<Range
     }
 
     public T getNearValue(T other) {
-        if (other == null || isEmpty()) return other;
+        if (other == null || isEmpty() || isInRange(other)) return other;
+        if (other.compareTo(minValue) <= 0) return minValue;
+        if (other.compareTo(maxValue) >= 0) return maxValue;
 
-        T distance = null;
-        T prevMax  = null;
-        for (Range<T> range : ranges) {
-            if (range.isLess(other)) {
-                if (prevMax != null) {
-                    return Range.distanceBetween(other, minValue).compareTo(prevMax) < 0 ? minValue : prevMax;
-                } else return minValue;
-            } else if (range.isMore(other)) {
-                prevMax = maxValue;
-                distance = Range.distanceBetween(other, maxValue);
+        for (int i = 1; i < ranges.length; i++) {
+            T prevMax = ranges[i - 1].getMaxValue();
+            T currMin = ranges[i].getMinValue();
+            if (other.compareTo(prevMax) >= 0 && other.compareTo(currMin) <= 0) {
+                double distToPrev = other.asDouble() * 0.5D - prevMax.asDouble() * 0.5D;
+                double distToNext = currMin.asDouble() * 0.5D - other.asDouble() * 0.5D;
+                return distToNext < distToPrev ? currMin : prevMax;
             }
         }
 
-        return distance;
+        return other;
     }
 
     @Nonnull public ImmutableList<Range<T>> getRanges() { return ImmutableList.copyOf(ranges); }

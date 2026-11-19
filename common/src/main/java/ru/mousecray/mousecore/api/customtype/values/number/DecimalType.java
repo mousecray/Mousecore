@@ -20,7 +20,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @MethodReturnsNonnullByDefault
 @ParametersAreNonnullByDefault
 public final class DecimalType extends NumberType<Double> {
-    public static final DecimalType MIN  = new DecimalType(Double.MIN_VALUE);
+    public static final DecimalType MIN  = new DecimalType(-Double.MAX_VALUE);
     public static final DecimalType MAX  = new DecimalType(Double.MAX_VALUE);
     public static final DecimalType NULL = new DecimalType(0D);
 
@@ -37,17 +37,17 @@ public final class DecimalType extends NumberType<Double> {
     private DecimalType(double value) { super(value); }
 
     public static DecimalType create(double value) {
-        if (MIN.asNumber() >= value) return MIN;
-        else if (MAX.asNumber() <= value) return MAX;
-        else if (value == 0) return NULL;
+        if (value == 0D) return NULL;
+        else if (value <= -Double.MAX_VALUE) return MIN;
+        else if (value >= Double.MAX_VALUE) return MAX;
         else return new DecimalType(value);
     }
 
     @Override public IValType getValType()                                               { return ValType.DECIMAL; }
 
-    public static DecimalType calcMedium(DecimalType min, DecimalType max)               { return create(min.value + max.value / 2D); }
-    public static DecimalType calcLow(DecimalType min, DecimalType max)                  { return create((min.value + (min.value + max.value) / 2D) / 2D); }
-    public static DecimalType calcHigh(DecimalType min, DecimalType max)                 { return create((max.value + (min.value + max.value) / 2D) / 2D); }
+    public static DecimalType calcMedium(DecimalType min, DecimalType max)               { return create(min.value * 0.5D + max.value * 0.5D); }
+    public static DecimalType calcLow(DecimalType min, DecimalType max)                  { return create(min.value * 0.75D + max.value * 0.25D); }
+    public static DecimalType calcHigh(DecimalType min, DecimalType max)                 { return create(min.value * 0.25D + max.value * 0.75D); }
 
     @Override public Double asNumber()                                                   { return value; }
 

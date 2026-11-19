@@ -36,7 +36,7 @@ public final class RandomQuantityType extends NumberType<Double> {
     public static final RandomQuantityType MIN  = new RandomQuantityType(PercentType.MIN, IntegralType.NULL, IntegralType.NULL);
     public static final RandomQuantityType MAX  = new RandomQuantityType(PercentType.MAX, IntegralType.MAX, IntegralType.MAX);
     public static final RandomQuantityType NULL = new RandomQuantityType(PercentType.NULL, IntegralType.NULL, IntegralType.NULL);
-
+    
     static {
         storage.put(RandomQuantityType.class, str -> {
             str = MouseStrings.trimWith(str, true, '\t');
@@ -71,47 +71,43 @@ public final class RandomQuantityType extends NumberType<Double> {
 
     private RandomQuantityType(PercentType chance, IntegralType min, IntegralType max) {
         super(chance.asDouble());
-        this.min = min.asInt();
-        this.max = max.asInt();
+        this.min = (int) Math.max(0L, Math.min(Integer.MAX_VALUE, min.asLong()));
+        this.max = (int) Math.max(0L, Math.min(Integer.MAX_VALUE, max.asLong()));
     }
 
     public static RandomQuantityType create(PercentType chance, IntegralType min, IntegralType max) {
-        if (chance.getLogicPipeline().isLessOrEqual(MIN.getChance()).asBoolean()
-                && min.getLogicPipeline().isLessOrEqual(MIN.getMin()).asBoolean()
-                && max.getLogicPipeline().isLessOrEqual(MIN.getMax()).asBoolean()
-        ) return MIN;
-        else if (chance.getLogicPipeline().isMoreOrEqual(MAX.getChance()).asBoolean()
-                && min.getLogicPipeline().isMoreOrEqual(MIN.getMin()).asBoolean()
-                && max.getLogicPipeline().isMoreOrEqual(MIN.getMax()).asBoolean()) return MAX;
-        else if (chance.getLogicPipeline().isEqual(NULL.getChance()).asBoolean()
-                && min.getLogicPipeline().isMoreOrEqual(MIN.getMin()).asBoolean()
-                && max.getLogicPipeline().isMoreOrEqual(MIN.getMax()).asBoolean()) return NULL;
-        else return new RandomQuantityType(chance, min, max);
+        double ch   = chance.asDouble();
+        long   minV = Math.max(0L, Math.min(Integer.MAX_VALUE, min.asLong()));
+        long   maxV = Math.max(0L, Math.min(Integer.MAX_VALUE, max.asLong()));
+
+        if (ch <= 0D && minV == 0L && maxV == 0L) return NULL;
+        if (ch >= 100D && minV >= Integer.MAX_VALUE && maxV >= Integer.MAX_VALUE) return MAX;
+        return new RandomQuantityType(chance, IntegralType.create(minV), IntegralType.create(maxV));
     }
 
     @Override public IValType getValType() { return ValType.RANDOM_QUANTITY; }
 
     public static RandomQuantityType calcMedium(RandomQuantityType min, RandomQuantityType max) {
         return create(
-                PercentType.create(min.value + max.value / 2D),
-                IntegralType.create((long) (min.min + max.min / 2D)),
-                IntegralType.create((long) (min.max + max.max / 2D))
+                PercentType.create(min.value * 0.5D + max.value * 0.5D),
+                IntegralType.create((long) (min.min * 0.5D + max.min * 0.5D)),
+                IntegralType.create((long) (min.max * 0.5D + max.max * 0.5D))
         );
     }
 
     public static RandomQuantityType calcLow(RandomQuantityType min, RandomQuantityType max) {
         return create(
-                PercentType.create((min.value + (min.value + max.value) / 2D) / 2D),
-                IntegralType.create((long) (min.min + (min.min + max.min / 2D) / 2D)),
-                IntegralType.create((long) (min.max + (min.max + max.max / 2D) / 2D))
+                PercentType.create(min.value * 0.75D + max.value * 0.25D),
+                IntegralType.create((long) (min.min * 0.75D + max.min * 0.25D)),
+                IntegralType.create((long) (min.max * 0.75D + max.max * 0.25D))
         );
     }
 
     public static RandomQuantityType calcHigh(RandomQuantityType min, RandomQuantityType max) {
         return create(
-                PercentType.create((max.value + (min.value + max.value) / 2D) / 2D),
-                IntegralType.create((long) (max.min + (min.min + max.min / 2D) / 2D)),
-                IntegralType.create((long) (max.max + (min.max + max.max / 2D) / 2D))
+                PercentType.create(min.value * 0.25D + max.value * 0.75D),
+                IntegralType.create((long) (min.min * 0.25D + max.min * 0.75D)),
+                IntegralType.create((long) (min.max * 0.25D + max.max * 0.75D))
         );
     }
 

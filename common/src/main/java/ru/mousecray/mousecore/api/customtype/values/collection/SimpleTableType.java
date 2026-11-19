@@ -77,21 +77,19 @@ public final class SimpleTableType extends TableType<SimpleTableType> {
     ) {
         Objects.requireNonNull(schema, "Schema cannot be null");
         String clean = MouseStrings.trimWith(raw, true, '\t');
-        if (clean == null || clean.isEmpty()) {
-            throw new ValueFormatException("Cannot parse empty string as Table");
-        }
+        if (clean == null || clean.isEmpty()) throw new ValueFormatException("Cannot parse empty string as Table");
 
-        if (clean.startsWith("[") && clean.endsWith("]")) {
-            clean = clean.substring(1, clean.length() - 1);
-        }
+        if (MouseStrings.isWrappedBy(clean, '[', ']')) clean = MouseStrings.trimWith(clean.substring(1, clean.length() - 1), true, '\t');
+        if (clean == null || clean.isEmpty()) return createEmpty(schema);
 
-        List<SimpleTupleType> parsedRows = new ArrayList<>();
-        String[]              rowStrings;
+        List<String> rowStrings;
+        if (MouseStrings.indexOfRespectingBrackets(clean, "\n") != -1) rowStrings = MouseStrings.splitRespectingBrackets(clean, '\n');
+        else if (clean.startsWith("(") && MouseStrings.indexOfRespectingBrackets(clean, ",") != -1) {
+            rowStrings = MouseStrings.splitRespectingBrackets(clean, ',');
+        } else if (MouseStrings.indexOfRespectingBrackets(clean, ";") != -1) rowStrings = MouseStrings.splitRespectingBrackets(clean, ';');
+        else rowStrings = Collections.singletonList(clean);
 
-        if (clean.contains("\n")) rowStrings = clean.split("\n");
-        else if (clean.contains(")") && clean.contains("(")) rowStrings = clean.split("(?<=\\))\\s*[,;]?\\s*(?=\\()");
-        else rowStrings = clean.split(";");
-
+        List<SimpleTupleType> parsedRows = new ArrayList<>(rowStrings.size());
         for (String rowStr : rowStrings) {
             String line = MouseStrings.trimWith(rowStr, true, '\t');
             if (line == null || line.isEmpty()) continue;

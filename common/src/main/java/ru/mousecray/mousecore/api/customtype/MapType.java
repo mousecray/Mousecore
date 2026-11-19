@@ -58,7 +58,7 @@ public abstract class MapType<K extends CustomType<?>, V extends CustomType<?>, 
     @Override
     public String toString() {
         return asMap().entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .map(entry -> entry.getKey() + " -> " + entry.getValue())
                 .collect(Collectors.joining(", ", "{", "}"));
     }
 

@@ -18,10 +18,7 @@ import ru.mousecray.mousecore.api.utils.MouseStrings;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
@@ -70,29 +67,34 @@ public final class SimpleMapType<K extends CustomType<?>, V extends CustomType<?
         Objects.requireNonNull(keyType, "KeyType cannot be null");
         Objects.requireNonNull(valueType, "ValueType cannot be null");
         String clean = MouseStrings.trimWith(raw, true, '\t');
-        if (clean == null || clean.isEmpty()) {
-            throw new ValueFormatException("Cannot parse empty string as Map");
-        }
+        if (clean == null || clean.isEmpty()) throw new ValueFormatException("Cannot parse empty string as Map");
 
-        if (clean.startsWith("{") && clean.endsWith("}")) {
-            clean = clean.substring(1, clean.length() - 1);
-        }
+        if (MouseStrings.isWrappedBy(clean, '{', '}')) clean = clean.substring(1, clean.length() - 1);
 
         Class<? extends CustomType> keyClass = Objects.requireNonNull(keyType.getTypeClass(), "Key class is undefined for " + keyType.getDisplayName());
         Class<? extends CustomType> valClass = Objects.requireNonNull(valueType.getTypeClass(), "Value class is undefined for " + valueType.getDisplayName());
 
-        Map<K, V> parsedMap = new LinkedHashMap<>();
-        String    delimiter = clean.contains("\n") ? "\n" : ",";
-        String[]  pairs     = clean.split(delimiter);
+        Map<K, V>    parsedMap = new LinkedHashMap<>();
+        char         delimiter = MouseStrings.indexOfRespectingBrackets(clean, "\n") != -1 ? '\n' : ',';
+        List<String> pairs     = MouseStrings.splitRespectingBrackets(clean, delimiter);
 
         for (String pairStr : pairs) {
             String line = MouseStrings.trimWith(pairStr, true, '\t');
             if (line == null || line.isEmpty()) continue;
 
-            String   sep = line.contains(":") ? ":" : (line.contains("->") ? "->" : "=");
-            String[] kv  = line.split(sep, 2);
-            if (kv.length != 2) {
-                String msg = "Invalid map pair format (missing ':' or '->'): '" + line + "'";
+            String sep    = null;
+            int    sepIdx = -1;
+            for (String candidate : new String[]{ "->", "=", ": ", ":" }) {
+                int idx = MouseStrings.indexOfRespectingBrackets(line, candidate);
+                if (idx != -1) {
+                    sep = candidate;
+                    sepIdx = idx;
+                    break;
+                }
+            }
+
+            if (sepIdx == -1) {
+                String msg = "Invalid map pair format (missing '->', '=' or ':'): '" + line + "'";
                 if (logger != null) {
                     logger.atWarn()
                             .withPrefix(LogPrefixes.CUSTOMTYPE)
@@ -102,8 +104,8 @@ public final class SimpleMapType<K extends CustomType<?>, V extends CustomType<?
                 throw new ValueFormatException(msg);
             }
 
-            String keyRaw = MouseStrings.trimWith(kv[0], true, '\t');
-            String valRaw = MouseStrings.trimWith(kv[1], true, '\t');
+            String keyRaw = MouseStrings.trimWith(line.substring(0, sepIdx), true, '\t');
+            String valRaw = MouseStrings.trimWith(line.substring(sepIdx + sep.length()), true, '\t');
 
             try {
                 K parsedKey = (K) CustomType.parse(keyClass, keyRaw);

@@ -50,9 +50,10 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
             IValType listComponentType, @Nullable Function<String, T> valCreator, boolean isConditional, boolean isUnique,
             List<ConditionalValType<T>> values
     ) {
-        super(checkValType(listComponentType), valCreator, values);
+        super(checkValType(listComponentType), valCreator);
         this.isConditional = isConditional;
         this.isUnique = isUnique;
+        for (ConditionalValType<T> val : Objects.requireNonNull(values)) if (val != null) addValue(val);
     }
 
     private static IValType checkValType(IValType listComponentType) {
@@ -71,9 +72,7 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
         return (TYPE) new SimpleListType<>(getListComponentValType(), getValCreator(), isConditional, isUnique, list);
     }
 
-    public boolean addOriginalValue(T value) {
-        return super.addValue(ConditionalValType.create(value, PlusMinusType.FALSE));
-    }
+    public boolean addOriginalValue(T value) { return addValue(ConditionalValType.create(value, PlusMinusType.FALSE)); }
 
     @Override
     public boolean addValue(ConditionalValType<T> value) {
@@ -84,15 +83,23 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
 
     @Override
     public boolean containsOriginalValue(@Nullable T value) {
-        if (value == null) return false;
+        if (value == null || isEmpty()) return false;
 
-        boolean flag = false;
-        for (ConditionalValType<T> val : getList()) {
-            T v = val.getValue();
-            if (val.isAnti().asBoolean()) flag = !v.equals(value);
-            else flag = v.equals(value);
+        boolean hasPositive     = false;
+        boolean matchedPositive = false;
+
+        for (ConditionalValType<T> entry : getList()) {
+            T v = entry.getValue();
+
+            if (isConditional && entry.isAnti().asBoolean()) {
+                if (v.equals(value)) return false;
+            } else {
+                hasPositive = true;
+                if (v.equals(value)) matchedPositive = true;
+            }
         }
-        return flag;
+
+        return !hasPositive || matchedPositive;
     }
 
     @SafeVarargs
@@ -134,7 +141,7 @@ public final class SimpleListType<T extends CustomType<?>> extends ListType<Cond
         SimpleListType<T> list = new SimpleListType<>(listComponentType, valCreator, isConditional, isUnique);
         if (rawString == null) return list;
 
-        String[] split = rawString.split(",");
+        List<String> split = MouseStrings.splitRespectingBrackets(rawString, ',');
         for (String s : split) {
             String str = MouseStrings.trimWith(s, true, '\t');
             if (StringUtils.isEmpty(str) || str.contains("\t")) continue;

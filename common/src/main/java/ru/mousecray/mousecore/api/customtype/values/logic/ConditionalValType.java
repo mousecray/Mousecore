@@ -87,8 +87,8 @@ public final class ConditionalValType<T extends CustomType<?>> extends CustomTyp
     }
 
     @Override public String toString() { return anti ? '!' + value.toString() : value.toString(); }
-    @Override public int hashCode()    { return Objects.hash(super.hashCode(), anti); }
-
+    @Override public int hashCode()    { return Objects.hash(value, anti); }
+    
     @SuppressWarnings("EqualsDoesntCheckParameterClass") @Override
     public boolean equals(Object o) { return EQUATOR.test(this, o); }
 

@@ -40,14 +40,14 @@ public class Range<T extends NumberType<?>> implements Comparable<Range<T>> {
 
     public boolean isLess(T value) {
         return includeMin
-                ? value.getLogicPipeline().isLessOrEqual(minValue).asBoolean()
-                : value.getLogicPipeline().isLess(minValue).asBoolean();
+                ? value.getLogicPipeline().isLess(minValue).asBoolean()
+                : value.getLogicPipeline().isLessOrEqual(minValue).asBoolean();
     }
 
     public boolean isMore(T value) {
         return includeMax
-                ? value.getLogicPipeline().isMoreOrEqual(maxValue).asBoolean()
-                : value.getLogicPipeline().isMore(maxValue).asBoolean();
+                ? value.getLogicPipeline().isMore(maxValue).asBoolean()
+                : value.getLogicPipeline().isMoreOrEqual(maxValue).asBoolean();
     }
 
     public boolean isInRange(T value) {
@@ -63,18 +63,23 @@ public class Range<T extends NumberType<?>> implements Comparable<Range<T>> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Range)) return false;
-        Range<?> range = (Range<?>) o;
-        return Objects.equals(minValue, range.minValue) && Objects.equals(maxValue, range.maxValue);
+        if (!(o instanceof Range<?> range)) return false;
+        return includeMin == range.includeMin
+                && includeMax == range.includeMax
+                && Objects.equals(minValue, range.minValue)
+                && Objects.equals(maxValue, range.maxValue);
     }
 
-    @Override public int hashCode() { return Objects.hash(minValue, maxValue); }
+    @Override
+    public int hashCode() { return Objects.hash(minValue, maxValue, includeMin, includeMax); }
 
     @Override
     public int compareTo(@Nonnull Range<T> other) {
         return Comparator
                 .<Range<T>, T>comparing(Range::getMinValue)
                 .thenComparing(Range::getMaxValue)
+                .thenComparing(Range::isIncludeMin)
+                .thenComparing(Range::isIncludeMax)
                 .compare(this, other);
     }
 
@@ -90,6 +95,8 @@ public class Range<T extends NumberType<?>> implements Comparable<Range<T>> {
 
     @SuppressWarnings("unchecked")
     public static <T extends NumberType<?>> T distanceBetween(T first, T second) {
-        return (T) second.getArithmeticPipeline().minus(first);
+        return first.compareTo(second) > 0
+                ? (T) first.getArithmeticPipeline().minus(second)
+                : (T) second.getArithmeticPipeline().minus(first);
     }
 }

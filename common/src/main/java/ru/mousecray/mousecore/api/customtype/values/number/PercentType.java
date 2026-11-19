@@ -24,7 +24,7 @@ import static ru.mousecray.mousecore.api.utils.MouseStrings.subAndTrimWithTabs;
 public final class PercentType extends NumberType<Double> {
     public static final PercentType MIN  = new PercentType(0D);
     public static final PercentType MAX  = new PercentType(100D);
-    public static final PercentType NULL = new PercentType(0D);
+    public static final PercentType NULL = MIN;
 
     static {
         storage.put(PercentType.class, str -> {
@@ -39,17 +39,16 @@ public final class PercentType extends NumberType<Double> {
     private PercentType(double value) { super(value); }
 
     public static PercentType create(double value) {
-        if (MIN.asNumber() >= value) return MIN;
-        else if (MAX.asNumber() <= value) return MAX;
-        else if (value == 0) return NULL;
+        if (Double.isNaN(value) || value <= 0D) return MIN;
+        else if (value >= 100D) return MAX;
         else return new PercentType(value);
     }
 
     @Override public IValType getValType()                                               { return ValType.PERCENT; }
 
-    public static PercentType calcMedium(PercentType min, PercentType max)               { return create(min.value + max.value / 2D); }
-    public static PercentType calcLow(PercentType min, PercentType max)                  { return create((min.value + (min.value + max.value) / 2D) / 2D); }
-    public static PercentType calcHigh(PercentType min, PercentType max)                 { return create((max.value + (min.value + max.value) / 2D) / 2D); }
+    public static PercentType calcMedium(PercentType min, PercentType max)               { return create(min.value * 0.5D + max.value * 0.5D); }
+    public static PercentType calcLow(PercentType min, PercentType max)                  { return create(min.value * 0.75D + max.value * 0.25D); }
+    public static PercentType calcHigh(PercentType min, PercentType max)                 { return create(min.value * 0.25D + max.value * 0.75D); }
 
     @Override public Double asNumber()                                                   { return value; }
     @Override public String toString()                                                   { return super.toString() + '%'; }

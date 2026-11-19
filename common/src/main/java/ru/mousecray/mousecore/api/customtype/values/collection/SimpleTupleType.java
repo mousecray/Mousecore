@@ -84,15 +84,15 @@ public final class SimpleTupleType extends TupleType<SimpleTupleType> {
         String clean = MouseStrings.trimWith(raw, true, '\t');
         if (clean == null || clean.isEmpty()) throw new ValueFormatException("Cannot parse empty string as Tuple");
 
-        if ((clean.startsWith("(") && clean.endsWith(")")) || (clean.startsWith("[") && clean.endsWith("]"))) clean = clean.substring(1, clean.length() - 1);
+        if (MouseStrings.isWrappedBy(clean, '(', ')') || MouseStrings.isWrappedBy(clean, '[', ']')) clean = clean.substring(1, clean.length() - 1);
 
-        String delimiter;
-        if (clean.contains("\n")) delimiter = "\n";
-        else if (clean.contains(";")) delimiter = ";";
-        else delimiter = ",";
+        char delimiter;
+        if (MouseStrings.indexOfRespectingBrackets(clean, "\n") != -1) delimiter = '\n';
+        else if (MouseStrings.indexOfRespectingBrackets(clean, ";") != -1) delimiter = ';';
+        else delimiter = ',';
 
-        String[]     rawParts = clean.split(delimiter);
-        List<String> parts    = new ArrayList<>(rawParts.length);
+        List<String> rawParts = MouseStrings.splitRespectingBrackets(clean, delimiter);
+        List<String> parts    = new ArrayList<>(rawParts.size());
         for (String p : rawParts) {
             String trimmed = MouseStrings.trimWith(p, true, '\t');
             if (trimmed != null && !trimmed.isEmpty()) parts.add(trimmed);

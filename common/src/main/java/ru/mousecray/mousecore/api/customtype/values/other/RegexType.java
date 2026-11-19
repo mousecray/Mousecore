@@ -137,11 +137,15 @@ public final class RegexType extends OtherType<String> {
     @Override public boolean equals(Object o) { return EQUATOR.test(this, o); }
     @Override public int hashCode() { return Objects.hash(value, flags); }
 
-    public int compareTo(RegexType o) {
-        return Comparator
-                .<RegexType, String>comparing(RegexType::asString)
-                .thenComparingInt(RegexType::getFlags)
-                .compare(this, o);
+    @Override
+    public int compareTo(OtherType<?> o) {
+        if (o instanceof RegexType other) {
+            return Comparator
+                    .comparing(RegexType::asString)
+                    .thenComparingInt(RegexType::getFlags)
+                    .compare(this, other);
+        }
+        return super.compareTo(o);
     }
 
     @Override

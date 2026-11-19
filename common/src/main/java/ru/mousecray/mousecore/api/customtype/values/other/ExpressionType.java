@@ -291,8 +291,9 @@ public final class ExpressionType extends OtherType<String> {
                         throw new ValueFormatException("Empty function argument before ',' in expression: " + rawExpr);
                     }
                     while (!opStack.isEmpty() && opStack.peek().type != TokenType.LEFT_PAREN) output.add(opStack.pop());
-                    if (opStack.isEmpty() || argCountStack.isEmpty())
+                    if (opStack.isEmpty() || argCountStack.isEmpty() || argCountStack.peek() < 0) {
                         throw new ValueFormatException("Misplaced ',' outside function call in expression: " + rawExpr);
+                    }
                     argCountStack.push(argCountStack.pop() + 1);
                 }
 
@@ -311,6 +312,7 @@ public final class ExpressionType extends OtherType<String> {
 
                 case LEFT_PAREN -> {
                     if (!opStack.isEmpty() && opStack.peek().type == TokenType.FUNCTION) argCountStack.push(1);
+                    else argCountStack.push(-1);
                     opStack.push(token);
                 }
 
@@ -319,11 +321,11 @@ public final class ExpressionType extends OtherType<String> {
                     while (!opStack.isEmpty() && opStack.peek().type != TokenType.LEFT_PAREN) output.add(opStack.pop());
                     if (opStack.isEmpty()) throw new ValueFormatException("Mismatched parentheses: unexpected ')' in expression: " + rawExpr);
                     opStack.pop();
+                    int countedArgs = argCountStack.pop();
 
                     if (!opStack.isEmpty() && opStack.peek().type == TokenType.FUNCTION) {
                         Token func       = opStack.pop();
-                        int   actualArgs = (prev != null && prev.type == TokenType.LEFT_PAREN) ? 0 : argCountStack.pop();
-                        if (prev != null && prev.type == TokenType.LEFT_PAREN) argCountStack.pop();
+                        int   actualArgs = (prev != null && prev.type == TokenType.LEFT_PAREN) ? 0 : countedArgs;
 
                         if (actualArgs != func.argCount) {
                             throw new ValueFormatException("Function '" + func.text + "' expects " + func.argCount

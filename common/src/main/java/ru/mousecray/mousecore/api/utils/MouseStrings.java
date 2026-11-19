@@ -135,4 +135,150 @@ public class MouseStrings {
 
         return sb.toString();
     }
+
+    public static boolean isWrappedBy(@Nullable String str, char open, char close) {
+        if (str == null || str.length() < 2) return false;
+        if (str.charAt(0) != open || str.charAt(str.length() - 1) != close) return false;
+
+        int     groupDepth = 0;
+        int     braceDepth = 0;
+        boolean inDouble   = false;
+        boolean inSingle   = false;
+
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (inDouble) {
+                if (c == '\\' && i + 1 < str.length()) {
+                    i++;
+                    continue;
+                }
+                if (c == '"') inDouble = false;
+                continue;
+            }
+            if (inSingle) {
+                if (c == '\\' && i + 1 < str.length()) {
+                    i++;
+                    continue;
+                }
+                if (c == '\'') inSingle = false;
+                continue;
+            }
+
+            if (c == '"') {
+                inDouble = true;
+                continue;
+            }
+            if (c == '\'' && braceDepth > 0) {
+                inSingle = true;
+                continue;
+            }
+
+            if (c == '(' || c == '[') groupDepth++;
+            else if (c == ')' || c == ']') groupDepth--;
+            else if (c == '{') braceDepth++;
+            else if (c == '}') braceDepth--;
+
+            if (groupDepth < 0 || braceDepth < 0) return false;
+            if (i < str.length() - 1 && groupDepth == 0 && braceDepth == 0) return false;
+        }
+        return groupDepth == 0 && braceDepth == 0 && !inDouble;
+    }
+
+    public static List<String> splitRespectingBrackets(@Nullable String str, char delimiter) {
+        if (str == null || str.isEmpty()) return Collections.emptyList();
+
+        List<String> result     = new ArrayList<>();
+        int          groupDepth = 0;
+        int          braceDepth = 0;
+        boolean      inDouble   = false;
+        boolean      inSingle   = false;
+        int          start      = 0;
+
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (inDouble) {
+                if (c == '\\' && i + 1 < str.length()) {
+                    i++;
+                    continue;
+                }
+                if (c == '"') inDouble = false;
+                continue;
+            }
+            if (inSingle) {
+                if (c == '\\' && i + 1 < str.length()) {
+                    i++;
+                    continue;
+                }
+                if (c == '\'') inSingle = false;
+                continue;
+            }
+
+            if (c == '"') {
+                inDouble = true;
+                continue;
+            }
+            if (c == '\'' && braceDepth > 0) {
+                inSingle = true;
+                continue;
+            }
+
+            if (c == '(' || c == '[') groupDepth++;
+            else if ((c == ')' || c == ']') && groupDepth > 0) groupDepth--;
+            else if (c == '{') braceDepth++;
+            else if (c == '}' && braceDepth > 0) braceDepth--;
+            else if (c == delimiter && groupDepth == 0 && braceDepth == 0) {
+                result.add(str.substring(start, i));
+                start = i + 1;
+            }
+        }
+        result.add(str.substring(start));
+        return result;
+    }
+
+    public static int indexOfRespectingBrackets(@Nullable String str, @Nullable String target) {
+        if (str == null || target == null || target.isEmpty() || str.length() < target.length()) return -1;
+
+        int     groupDepth = 0;
+        int     braceDepth = 0;
+        boolean inDouble   = false;
+        boolean inSingle   = false;
+        int     limit      = str.length() - target.length();
+
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (inDouble) {
+                if (c == '\\' && i + 1 < str.length()) {
+                    i++;
+                    continue;
+                }
+                if (c == '"') inDouble = false;
+                continue;
+            }
+            if (inSingle) {
+                if (c == '\\' && i + 1 < str.length()) {
+                    i++;
+                    continue;
+                }
+                if (c == '\'') inSingle = false;
+                continue;
+            }
+
+            if (groupDepth == 0 && braceDepth == 0 && i <= limit && str.startsWith(target, i)) return i;
+
+            if (c == '"') {
+                inDouble = true;
+                continue;
+            }
+            if (c == '\'' && braceDepth > 0) {
+                inSingle = true;
+                continue;
+            }
+
+            if (c == '(' || c == '[') groupDepth++;
+            else if ((c == ')' || c == ']') && groupDepth > 0) groupDepth--;
+            else if (c == '{') braceDepth++;
+            else if (c == '}' && braceDepth > 0) braceDepth--;
+        }
+        return -1;
+    }
 }

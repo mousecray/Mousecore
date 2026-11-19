@@ -45,10 +45,10 @@ public final class IntegralType extends NumberType<Long> {
 
     @Override public IValType getValType()                                                { return ValType.INTEGRAL; }
 
-    public static IntegralType calcMedium(IntegralType min, IntegralType max)             { return create((long) (min.value + max.value / 2D)); }
-    public static IntegralType calcLow(IntegralType min, IntegralType max)                { return create((long) ((min.value + (min.value + max.value) / 2D) / 2D)); }
-    public static IntegralType calcHigh(IntegralType min, IntegralType max)               { return create((long) ((max.value + (min.value + max.value) / 2D) / 2D)); }
-
+    public static IntegralType calcMedium(IntegralType min, IntegralType max)             { return create((long) (min.value * 0.5D + max.value * 0.5D)); }
+    public static IntegralType calcLow(IntegralType min, IntegralType max)                { return create((long) (min.value * 0.75D + max.value * 0.25D)); }
+    public static IntegralType calcHigh(IntegralType min, IntegralType max)               { return create((long) (min.value * 0.25D + max.value * 0.75D)); }
+    
     @Override public Long asNumber()                                                      { return value; }
 
     @SuppressWarnings("unchecked") @Override public IntegralType createType(Number value) { return create(value.longValue()); }
