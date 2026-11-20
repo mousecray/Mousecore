@@ -1,10 +1,3 @@
-/*
- * ******************************************************************************
- *  * Copyright © 2026 mousecray
- *  * Licensed under the GNU Lesser General Public License, Version 3.0
- *  *****************************************************************************
- */
-
 package ru.mousecray.mousecore.core.config.build.struct;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -45,13 +38,13 @@ public final class ConfigDictionaryBuilder {
         return new ConfigDictionaryBuilder(Objects.requireNonNull(owner), Objects.requireNonNull(currentLanguage));
     }
 
-    //TODO: Specific brackets for range type
     public ConfigDictionaryBuilder setDefaultForLanguage() {
         switch (currentLanguage) {
             case RU_RU:
                 if (localeTypes != null) localeTypes.clear();
                 if (localizedValTypes != null) localizedValTypes.clear();
                 if (rulesValTypes != null) rulesValTypes.clear();
+
                 setLocaleForLocale(ConfigLocaleType.DEFAULT, "По-умолчанию");
                 setLocaleForLocale(ConfigLocaleType.DISABLED, "Отключённое");
                 setLocaleForLocale(ConfigLocaleType.PREDEFINED, "Предопределёно");
@@ -65,6 +58,9 @@ public final class ConfigDictionaryBuilder {
                 setLocaleForLocale(ConfigLocaleType.ANY_VARIANT, "Любой");
                 setLocaleForLocale(ConfigLocaleType.NONE_VARIANT, "Никакой");
                 setLocaleForLocale(ConfigLocaleType.LIST_VARIANT, "Использовать список");
+                setLocaleForLocale(ConfigLocaleType.RULE_MODIFIER_CONDITIONAL, "[!] перед значением - противоположное");
+                setLocaleForLocale(ConfigLocaleType.RULE_MODIFIER_UNIQUE, "Дубликаты запрещены");
+
                 setLocaleForValType(ValType.PLUS_MINUS, "Логический");
                 setLocaleForValType(ValType.DECIMAL, "Дробное число");
                 setLocaleForValType(ValType.INTEGRAL, "Целое число");
@@ -76,6 +72,35 @@ public final class ConfigDictionaryBuilder {
                 setLocaleForValType(ValType.SIMPLE_CONDITION, "Условие");
                 setLocaleForValType(ValType.SIMPLE_LIST, "Список",
                         "Разделитель значений - [,]. В начале новой строки - [│] как в секции");
+
+                setLocaleForValType(ValType.RANGE, "Диапазон");
+                setLocaleForValType(ValType.TIME, "Время");
+
+                setLocaleForValType(ValType.VECTOR3D, "Вектор 3D");
+                setLocaleForValType(ValType.BLOCK_POS, "Позиция блока");
+
+                setLocaleForValType(ValType.ENUM, "Перечисление");
+                setLocaleForValType(ValType.COLOR, "Цвет");
+                setLocaleForValType(ValType.REGEX, "Регулярное выражение");
+                setLocaleForValType(ValType.EXPRESSION, "Математическое выражение");
+
+                setLocaleForValType(ValType.SIMPLE_TUPLE, "Кортеж");
+                setLocaleForValType(ValType.SIMPLE_MAP, "Карта");
+                setLocaleForValType(ValType.SIMPLE_TABLE, "Таблица");
+                setLocaleForValType(ValType.SIMPLE_MATRIX, "Матрица");
+                setLocaleForValType(ValType.NBT, "NBT");
+
+                setLocaleForValType(ValType.MINECRAFT_BLOCK, "Блок Minecraft");
+                setLocaleForValType(ValType.MINECRAFT_ITEM, "Предмет Minecraft");
+                setLocaleForValType(ValType.MINECRAFT_ITEM_STACK, "Стак предметов Minecraft");
+                setLocaleForValType(ValType.MINECRAFT_TAG, "Тег Minecraft");
+                setLocaleForValType(ValType.MINECRAFT_ENTITY, "Сущность Minecraft");
+                setLocaleForValType(ValType.MINECRAFT_DIMENSION, "Измерение Minecraft");
+                setLocaleForValType(ValType.MINECRAFT_BIOME, "Биом Minecraft");
+                setLocaleForValType(ValType.MINECRAFT_EFFECT, "Эффект Minecraft");
+                setLocaleForValType(ValType.MINECRAFT_ENCHANTMENT, "Зачарование Minecraft");
+                setLocaleForValType(ValType.MINECRAFT_PARTICLE, "Частица Minecraft");
+                setLocaleForValType(ValType.MINECRAFT_SOUND, "Звук Minecraft");
                 return this;
 
             case EN_US:
@@ -83,6 +108,7 @@ public final class ConfigDictionaryBuilder {
                 if (localeTypes != null) localeTypes.clear();
                 if (localizedValTypes != null) localizedValTypes.clear();
                 if (rulesValTypes != null) rulesValTypes.clear();
+
                 setLocaleForLocale(ConfigLocaleType.DEFAULT, "Default");
                 setLocaleForLocale(ConfigLocaleType.DISABLED, "Disabled");
                 setLocaleForLocale(ConfigLocaleType.PREDEFINED, "Predefined");
@@ -96,6 +122,9 @@ public final class ConfigDictionaryBuilder {
                 setLocaleForLocale(ConfigLocaleType.ANY_VARIANT, "Any");
                 setLocaleForLocale(ConfigLocaleType.NONE_VARIANT, "None");
                 setLocaleForLocale(ConfigLocaleType.LIST_VARIANT, "Use List");
+                setLocaleForLocale(ConfigLocaleType.RULE_MODIFIER_CONDITIONAL, "[!] before value - opposite");
+                setLocaleForLocale(ConfigLocaleType.RULE_MODIFIER_UNIQUE, "Duplicates are not allowed");
+
                 setLocaleForValType(ValType.PLUS_MINUS, "Logical");
                 setLocaleForValType(ValType.DECIMAL, "Decimal Number");
                 setLocaleForValType(ValType.INTEGRAL, "Integral Number");
@@ -107,6 +136,35 @@ public final class ConfigDictionaryBuilder {
                 setLocaleForValType(ValType.SIMPLE_CONDITION, "Condition");
                 setLocaleForValType(ValType.SIMPLE_LIST, "List",
                         "Value delimiter - [,]. Before start new line - [│] like a section");
+
+                setLocaleForValType(ValType.RANGE, "Range");
+                setLocaleForValType(ValType.TIME, "Time");
+
+                setLocaleForValType(ValType.VECTOR3D, "Vector 3D");
+                setLocaleForValType(ValType.BLOCK_POS, "Block Position");
+
+                setLocaleForValType(ValType.ENUM, "Enum");
+                setLocaleForValType(ValType.COLOR, "Color");
+                setLocaleForValType(ValType.REGEX, "Regex");
+                setLocaleForValType(ValType.EXPRESSION, "Expression");
+
+                setLocaleForValType(ValType.SIMPLE_TUPLE, "Tuple");
+                setLocaleForValType(ValType.SIMPLE_MAP, "Map");
+                setLocaleForValType(ValType.SIMPLE_TABLE, "Table");
+                setLocaleForValType(ValType.SIMPLE_MATRIX, "Matrix");
+                setLocaleForValType(ValType.NBT, "NBT");
+
+                setLocaleForValType(ValType.MINECRAFT_BLOCK, "Minecraft Block");
+                setLocaleForValType(ValType.MINECRAFT_ITEM, "Minecraft Item");
+                setLocaleForValType(ValType.MINECRAFT_ITEM_STACK, "Minecraft Item Stack");
+                setLocaleForValType(ValType.MINECRAFT_TAG, "Minecraft Tag");
+                setLocaleForValType(ValType.MINECRAFT_ENTITY, "Minecraft Entity");
+                setLocaleForValType(ValType.MINECRAFT_DIMENSION, "Minecraft Dimension");
+                setLocaleForValType(ValType.MINECRAFT_BIOME, "Minecraft Biome");
+                setLocaleForValType(ValType.MINECRAFT_EFFECT, "Minecraft Effect");
+                setLocaleForValType(ValType.MINECRAFT_ENCHANTMENT, "Minecraft Enchantment");
+                setLocaleForValType(ValType.MINECRAFT_PARTICLE, "Minecraft Particle");
+                setLocaleForValType(ValType.MINECRAFT_SOUND, "Minecraft Sound");
                 return this;
         }
     }
@@ -161,8 +219,7 @@ public final class ConfigDictionaryBuilder {
 
         if (defThreshold == null) defThreshold = new HashMap<>();
         for (IValType type : types) {
-            List<Pair<String, String>> values = defThreshold.computeIfAbsent(Objects.requireNonNull(type),
-                    key -> new ArrayList<>());
+            List<Pair<String, String>> values = defThreshold.computeIfAbsent(Objects.requireNonNull(type), key -> new ArrayList<>());
             values.add(Pair.of(minDisplayName, maxDisplayName));
         }
         return this;
@@ -177,8 +234,7 @@ public final class ConfigDictionaryBuilder {
 
         if (defUseList == null) defUseList = new HashMap<>();
         for (IValType type : types) {
-            List<String> values = defUseList.computeIfAbsent(Objects.requireNonNull(type),
-                    key -> new ArrayList<>());
+            List<String> values = defUseList.computeIfAbsent(Objects.requireNonNull(type), key -> new ArrayList<>());
             values.add(listDisplayName);
         }
         return this;
@@ -202,8 +258,9 @@ public final class ConfigDictionaryBuilder {
 
         if (defStandard == null) defStandard = new HashMap<>();
         for (IValType type : types) {
-            List<Triple<String, String, String>> values = defStandard.computeIfAbsent(Objects.requireNonNull(type),
-                    key -> new ArrayList<>());
+            List<Triple<String, String, String>> values = defStandard.computeIfAbsent(
+                    Objects.requireNonNull(type), key -> new ArrayList<>()
+            );
             values.add(Triple.of(lowDisplayName, middleDisplayName, highDisplayName));
         }
         return this;
