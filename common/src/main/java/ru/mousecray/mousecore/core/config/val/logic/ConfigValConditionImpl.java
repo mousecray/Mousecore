@@ -15,6 +15,7 @@ import ru.mousecray.mousecore.api.config.utils.ConfigLocaleType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
 import ru.mousecray.mousecore.api.config.val.ILocaleType;
+import ru.mousecray.mousecore.api.config.val.base.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.config.val.logic.ConfigValCondition;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
@@ -24,7 +25,6 @@ import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.core.config.utils.PredefinedValueImpl;
-import ru.mousecray.mousecore.core.config.val.base.ConfigValListImpl;
 import ru.mousecray.mousecore.core.config.val.base.ConfigValOtherImpl;
 
 import javax.annotation.Nullable;
@@ -207,7 +207,7 @@ public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigValOt
         if (cachedList != null) cachedList = null;
 
         if (pathToParList != null) {
-            ConfigValListImpl<? extends CustomType<?>, ? extends CustomType<?>, ? extends ListType<?, ?>> list = getConfig().getListVal(pathToParList);
+            ConfigValSimpleList<CustomType<?>> list = getConfig().getListVal(pathToParList);
             if (list != null) {
                 if (listComponentType == list.getListComponentType()) {
                     ListType var = list.getList();
