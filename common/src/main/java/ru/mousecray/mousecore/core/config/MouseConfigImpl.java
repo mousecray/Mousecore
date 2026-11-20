@@ -34,11 +34,17 @@ import ru.mousecray.mousecore.core.config.par.ConfigParImpl;
 import ru.mousecray.mousecore.core.config.par.group.ConfigParGroupImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectBaseImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectImpl;
+import ru.mousecray.mousecore.core.config.val.container.*;
 import ru.mousecray.mousecore.core.config.val.logic.ConfigValConditionImpl;
 import ru.mousecray.mousecore.core.config.val.logic.ConfigValPlusMinusImpl;
-import ru.mousecray.mousecore.core.config.val.number.ConfigValDecimalImpl;
-import ru.mousecray.mousecore.core.config.val.number.ConfigValIntegralImpl;
-import ru.mousecray.mousecore.core.config.val.number.ConfigValPercentImpl;
+import ru.mousecray.mousecore.core.config.val.minecraft.*;
+import ru.mousecray.mousecore.core.config.val.number.*;
+import ru.mousecray.mousecore.core.config.val.other.ConfigValColorImpl;
+import ru.mousecray.mousecore.core.config.val.other.ConfigValEnumImpl;
+import ru.mousecray.mousecore.core.config.val.other.ConfigValExpressionImpl;
+import ru.mousecray.mousecore.core.config.val.other.ConfigValRegexImpl;
+import ru.mousecray.mousecore.core.config.val.vec3.ConfigValBlockPosImpl;
+import ru.mousecray.mousecore.core.config.val.vec3.ConfigValVector3dImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -230,12 +236,46 @@ public class MouseConfigImpl implements MouseConfig {
         try { return (D) getGroup0(fullName); } catch (ClassCastException ignore) { return null; }
     }
 
-    @Nullable @Override public ConfigValPlusMinusImpl getBooleanVal(@Nullable String fullName)         { return getValue(fullName); }
-    @Nullable @Override public ConfigValDecimalImpl getDecimalVal(@Nullable String fullName)           { return getValue(fullName); }
-    @Nullable @Override public ConfigValIntegralImpl getIntegerVal(@Nullable String fullName)          { return getValue(fullName); }
-    @Nullable @Override public ConfigValString getStringVal(@Nullable String fullName)                 { return getValue(fullName); }
-    @Nullable @Override public ConfigValRandomQuantity getRandomQuantityVal(@Nullable String fullName) { return getValue(fullName); }
-    @Nullable @Override public ConfigValPercentImpl getPercentVal(@Nullable String fullName)           { return getValue(fullName); }
+    @Nullable @Override public ConfigValPlusMinusImpl getBooleanVal(@Nullable String fullName)                { return getValue(fullName); }
+    @Nullable @Override public ConfigValDecimalImpl getDecimalVal(@Nullable String fullName)                  { return getValue(fullName); }
+    @Nullable @Override public ConfigValIntegralImpl getIntegerVal(@Nullable String fullName)                 { return getValue(fullName); }
+    @Nullable @Override public ConfigValString getStringVal(@Nullable String fullName)                        { return getValue(fullName); }
+    @Nullable @Override public ConfigValRandomQuantity getRandomQuantityVal(@Nullable String fullName)        { return getValue(fullName); }
+    @Nullable @Override public ConfigValPercentImpl getPercentVal(@Nullable String fullName)                  { return getValue(fullName); }
+
+    @Nullable @Override public ConfigValRangeImpl getRangeVal(@Nullable String fullName)                      { return getValue(fullName); }
+    @Nullable @Override public ConfigValTimeImpl getTimeVal(@Nullable String fullName)                        { return getValue(fullName); }
+
+    @Nullable @Override public ConfigValVector3dImpl getVector3dVal(@Nullable String fullName)                { return getValue(fullName); }
+    @Nullable @Override public ConfigValBlockPosImpl getBlockPosVal(@Nullable String fullName)                { return getValue(fullName); }
+
+    @Nullable @Override public <E extends Enum<E>> ConfigValEnumImpl<E> getEnumVal(@Nullable String fullName) { return getValue(fullName); }
+    @Nullable @Override public ConfigValColorImpl getColorVal(@Nullable String fullName)                      { return getValue(fullName); }
+    @Nullable @Override public ConfigValRegexImpl getRegexVal(@Nullable String fullName)                      { return getValue(fullName); }
+    @Nullable @Override public ConfigValExpressionImpl getExpressionVal(@Nullable String fullName)            { return getValue(fullName); }
+
+    @Nullable @Override public ConfigValBlockImpl getBlockVal(@Nullable String fullName)                      { return getValue(fullName); }
+    @Nullable @Override public ConfigValItemImpl getItemVal(@Nullable String fullName)                        { return getValue(fullName); }
+    @Nullable @Override public ConfigValItemStackImpl getItemStackVal(@Nullable String fullName)              { return getValue(fullName); }
+    @Nullable @Override public ConfigValTagImpl getTagVal(@Nullable String fullName)                          { return getValue(fullName); }
+    @Nullable @Override public ConfigValEntityImpl getEntityVal(@Nullable String fullName)                    { return getValue(fullName); }
+    @Nullable @Override public ConfigValDimensionImpl getDimensionVal(@Nullable String fullName)              { return getValue(fullName); }
+    @Nullable @Override public ConfigValBiomeImpl getBiomeVal(@Nullable String fullName)                      { return getValue(fullName); }
+    @Nullable @Override public ConfigValEffectImpl getEffectVal(@Nullable String fullName)                    { return getValue(fullName); }
+    @Nullable @Override public ConfigValEnchantmentImpl getEnchantmentVal(@Nullable String fullName)          { return getValue(fullName); }
+    @Nullable @Override public ConfigValParticleImpl getParticleVal(@Nullable String fullName)                { return getValue(fullName); }
+    @Nullable @Override public ConfigValSoundImpl getSoundVal(@Nullable String fullName)                      { return getValue(fullName); }
+
+    @Nullable @Override public ConfigValNBTImpl getNBTVal(@Nullable String fullName)                          { return getValue(fullName); }
+    @Nullable @Override public ConfigValTupleImpl getTupleVal(@Nullable String fullName)                      { return getValue(fullName); }
+
+    @Nullable @Override public ConfigValTableImpl getTableVal(@Nullable String fullName)                      { return getValue(fullName); }
+    @Nullable @Override public ConfigValMatrixImpl getMatrixVal(@Nullable String fullName)                    { return getValue(fullName); }
+
+    @Nullable @Override
+    public <K extends CustomType<?>, V extends CustomType<?>> ConfigValMapImpl<K, V> getMapVal(@Nullable String fullName) {
+        return getValue(fullName);
+    }
 
     @Nullable @Override
     public <TYPE extends CustomType<?>> ConfigValConditionImpl<TYPE> getConditionVal(@Nullable String fullName) {
