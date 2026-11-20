@@ -28,18 +28,18 @@ import java.util.function.Function;
 public class ConfigValStringListImpl extends ConfigValSimpleListOtherImpl<StringType> implements ConfigValStringList {
     @SafeVarargs
     public ConfigValStringListImpl(
-            boolean isConditional,
+            boolean isConditional, boolean isUnique,
             @Nullable SimpleListType<StringType> defaultValue, @Nullable SimpleListType<StringType> disabledValue,
             @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<SimpleListType<StringType>>... configureValues
     ) {
         super(
-                isConditional, createValCreator(),
+                isConditional, isUnique, createValCreator(),
                 defaultValue == null
-                        ? SimpleListType.create(ValType.SIMPLE_STRING, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.SIMPLE_STRING, isConditional, isUnique, createValCreator())
                         : defaultValue,
                 disabledValue == null
-                        ? SimpleListType.create(ValType.SIMPLE_STRING, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.SIMPLE_STRING, isConditional, isUnique, createValCreator())
                         : disabledValue,
                 constraints, configureValues
         );

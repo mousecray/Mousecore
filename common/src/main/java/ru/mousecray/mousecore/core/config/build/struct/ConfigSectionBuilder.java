@@ -1,10 +1,3 @@
-/*
- * ******************************************************************************
- *  * Copyright © 2026 mousecray
- *  * Licensed under the GNU Lesser General Public License, Version 3.0
- *  *****************************************************************************
- */
-
 package ru.mousecray.mousecore.core.config.build.struct;
 
 import ru.mousecray.mousecore.api.DisplayName;
@@ -44,6 +37,12 @@ public final class ConfigSectionBuilder extends AbstractConfigChildBuilder {
         return this;
     }
 
+    @Override
+    public ConfigSectionBuilder setCanBeDisabled() {
+        canBeDisabled = true;
+        return this;
+    }
+
     public ConfigDisablerBuilder<ConfigSectionBuilder> createDisabler(String displayName) {
         return ConfigDisablerBuilder.create(this, Objects.requireNonNull(displayName), false);
     }
@@ -62,10 +61,11 @@ public final class ConfigSectionBuilder extends AbstractConfigChildBuilder {
                             disablePar.getName().getInternalName(), path, name.getInternalName(), disabler.getName().getInternalName());
         }
         disablePar = disabler;
+        canBeDisabled = true;
     }
 
     public MouseConfigBuilder buildSection() {
-        ConfigSectImpl section = new ConfigSectImpl(name, disablePar, comment);
+        ConfigSectImpl section = new ConfigSectImpl(name, canBeDisabled, disablePar, comment);
         configBuilder.putSection(path, section);
         return configBuilder;
     }

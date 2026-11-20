@@ -30,19 +30,19 @@ import java.util.function.Function;
 public class ConfigValRandomQuantityListImpl extends ConfigValSimpleListNumberImpl<RandomQuantityType> implements ConfigValRandomQuantityList {
     @SafeVarargs
     public ConfigValRandomQuantityListImpl(
-            boolean isConditional,
+            boolean isConditional, boolean isUnique,
             @Nullable SimpleListType<RandomQuantityType> defaultValue, @Nullable SimpleListType<RandomQuantityType> disabledValue,
             @Nullable RangeContainer<RandomQuantityType> range,
             @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<SimpleListType<RandomQuantityType>>... configureValues
     ) {
         super(
-                isConditional, createValCreator(),
+                isConditional, isUnique, createValCreator(),
                 defaultValue == null
-                        ? SimpleListType.create(ValType.RANDOM_QUANTITY, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.RANDOM_QUANTITY, isConditional, isUnique, createValCreator())
                         : defaultValue,
                 disabledValue == null
-                        ? SimpleListType.create(ValType.RANDOM_QUANTITY, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.RANDOM_QUANTITY, isConditional, isUnique, createValCreator())
                         : disabledValue,
                 range == null
                         ? new RangeContainer<>(Range.of(RandomQuantityType.MIN, RandomQuantityType.MAX))

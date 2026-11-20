@@ -1,10 +1,3 @@
-/*
- * ******************************************************************************
- *  * Copyright © 2026 mousecray
- *  * Licensed under the GNU Lesser General Public License, Version 3.0
- *  *****************************************************************************
- */
-
 package ru.mousecray.mousecore.core.config.sect;
 
 import ru.mousecray.mousecore.api.DisplayName;
@@ -32,9 +25,11 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
     @Nullable protected final String                                              comment;
     protected                 ImmutableDisplayNameMap.Mutable<ConfigSectBaseImpl> children;
     protected final           boolean                                             canBeDisabled;
-    protected                 boolean                                             isDisabled;
+    protected                 boolean                                             canBeDisabledByParent;
     protected                 boolean                                             setByConfig;
     protected                 int                                                 deep;
+    protected                 boolean                                             isDisabled;
+    protected                 boolean                                             isStructurallyDisabled;
     protected                 MouseConfigImpl                                     config;
 
     public ConfigSectBaseImpl(DisplayName name, boolean canBeDisabled, @Nullable String comment) {
@@ -47,14 +42,12 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
     }
 
     @Override public boolean hasChildren()   { return isSupportChildren() && children != null && !children.isEmpty(); }
-    @Override public boolean canBeDisabled() { return canBeDisabled; }
+    @Override public boolean canBeDisabled() { return canBeDisabled || canBeDisabledByParent; }
+    public boolean isStructurallyDisabled()  { return isStructurallyDisabled; }
 
-    @Override public boolean isDisabled() {
-        if (canBeDisabled()) {
-            boolean is = isDisabled;
-            if (parent != null && parent.isDisabled()) is = is || parent.isDisabled();
-            return is;
-        } else return false;
+    @Override
+    public boolean isDisabled() {
+        return isDisabled || isStructurallyDisabled;
     }
 
     @Override public <T extends ConfigSectBase> boolean isSupportChild(T child) { return true; }
@@ -107,6 +100,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         sectionImpl.parent = this;
         sectionImpl.setDeep(deep + 1);
         sectionImpl.setConfig(config);
+        sectionImpl.setCanBeDisabledByParent(canBeDisabled());
 
         if (hasConfig()) {
             assert getConfig() != null;
@@ -135,6 +129,12 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         if (hasChildren()) children.values().forEach(c -> c.setConfig(config));
     }
 
+    protected void setCanBeDisabledByParent(boolean value) {
+        canBeDisabledByParent = value;
+        boolean effective = canBeDisabled();
+        if (hasChildren()) children.values().forEach(c -> c.setCanBeDisabledByParent(effective));
+    }
+
     @SuppressWarnings("DataFlowIssue")
     public void removeChild(DisplayName name) {
         Objects.requireNonNull(name);
@@ -143,6 +143,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
             if (remove != null && remove.getValue() != null) {
                 ConfigSectBaseImpl value = remove.getValue();
                 value.parent = null;
+                value.setCanBeDisabledByParent(false);
                 if (hasConfig() && getConfig().isBuilt()) {
                     ArrayList<ConfigSectBase> list = new ArrayList<>();
                     list.add(value);
@@ -184,6 +185,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
 
     @Override
     public void reset() {
+        isDisabled = false;
         if (hasChildren()) {
             children.forEach((key, value) -> {
                 value.reset();
@@ -192,7 +194,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         }
     }
 
-    protected void reloadCache() {
+    public void reloadCache() {
         if (hasChildren()) children.forEach((key, value) -> value.reloadCache());
     }
 
@@ -213,10 +215,17 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         return setByConfig && hasConfig() && getConfig().isLoaded();
     }
 
+    public void setDisabledStructurally(boolean parentDisabled) {
+        isStructurallyDisabled = parentDisabled;
+        boolean effective = isDisabled();
+        if (hasChildren()) children.forEach((key, value) -> value.setDisabledStructurally(effective));
+    }
+
     @Override
     public void setDisabled(boolean disabled) {
         if (!canBeDisabled()) throw new UnsupportedOperationException("This ConfigSection does not support disabling");
         isDisabled = disabled;
-        if (hasChildren()) children.forEach((key, value) -> value.setDisabled(disabled));
+        if (hasConfig() && config.isBuilt()) config.reloadCache();
+        else setDisabledStructurally(isStructurallyDisabled);
     }
 }

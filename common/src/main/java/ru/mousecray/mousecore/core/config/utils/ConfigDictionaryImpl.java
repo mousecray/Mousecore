@@ -137,17 +137,26 @@ public class ConfigDictionaryImpl implements ConfigDictionary {
 
     @Nullable @Override public ImmutableList<Pair<String, String>> getDefThresholdForType(IValType type) {
         Objects.requireNonNull(type);
-        return defThreshold == null ? null : ImmutableList.copyOf(defThreshold.get(type));
+        if (defThreshold == null) { return null; } else {
+            List<Pair<String, String>> res = defThreshold.get(type);
+            return res == null ? null : ImmutableList.copyOf(res);
+        }
     }
 
     @Nullable @Override public ImmutableList<String> getDefUseListForType(IValType type) {
         Objects.requireNonNull(type);
-        return defUseList == null ? null : ImmutableList.copyOf(defUseList.get(type));
+        if (defUseList == null) { return null; } else {
+            List<String> res = defUseList.get(type);
+            return res == null ? null : ImmutableList.copyOf(res);
+        }
     }
 
     @Nullable @Override public ImmutableList<Triple<String, String, String>> getDefStandardForType(IValType type) {
         Objects.requireNonNull(type);
-        return defStandard == null ? null : ImmutableList.copyOf(defStandard.get(type));
+        if (defStandard == null) { return null; } else {
+            List<Triple<String, String, String>> res = defStandard.get(type);
+            return res == null ? null : ImmutableList.copyOf(res);
+        }
     }
 
     @Nonnull @Override public String getLocaleForLocale(ILocaleType type) {

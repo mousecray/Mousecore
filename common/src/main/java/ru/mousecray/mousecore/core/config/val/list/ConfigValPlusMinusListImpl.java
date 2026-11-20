@@ -28,18 +28,18 @@ import java.util.function.Function;
 public class ConfigValPlusMinusListImpl extends ConfigValSimpleListLogicalImpl<PlusMinusType> implements ConfigValPlusMinusList {
     @SafeVarargs
     public ConfigValPlusMinusListImpl(
-            boolean isConditional,
+            boolean isConditional, boolean isUnique,
             @Nullable SimpleListType<PlusMinusType> defaultValue, @Nullable SimpleListType<PlusMinusType> disabledValue,
             @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<SimpleListType<PlusMinusType>>... configureValues
     ) {
         super(
-                isConditional, createValCreator(),
+                isConditional, isUnique, createValCreator(),
                 defaultValue == null
-                        ? SimpleListType.create(ValType.PLUS_MINUS, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.PLUS_MINUS, isConditional, isUnique, createValCreator())
                         : defaultValue,
                 disabledValue == null
-                        ? SimpleListType.create(ValType.PLUS_MINUS, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.PLUS_MINUS, isConditional, isUnique, createValCreator())
                         : disabledValue,
                 constraints, configureValues
         );

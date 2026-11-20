@@ -12,7 +12,7 @@ import ru.mousecray.mousecore.api.customtype.LogicalType;
 import ru.mousecray.mousecore.api.customtype.NumberType;
 import ru.mousecray.mousecore.api.customtype.OtherType;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
-import ru.mousecray.mousecore.api.customtype.type.ValType;
+import ru.mousecray.mousecore.api.customtype.type.ValTypeCategory;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 
 import javax.annotation.Nonnull;
@@ -26,13 +26,13 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
     @Nonnull private final  ConstraintType          type;
     @Nonnull private final  ConstraintConditionType relationType;
     @Nullable private final String                  path;
-    @Nonnull private final  ValType                 valType;
+    @Nonnull private final  ValTypeCategory         valTypeCategory;
     @Nullable private final T                       val;
     @Nullable private final RangeContainer<?>       range;
 
     private ConstraintImpl(
             ConstraintType type, ConstraintConditionType relationType,
-            @Nullable String path, ValType valType, @Nullable T val, @Nullable RangeContainer<?> range
+            @Nullable String path, ValTypeCategory valTypeCategory, @Nullable T val, @Nullable RangeContainer<?> range
     ) {
         this.type = Objects.requireNonNull(type);
         this.relationType = Objects.requireNonNull(relationType);
@@ -42,7 +42,7 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
             if (path.contains("\t")) throw new IllegalArgumentException("path cannot contains tabs");
         }
         this.path = path;
-        this.valType = Objects.requireNonNull(valType);
+        this.valTypeCategory = Objects.requireNonNull(valTypeCategory);
         this.val = val;
         this.range = range;
     }
@@ -51,7 +51,7 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
     @Override public ConstraintConditionType getConditionType() { return relationType; }
     @Override public boolean hasSpecific()                      { return val != null || range != null; }
     @Nullable @Override public String getPath()                 { return path; }
-    @Override public ValType getValType()                       { return valType; }
+    @Override public ValTypeCategory getValTypeCategory()       { return valTypeCategory; }
     @Nullable @Override public T getVal()                       { return val; }
     @Nullable @Override public RangeContainer<?> getRange()     { return range; }
 
@@ -61,7 +61,7 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
                 "type=" + type +
                 ", relationType=" + relationType +
                 ", path='" + path + '\'' +
-                ", valType=" + valType +
+                ", valType=" + valTypeCategory +
                 ", val=" + val +
                 ", range=" + range +
                 '}';
@@ -72,11 +72,11 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
         if (this == o) return true;
         if (!(o instanceof ConstraintImpl value)) return false;
         return type == value.type && relationType == value.relationType
-                && Objects.equals(path, value.path) && Objects.equals(valType, value.valType)
+                && Objects.equals(path, value.path) && Objects.equals(valTypeCategory, value.valTypeCategory)
                 && Objects.equals(val, value.val) && Objects.equals(range, value.range);
     }
 
-    @Override public int hashCode() { return Objects.hash(type, relationType, path, valType, val, range); }
+    @Override public int hashCode() { return Objects.hash(type, relationType, path, valTypeCategory, val, range); }
 
     public static final class BuilderImpl implements Constraint.Builder {
         private ConstraintType type;
@@ -113,35 +113,35 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
             @Override public <T extends LogicalType<?>> Constraint<T> setConditionDisabled() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.DISABLED,
-                        path, ValType.LOGICAL, null, null
+                        path, ValTypeCategory.LOGICAL, null, null
                 );
             }
 
             @Override public <T extends LogicalType<?>> Constraint<T> setConditionEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.EQUAL,
-                        path, ValType.LOGICAL, null, null
+                        path, ValTypeCategory.LOGICAL, null, null
                 );
             }
 
             @Override public <T extends LogicalType<?>> Constraint<T> setConditionNotEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.NOT_EQUAL,
-                        path, ValType.LOGICAL, null, null
+                        path, ValTypeCategory.LOGICAL, null, null
                 );
             }
 
             @Override public <T extends LogicalType<?>> Constraint<T> setConditionEqual(T val) {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.EQUAL,
-                        path, ValType.LOGICAL, Objects.requireNonNull(val), null
+                        path, ValTypeCategory.LOGICAL, Objects.requireNonNull(val), null
                 );
             }
 
             @Override public <T extends LogicalType<?>> Constraint<T> setConditionNotEqual(T val) {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.NOT_EQUAL,
-                        path, ValType.LOGICAL, Objects.requireNonNull(val), null
+                        path, ValTypeCategory.LOGICAL, Objects.requireNonNull(val), null
                 );
             }
         }
@@ -152,98 +152,98 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
             @Override public <T extends NumberType<?>> Constraint<T> setConditionDisabled() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.DISABLED,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.EQUAL,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionNotEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.NOT_EQUAL,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionEqual(T val) {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.EQUAL,
-                        path, ValType.NUMBER, Objects.requireNonNull(val), null
+                        path, ValTypeCategory.NUMBER, Objects.requireNonNull(val), null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionNotEqual(T val) {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.NOT_EQUAL,
-                        path, ValType.NUMBER, Objects.requireNonNull(val), null
+                        path, ValTypeCategory.NUMBER, Objects.requireNonNull(val), null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionLess() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.LESS,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.LESS_OR_EQUAL,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionMore() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.MORE,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.MORE_OR_EQUAL,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionLess(T val) {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.LESS,
-                        path, ValType.NUMBER, Objects.requireNonNull(val), null
+                        path, ValTypeCategory.NUMBER, Objects.requireNonNull(val), null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual(T val) {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.LESS_OR_EQUAL,
-                        path, ValType.NUMBER, Objects.requireNonNull(val), null
+                        path, ValTypeCategory.NUMBER, Objects.requireNonNull(val), null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionMore(T val) {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.MORE,
-                        path, ValType.NUMBER, Objects.requireNonNull(val), null
+                        path, ValTypeCategory.NUMBER, Objects.requireNonNull(val), null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual(T val) {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.MORE_OR_EQUAL,
-                        path, ValType.NUMBER, Objects.requireNonNull(val), null
+                        path, ValTypeCategory.NUMBER, Objects.requireNonNull(val), null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionRange(RangeContainer<T> range) {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.IN_RANGE,
-                        path, ValType.NUMBER, null, Objects.requireNonNull(range)
+                        path, ValTypeCategory.NUMBER, null, Objects.requireNonNull(range)
                 );
             }
         }
@@ -254,35 +254,35 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
             @Override public <T extends OtherType<?>> Constraint<T> setConditionDisabled() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.DISABLED,
-                        path, ValType.OTHER, null, null
+                        path, ValTypeCategory.OTHER, null, null
                 );
             }
 
             @Override public <T extends OtherType<?>> Constraint<T> setConditionEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.EQUAL,
-                        path, ValType.OTHER, null, null
+                        path, ValTypeCategory.OTHER, null, null
                 );
             }
 
             @Override public <T extends OtherType<?>> Constraint<T> setConditionNotEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.NOT_EQUAL,
-                        path, ValType.OTHER, null, null
+                        path, ValTypeCategory.OTHER, null, null
                 );
             }
 
             @Override public <T extends OtherType<?>> Constraint<T> setConditionEqual(T val) {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.EQUAL,
-                        path, ValType.OTHER, Objects.requireNonNull(val), null
+                        path, ValTypeCategory.OTHER, Objects.requireNonNull(val), null
                 );
             }
 
             @Override public <T extends OtherType<?>> Constraint<T> setConditionNotEqual(T val) {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.NOT_EQUAL,
-                        path, ValType.OTHER, Objects.requireNonNull(val), null
+                        path, ValTypeCategory.OTHER, Objects.requireNonNull(val), null
                 );
             }
         }
@@ -301,14 +301,14 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
             @Override public <T extends LogicalType<?>> Constraint<T> setConditionEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.EQUAL,
-                        path, ValType.LOGICAL, null, null
+                        path, ValTypeCategory.LOGICAL, null, null
                 );
             }
 
             @Override public <T extends LogicalType<?>> Constraint<T> setConditionNotEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.NOT_EQUAL,
-                        path, ValType.LOGICAL, null, null
+                        path, ValTypeCategory.LOGICAL, null, null
                 );
             }
         }
@@ -319,42 +319,42 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
             @Override public <T extends NumberType<?>> Constraint<T> setConditionEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.EQUAL,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionNotEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.NOT_EQUAL,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionLess() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.LESS,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.LESS_OR_EQUAL,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionMore() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.MORE,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
 
             @Override public <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.MORE_OR_EQUAL,
-                        path, ValType.NUMBER, null, null
+                        path, ValTypeCategory.NUMBER, null, null
                 );
             }
         }
@@ -365,14 +365,14 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
             @Override public <T extends OtherType<?>> Constraint<T> setConditionEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.EQUAL,
-                        path, ValType.OTHER, null, null
+                        path, ValTypeCategory.OTHER, null, null
                 );
             }
 
             @Override public <T extends OtherType<?>> Constraint<T> setConditionNotEqual() {
                 return new ConstraintImpl<>(
                         type, ConstraintConditionType.NOT_EQUAL,
-                        path, ValType.OTHER, null, null
+                        path, ValTypeCategory.OTHER, null, null
                 );
             }
         }

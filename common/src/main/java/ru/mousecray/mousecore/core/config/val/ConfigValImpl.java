@@ -56,6 +56,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
      */
     protected final     List<Constraint<? extends CustomType<?>>> constraints     = new ArrayList<>();
     protected           V                                         constrainedValue;
+    protected           boolean                                   constrainedDisabled;
     /**
      * Current predefined value if it specified in config
      */
@@ -92,7 +93,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
 
     @Override public IValType getType() { return defaultValue.getValType(); }
     @Override
-    public final V getValue() { return isDisabled() ? getDisabledValue() : getConstrainedValue(); }
+    public final V getValue() { return isValueDisabled() ? getDisabledValue() : getConstrainedValue(); }
     @Override public final V getDisabledValue()                              { return disabledValue; }
     @Override public final V getDefaultValue()                               { return defaultValue; }
     protected final V getConstrainedValue()                                  { return constrainedValue; }
@@ -111,12 +112,18 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
 
     @Override public boolean canBeConfigured()  { return !configureValues.isEmpty(); }
     @Override public boolean canBeConstrained() { return !constraints.isEmpty(); }
-    @Override public boolean canBeDisabled()    { return owner != null && owner.canBeDisabled(); }
-    @Override public boolean isDisabled()       { return owner != null && owner.isDisabled(); }
+    @Override public boolean canBeDisabled()    { return (owner != null && owner.canBeDisabled()) || hasDisablingConstraints(); }
+    @Override public boolean isDisabled()       { return isValueDisabled(); }
+    public boolean isConstrainedDisabled()      { return constrainedDisabled; }
 
-    protected V adaptValue(V value)             { return value; }
+    public boolean hasDisablingConstraints() {
+        for (Constraint<? extends CustomType<?>> c : constraints) if (c.getType() == Constraint.ConstraintType.DISABLED) return true;
+        return false;
+    }
 
-//    @Nonnull protected abstract VariableValue<V> invertValue(@Nullable V value);
+    protected boolean isValueDisabled() { return (owner != null && owner.isDisabled()) || constrainedDisabled; }
+
+    protected V adaptValue(V value)     { return value; }
 
     protected void setValue(@Nullable V value) {
         if (value == null) return;
@@ -130,9 +137,12 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                         .log("ConfigValue '{0}' got value that not valid. It was adapted", owner.getFullInternalName());
             }
         }
+        this.value = val;
+        constrainedValue = val;
         currentConfigure = getCurrConfigureFromValue(this.value);
-        reloadCache();
         if (owner != null) owner.markDirty();
+        if (hasConfig() && getConfig().isBuilt()) getConfig().reloadCache();
+        else reloadCache();
     }
 
     protected abstract VariableValue<V> parseValue(@Nullable String value);
@@ -146,6 +156,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
         if (canBeConfigured()) {
             if (cVal != null) {
                 this.value = cVal.getValue();
+                constrainedValue = this.value;
                 currentConfigure = cVal;
                 return ValueParseResult.SUCCESS;
             }
@@ -159,6 +170,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
         V val        = parsed.getValue();
         V adaptedVal = adaptValue(val);
         this.value = adaptedVal;
+        constrainedValue = adaptedVal;
         currentConfigure = getCurrConfigureFromValue(val);
         if (val != adaptedVal) {
             if (hasLogger()) {
@@ -274,7 +286,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                 .withPrefix(LogPrefixes.CONFIG)
                 .withStyle(ConsoleColor.YELLOW_BG)
                 .log("ConfigValue '{0}' got a {1} ConstraintImpl '{2}' with path '{3}' {4} It ConstraintImpl will be skipped",
-                        owner.getFullInternalName(), constraint.getValType(), constraint.getConditionType(), constraint.getPath(), uniqueMessage
+                        owner.getFullInternalName(), constraint.getValTypeCategory(), constraint.getConditionType(), constraint.getPath(), uniqueMessage
                 );
     }
 
@@ -285,7 +297,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                     .withPrefix(LogPrefixes.CONFIG)
                     .log("ConfigValue '{0}' got a {1} ConstraintImpl '{2}' of {3} type with path '{4}'" +
                                     "and that ConstraintImpl was applied. All other Constraints will be skipped",
-                            owner.getFullInternalName(), constraint.getValType(), constraint.getConditionType(),
+                            owner.getFullInternalName(), constraint.getValTypeCategory(), constraint.getConditionType(),
                             constraint.getType(), constraint.getPath());
         }
     }
@@ -297,12 +309,14 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                     .withPrefix(LogPrefixes.CONFIG)
                     .log("ConfigValue '{0}' got a {1} ConstraintImpl '{2}' of {3} type with path '{4}'" +
                                     "and that ConstraintImpl was applied. Current Value is '{5}'",
-                            owner.getFullInternalName(), constraint.getValType(), constraint.getConditionType(),
+                            owner.getFullInternalName(), constraint.getValTypeCategory(), constraint.getConditionType(),
                             constraint.getType(), constraint.getPath(), constrainedValue);
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void reloadCache() {
+        constrainedDisabled = false;
         if (!constraints.isEmpty()) {
             if (!canBeConstrained()) {
                 constrainedValue = value;
@@ -325,6 +339,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                         if (sect.canBeDisabled()) {
                             if (sect.isDisabled()) {
                                 constrainedValue = disabledValue;
+                                constrainedDisabled = true;
                                 logConstraintDisabledConditionEnd(constraint);
                                 return;
                             }
@@ -333,7 +348,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                         ConfigVal<? extends CustomType<?>> val = ((ConfigParBase<? extends CustomType<?>>) sect).getConfigVal();
                         if (constraint.getType() == Constraint.ConstraintType.DISABLED) {
                             if (constraint.hasSpecific()) {
-                                switch (constraint.getValType().getCategory()) {
+                                switch (constraint.getValTypeCategory()) {
                                     case LOGICAL:
                                         if (val.getType().getCategory() == LOGICAL) {
                                             if (constraint.getVal() == null) {
@@ -345,6 +360,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case EQUAL:
                                                     if (val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -352,6 +368,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case NOT_EQUAL:
                                                     if (!val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -378,6 +395,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case LESS:
                                                     if (val.getValue().getLogicPipeline().isLess(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -385,6 +403,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case MORE:
                                                     if (val.getValue().getLogicPipeline().isMore(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -392,6 +411,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case EQUAL:
                                                     if (val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -399,6 +419,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case NOT_EQUAL:
                                                     if (!val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -406,6 +427,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case LESS_OR_EQUAL:
                                                     if (val.getValue().getLogicPipeline().isLessOrEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -413,6 +435,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case MORE_OR_EQUAL:
                                                     if (val.getValue().getLogicPipeline().isMoreOrEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -421,6 +444,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     if (val instanceof ConfigValNumberImpl) {
                                                         if (constraint.getRange().isInRange(((ConfigNumberVal<? extends NumberType<?>>) val).getValue())) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -438,6 +462,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case EQUAL:
                                                     if (val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -445,6 +470,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case NOT_EQUAL:
                                                     if (!val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -461,6 +487,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case EQUAL:
                                                     if (val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -468,6 +495,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                 case NOT_EQUAL:
                                                     if (!val.getValue().getLogicPipeline().isEqual(constraint.getVal()).asBoolean()) {
                                                         constrainedValue = disabledValue;
+                                                        constrainedDisabled = true;
                                                         logConstraintDisabledEnd(constraint);
                                                         return;
                                                     }
@@ -482,7 +510,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                         logConstraintConditionNotSupport(constraint);
                                 }
                             } else {
-                                switch (constraint.getValType().getCategory()) {
+                                switch (constraint.getValTypeCategory()) {
                                     case LOGICAL:
                                         if (val.getType().getCategory() == LOGICAL) {
                                             if (getType().getCategory() == LOGICAL) {
@@ -490,6 +518,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case EQUAL:
                                                         if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -497,6 +526,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case NOT_EQUAL:
                                                         if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -515,6 +545,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case LESS:
                                                         if (constrainedValue.getLogicPipeline().isLess(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -522,6 +553,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case MORE:
                                                         if (constrainedValue.getLogicPipeline().isMore(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -529,6 +561,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case EQUAL:
                                                         if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -536,6 +569,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case NOT_EQUAL:
                                                         if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -543,6 +577,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case LESS_OR_EQUAL:
                                                         if (constrainedValue.getLogicPipeline().isLessOrEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -550,6 +585,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case MORE_OR_EQUAL:
                                                         if (constrainedValue.getLogicPipeline().isMoreOrEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -568,6 +604,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case EQUAL:
                                                         if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -575,6 +612,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case NOT_EQUAL:
                                                         if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -593,6 +631,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case EQUAL:
                                                         if (constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -600,6 +639,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     case NOT_EQUAL:
                                                         if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
                                                             constrainedValue = disabledValue;
+                                                            constrainedDisabled = true;
                                                             logConstraintDisabledEnd(constraint);
                                                             return;
                                                         }
@@ -616,14 +656,13 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                 }
                             }
                         } else {
-                            switch (constraint.getValType().getCategory()) {
+                            switch (constraint.getValTypeCategory()) {
                                 case LOGICAL:
                                     if (val.getType().getCategory() == LOGICAL) {
                                         if (getType().getCategory() == LOGICAL) {
                                             switch (constraint.getConditionType()) {
                                                 case EQUAL:
                                                     if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
-                                                        //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asLogicalType()
                                                                 .createType(val.getValue().asLogicalType().asBoolean());
                                                         logConstraintRelationEnd(constraint);
@@ -648,7 +687,6 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                             switch (constraint.getConditionType()) {
                                                 case LESS:
                                                     if (!constrainedValue.getLogicPipeline().isLess(val.getValue()).asBoolean()) {
-                                                        //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asNumberType().createType(
                                                                 val.getValue().getArithmeticPipeline().decrement()
                                                                         .asNumberType().asNumber()
@@ -658,7 +696,6 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     continue;
                                                 case MORE:
                                                     if (!constrainedValue.getLogicPipeline().isMore(val.getValue()).asBoolean()) {
-                                                        //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asNumberType().createType(
                                                                 val.getValue().getArithmeticPipeline().increment()
                                                                         .asNumberType().asNumber()
@@ -668,7 +705,6 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     continue;
                                                 case EQUAL:
                                                     if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
-                                                        //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asNumberType()
                                                                 .createType(val.getValue().asNumberType().asNumber());
                                                         logConstraintRelationEnd(constraint);
@@ -682,7 +718,6 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     continue;
                                                 case LESS_OR_EQUAL:
                                                     if (!constrainedValue.getLogicPipeline().isLessOrEqual(val.getValue()).asBoolean()) {
-                                                        //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asNumberType().createType(
                                                                 val.getValue().asNumberType().asNumber()
                                                         );
@@ -691,7 +726,6 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                                     continue;
                                                 case MORE_OR_EQUAL:
                                                     if (!constrainedValue.getLogicPipeline().isMoreOrEqual(val.getValue()).asBoolean()) {
-                                                        //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asNumberType().createType(
                                                                 val.getValue().asNumberType().asNumber()
                                                         );
@@ -711,7 +745,6 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                             switch (constraint.getConditionType()) {
                                                 case EQUAL:
                                                     if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
-                                                        //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asOtherType()
                                                                 .createType(val.getValue().asOtherType().getValue());
                                                         logConstraintRelationEnd(constraint);
@@ -736,7 +769,6 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                                             switch (constraint.getConditionType()) {
                                                 case EQUAL:
                                                     if (!constrainedValue.getLogicPipeline().isEqual(val.getValue()).asBoolean()) {
-                                                        //noinspection unchecked
                                                         constrainedValue = (V) constrainedValue.asOtherType()
                                                                 .createType(val.getValue().asOtherType().getValue());
                                                         logConstraintRelationEnd(constraint);

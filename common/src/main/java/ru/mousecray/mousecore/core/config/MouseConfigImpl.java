@@ -72,7 +72,6 @@ public class MouseConfigImpl implements MouseConfig {
             int autoSyncSecInterval, int autoSaveSecInterval
     ) {
         this.name = name;
-        /*new File(FMLCommonHandler.instance().getSavesDirectory().getParentFile()*/
         path = new File(".", folderName);
         parser = new ConfigParser(this, logger);
         this.logger = logger;
@@ -143,7 +142,8 @@ public class MouseConfigImpl implements MouseConfig {
         }
     }
 
-    @SuppressWarnings("DataFlowIssue") @Nullable @Override public ConfigSectBase getSectionBase(@Nullable String fullName) {
+    @SuppressWarnings("DataFlowIssue") @Nullable @Override
+    public ConfigSectBase getSectionBase(@Nullable String fullName) {
         if (fullName == null) return null;
         fullName = MouseStrings.trimWith(fullName, true, '.');
         if (fullName.isEmpty()) return null;
@@ -176,10 +176,10 @@ public class MouseConfigImpl implements MouseConfig {
             if (section == null) section = sections.getByInternalName(s);
             else {
                 if (section instanceof ConfigSectImpl sect) {
-                    if (sect.canBeDisabled() && sect.disablePar.getName().getInternalName().equals(s)) section = sect.disablePar;
+                    if (sect.hasDisabler() && sect.disablePar.getName().getInternalName().equals(s)) section = sect.disablePar;
                     else section = section.getChild(s);
                 } else if (section instanceof ConfigParGroupImpl<?> sect) {
-                    if (sect.canBeDisabled() && sect.disablePar.getName().getInternalName().equals(s)) section = sect.disablePar;
+                    if (sect.hasDisabler() && sect.disablePar.getName().getInternalName().equals(s)) section = sect.disablePar;
                     else {
                         stopped = i;
                         break;
@@ -188,8 +188,9 @@ public class MouseConfigImpl implements MouseConfig {
             }
         }
 
-        if (stopped >= 0)
+        if (stopped >= 0) {
             return splitted.length - stopped > 1 ? null : ((ConfigParGroup<? extends CustomType<?>>) section).getConfigVal(splitted[stopped]);
+        }
 
         if (section instanceof ConfigParImpl) return ((ConfigPar) section).getConfigVal();
         return null;
@@ -218,24 +219,19 @@ public class MouseConfigImpl implements MouseConfig {
     }
 
     @SuppressWarnings("unchecked") @Override
-    public <T extends CustomType<T>, D extends ConfigParGroup<T>> D getGroup(@Nullable String fullName) {
+    public <T extends CustomType<?>, D extends ConfigParGroup<T>> D getGroup(@Nullable String fullName) {
         try { return (D) getGroup0(fullName); } catch (ClassCastException ignore) { return null; }
     }
 
-    @Nullable @Override public ConfigValPlusMinusImpl getBooleanVal(@Nullable String fullName) { return getValue(fullName); }
-    @Nullable @Override
-    public ConfigValDecimalImpl getDecimalVal(@Nullable String fullName) { return getValue(fullName); }
-    @Nullable @Override
-    public ConfigValIntegralImpl getIntegerVal(@Nullable String fullName) { return getValue(fullName); }
-    @Nullable @Override
-    public ConfigValString getStringVal(@Nullable String fullName) { return getValue(fullName); }
-    @Nullable @Override
-    public ConfigValRandomQuantity getRandomQuantityVal(@Nullable String fullName) { return getValue(fullName); }
-    @Nullable @Override
-    public ConfigValPercentImpl getPercentVal(@Nullable String fullName) { return getValue(fullName); }
+    @Nullable @Override public ConfigValPlusMinusImpl getBooleanVal(@Nullable String fullName)         { return getValue(fullName); }
+    @Nullable @Override public ConfigValDecimalImpl getDecimalVal(@Nullable String fullName)           { return getValue(fullName); }
+    @Nullable @Override public ConfigValIntegralImpl getIntegerVal(@Nullable String fullName)          { return getValue(fullName); }
+    @Nullable @Override public ConfigValString getStringVal(@Nullable String fullName)                 { return getValue(fullName); }
+    @Nullable @Override public ConfigValRandomQuantity getRandomQuantityVal(@Nullable String fullName) { return getValue(fullName); }
+    @Nullable @Override public ConfigValPercentImpl getPercentVal(@Nullable String fullName)           { return getValue(fullName); }
 
     @Nullable @Override
-    public <TYPE extends CustomType<TYPE>> ConfigValConditionImpl<TYPE> getConditionVal(@Nullable String fullName) {
+    public <TYPE extends CustomType<?>> ConfigValConditionImpl<TYPE> getConditionVal(@Nullable String fullName) {
         return getValue(fullName);
     }
 
@@ -267,7 +263,8 @@ public class MouseConfigImpl implements MouseConfig {
 
     @Override public List<ConfigSectBase> getChildrenRecursively() { return getChildrenRecursivelyInternal(null); }
 
-    @Nonnull public List<ConfigSectBase> getChildrenRecursivelyInternal(@Nullable List<ConfigSectBase> sections) {
+    @Nonnull
+    public List<ConfigSectBase> getChildrenRecursivelyInternal(@Nullable List<ConfigSectBase> sections) {
         if (sections == null) sections = this.sections.values().toList();
         List<ConfigSectBase> output = new ArrayList<>(sections);
 
@@ -279,8 +276,17 @@ public class MouseConfigImpl implements MouseConfig {
         return output;
     }
 
-    @Override public void reset() { sections.forEach((key, value) -> value.reset()); }
-    public void reloadCache()     { if (built) sections.forEach((key, value) -> value.reloadCache()); }
+    @Override
+    public void reset() {
+        sections.forEach((key, value) -> value.reset());
+        reloadCache();
+    }
+
+    public void reloadCache() {
+        if (!built) return;
+        sections.forEach((key, value) -> value.setDisabledStructurally(false));
+        sections.forEach((key, value) -> value.reloadCache());
+    }
 
     @Override
     public IOFuture load() {
@@ -292,6 +298,7 @@ public class MouseConfigImpl implements MouseConfig {
         if (result.getType() == ConfigIOResultType.SUCCESS) {
             loaded = true;
             lastSyncTime = LocalTime.now();
+            reloadCache();
         }
         return result;
     }
@@ -360,7 +367,8 @@ public class MouseConfigImpl implements MouseConfig {
         if (par.getConfig() == this && built) synchronized (dirtySections) { dirtySections.add(par); }
     }
 
-    @Override public boolean hasUnsavedChanges() {
+    @Override
+    public boolean hasUnsavedChanges() {
         synchronized (dirtySections) { return !dirtySections.isEmpty(); }
     }
 

@@ -30,19 +30,19 @@ import java.util.function.Function;
 public class ConfigValPercentListImpl extends ConfigValSimpleListNumberImpl<PercentType> implements ConfigValPercentList {
     @SafeVarargs
     public ConfigValPercentListImpl(
-            boolean isConditional,
+            boolean isConditional, boolean isUnique,
             @Nullable SimpleListType<PercentType> defaultValue, @Nullable SimpleListType<PercentType> disabledValue,
             @Nullable RangeContainer<PercentType> range,
             @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<SimpleListType<PercentType>>... configureValues
     ) {
         super(
-                isConditional, createValCreator(),
+                isConditional, isUnique, createValCreator(),
                 defaultValue == null
-                        ? SimpleListType.create(ValType.PERCENT, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.PERCENT, isConditional, isUnique, createValCreator())
                         : defaultValue,
                 disabledValue == null
-                        ? SimpleListType.create(ValType.PERCENT, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.PERCENT, isConditional, isUnique, createValCreator())
                         : disabledValue,
                 range == null
                         ? new RangeContainer<>(Range.of(PercentType.MIN, PercentType.MAX))

@@ -30,19 +30,19 @@ import java.util.function.Function;
 public class ConfigValDecimalListImpl extends ConfigValSimpleListNumberImpl<DecimalType> implements ConfigValDecimalList {
     @SafeVarargs
     public ConfigValDecimalListImpl(
-            boolean isConditional,
+            boolean isConditional, boolean isUnique,
             @Nullable SimpleListType<DecimalType> defaultValue, @Nullable SimpleListType<DecimalType> disabledValue,
             @Nullable RangeContainer<DecimalType> range,
             @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<SimpleListType<DecimalType>>... configureValues
     ) {
         super(
-                isConditional, createValCreator(),
+                isConditional, isUnique, createValCreator(),
                 defaultValue == null
-                        ? SimpleListType.create(ValType.DECIMAL, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.DECIMAL, isConditional, isUnique, createValCreator())
                         : defaultValue,
                 disabledValue == null
-                        ? SimpleListType.create(ValType.DECIMAL, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.DECIMAL, isConditional, isUnique, createValCreator())
                         : disabledValue,
                 range == null
                         ? new RangeContainer<>(Range.of(DecimalType.MIN, DecimalType.MAX))

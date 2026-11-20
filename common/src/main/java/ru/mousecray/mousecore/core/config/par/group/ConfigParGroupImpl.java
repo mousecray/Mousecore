@@ -1,10 +1,3 @@
-/*
- * ******************************************************************************
- *  * Copyright © 2026 mousecray
- *  * Licensed under the GNU Lesser General Public License, Version 3.0
- *  *****************************************************************************
- */
-
 package ru.mousecray.mousecore.core.config.par.group;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,43 +25,75 @@ public abstract class ConfigParGroupImpl<T extends CustomType<?>> extends Config
             Pair<DisplayName, ? extends ConfigValImpl<T>> valuePair,
             @Nullable String comment, @Nullable Map<DisplayName, ConfigValImpl<? extends CustomType<?>>> values
     ) {
-        super(name, disablePar != null, valuePair, values, comment);
+        this(name, disablePar != null, disablePar, valuePair, comment, values);
+    }
+
+    public ConfigParGroupImpl(
+            DisplayName name,
+            boolean canBeDisabled,
+            @Nullable ConfigParDisablerImpl disablePar,
+            Pair<DisplayName, ? extends ConfigValImpl<T>> valuePair,
+            @Nullable String comment, @Nullable Map<DisplayName, ConfigValImpl<? extends CustomType<?>>> values
+    ) {
+        super(name, canBeDisabled || disablePar != null, valuePair, values, comment);
         this.disablePar = disablePar;
         if (disablePar != null) {
             disablePar.setParent(this);
             disablePar.setDeep(deep + 1);
-            setConfig(config);
+            disablePar.setConfig(config);
+            isDisabled = disablePar.isDisabled();
         }
     }
 
+    public boolean hasDisabler() { return disablePar != null; }
+
     @SuppressWarnings("DataFlowIssue") @Override public void setDeep(int deep) {
         super.setDeep(deep);
-        if (canBeDisabled()) disablePar.setDeep(deep + 1);
+        if (hasDisabler()) disablePar.setDeep(deep + 1);
     }
 
     @SuppressWarnings("DataFlowIssue") @Override public void setConfig(MouseConfigImpl config) {
         super.setConfig(config);
-        if (canBeDisabled()) disablePar.setConfig(config);
+        if (hasDisabler()) disablePar.setConfig(config);
     }
 
     @SuppressWarnings("DataFlowIssue") @Override
     public void setDisabled(boolean disabled) {
-        super.setDisabled(disabled);
-        disablePar.setDisabled(!disabled);
+        if (!canBeDisabled()) throw new UnsupportedOperationException("This ConfigParGroup does not support disabling");
+        if (hasDisabler()) {
+            disablePar.setDisabled(disabled);
+            isDisabled = disablePar.isDisabled();
+        } else {
+            isDisabled = disabled;
+            if (hasConfig() && config.isBuilt()) config.reloadCache();
+            else setDisabledStructurally(isStructurallyDisabled);
+        }
     }
 
     @SuppressWarnings("DataFlowIssue") @Override
     public void reset() {
         super.reset();
-        if (canBeDisabled()) disablePar.reset();
+        if (hasDisabler()) {
+            disablePar.reset();
+            isDisabled = disablePar.isDisabled();
+        }
     }
 
     @SuppressWarnings("DataFlowIssue") @Override
-    protected void reloadCache() {
+    public void reloadCache() {
+        if (hasDisabler()) {
+            disablePar.reloadCache();
+            isDisabled = disablePar.isDisabled();
+        }
         super.reloadCache();
-        if (canBeDisabled()) disablePar.reloadCache();
     }
 
-    @SuppressWarnings("DataFlowIssue") @Override public boolean isDisabled() { return super.isDisabled() || !disablePar.isDisabled(); }
-
+    @SuppressWarnings("DataFlowIssue") @Override
+    public void setDisabledStructurally(boolean parentDisabled) {
+        isStructurallyDisabled = parentDisabled;
+        if (hasDisabler()) {
+            disablePar.setDisabledStructurally(parentDisabled);
+            isDisabled = disablePar.isDisabled();
+        }
+    }
 }

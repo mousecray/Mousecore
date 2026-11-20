@@ -58,7 +58,7 @@ public abstract class ConfigParBaseImpl<T extends CustomType<?>> extends ConfigS
     }
 
     @Override
-    protected void reloadCache() {
+    public void reloadCache() {
         super.reloadCache();
         values.values().forEach(val -> { if (val instanceof ConfigValImpl<?> impl) impl.reloadCache(); });
     }
@@ -87,4 +87,8 @@ public abstract class ConfigParBaseImpl<T extends CustomType<?>> extends ConfigS
 
     @Override
     public IValType getType() { return getConfigVal().getType(); }
+
+    @Override public void setDisabledStructurally(boolean disabled) {
+        super.setDisabledStructurally(disabled);
+    }
 }

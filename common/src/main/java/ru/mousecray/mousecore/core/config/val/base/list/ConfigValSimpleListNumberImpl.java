@@ -29,7 +29,7 @@ public abstract class ConfigValSimpleListNumberImpl<T extends NumberType<?>> ext
 
     @SafeVarargs
     public ConfigValSimpleListNumberImpl(
-            boolean isConditional,
+            boolean isConditional, boolean isUnique,
             @Nullable Function<String, T> valCreator,
             SimpleListType<T> defaultValue, SimpleListType<T> disabledValue,
             RangeContainer<T> range,
@@ -37,7 +37,7 @@ public abstract class ConfigValSimpleListNumberImpl<T extends NumberType<?>> ext
             @Nullable PredefinedValue<SimpleListType<T>>... configureValues
     ) {
         super(
-                isConditional,
+                isConditional, isUnique,
                 valCreator,
                 checkValue(range, defaultValue, "defaultValue"),
                 checkValue(range, disabledValue, "disabledValue"),

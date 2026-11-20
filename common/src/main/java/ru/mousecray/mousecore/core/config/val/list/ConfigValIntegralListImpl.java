@@ -30,19 +30,19 @@ import java.util.function.Function;
 public class ConfigValIntegralListImpl extends ConfigValSimpleListNumberImpl<IntegralType> implements ConfigValIntegralList {
     @SafeVarargs
     public ConfigValIntegralListImpl(
-            boolean isConditional,
+            boolean isConditional, boolean isUnique,
             @Nullable SimpleListType<IntegralType> defaultValue, @Nullable SimpleListType<IntegralType> disabledValue,
             @Nullable RangeContainer<IntegralType> range,
             @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<SimpleListType<IntegralType>>... configureValues
     ) {
         super(
-                isConditional, createValCreator(),
+                isConditional, isUnique, createValCreator(),
                 defaultValue == null
-                        ? SimpleListType.create(ValType.INTEGRAL, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.INTEGRAL, isConditional, isUnique, createValCreator())
                         : defaultValue,
                 disabledValue == null
-                        ? SimpleListType.create(ValType.INTEGRAL, isConditional, createValCreator())
+                        ? SimpleListType.create(ValType.INTEGRAL, isConditional, isUnique, createValCreator())
                         : disabledValue,
                 range == null
                         ? new RangeContainer<>(Range.of(IntegralType.MIN, IntegralType.MAX))

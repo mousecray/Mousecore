@@ -14,6 +14,7 @@ import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.config.val.*;
+import ru.mousecray.mousecore.api.config.val.base.ConfigListVal;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
 import ru.mousecray.mousecore.api.log.MouseLogger;
@@ -33,7 +34,7 @@ public interface MouseConfig {
     @Nullable ConfigValRandomQuantity getRandomQuantityVal(@Nullable String fullName);
     @Nullable ConfigValPercent getPercentVal(@Nullable String fullName);
 
-    @Nullable <TYPE extends CustomType<TYPE>> ConfigValCondition<TYPE> getConditionVal(@Nullable String fullName);
+    @Nullable <TYPE extends CustomType<?>> ConfigValCondition<TYPE> getConditionVal(@Nullable String fullName);
     @Nullable <
             LIST_VAL extends CustomType<?>,
             VAL extends CustomType<?>,
@@ -41,7 +42,7 @@ public interface MouseConfig {
             >
     ConfigListVal<LIST_VAL, VAL, TYPE> getListVal(@Nullable String fullName);
 
-    <T extends CustomType<T>, D extends ConfigParGroup<T>> D getGroup(@Nullable String fullName);
+    <T extends CustomType<?>, D extends ConfigParGroup<T>> D getGroup(@Nullable String fullName);
 
     ConfigSect getSection(DisplayName name);
     @Nullable ConfigSectBase getSectionBase(@Nullable String fullName);

@@ -1,8 +1,3 @@
-/*******************************************************************************
- * Copyright © 2026 mousecray
- * Licensed under the GNU Lesser General Public License, Version 3.0
- ******************************************************************************/
-
 package ru.mousecray.mousecore.core.config.val;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -29,6 +24,11 @@ public class ConfigValDisablerImpl extends ConfigValPlusMinusImpl implements Con
         );
     }
 
-    @Override public boolean isDisabled()          { return value.isFalse(); }
-    @Override public void setDisabled(boolean val) { setValue(PlusMinusType.create(!val)); }
+    @Override
+    protected boolean isValueDisabled() {
+        return (owner != null && owner.isStructurallyDisabled()) || constrainedDisabled;
+    }
+
+    @Override public boolean isDisabled()          { return getValue().isTrue(); }
+    @Override public void setDisabled(boolean val) { setValue(PlusMinusType.create(val)); }
 }

@@ -1,10 +1,3 @@
-/*
- * ******************************************************************************
- *  * Copyright © 2026 mousecray
- *  * Licensed under the GNU Lesser General Public License, Version 3.0
- *  *****************************************************************************
- */
-
 package ru.mousecray.mousecore.core.config.par;
 
 import ru.mousecray.mousecore.api.DisplayName;
@@ -25,6 +18,7 @@ public class ConfigParDisablerImpl extends ConfigParImpl<PlusMinusType> implemen
     public ConfigParDisablerImpl(DisplayName name, boolean useDefaultName, ConfigValDisablerImpl value, @Nullable String comment) {
         super(name, true, value, comment);
         this.useDefaultName = useDefaultName;
+        isDisabled = value.isDisabled();
     }
 
     @SuppressWarnings("DataFlowIssue") @Nonnull @Override
@@ -36,8 +30,8 @@ public class ConfigParDisablerImpl extends ConfigParImpl<PlusMinusType> implemen
                 : super.getName();
     }
 
-    protected ValueParseResult setDisabledRaw(@Nullable String value) {
-        ConfigValDisablerImpl val = ((ConfigValDisablerImpl) getConfigVal());
+    public ValueParseResult setDisabledRaw(@Nullable String value) {
+        ConfigValDisablerImpl val = getValue();
         ValueParseResult      res = val.setValueRaw(value);
         isDisabled = val.isDisabled();
         return res;
@@ -45,25 +39,32 @@ public class ConfigParDisablerImpl extends ConfigParImpl<PlusMinusType> implemen
 
     @Override
     public void setDisabled(boolean disabled) {
-        super.setDisabled(disabled);
-        ((ConfigValDisablerImpl) getConfigVal()).setDisabled(disabled);
+        ConfigValDisablerImpl val = getValue();
+        val.setDisabled(disabled);
+        isDisabled = val.isDisabled();
     }
 
-    @Override public boolean isDisabled()             { return isDisabled || getConfigVal().isDisabled(); }
+    @Override
+    public void setDisabledStructurally(boolean parentDisabled) {
+        isStructurallyDisabled = parentDisabled;
+        isDisabled = getValue().isDisabled();
+    }
 
+    @Override public boolean isDisabled()             { return isDisabled; }
     @Override public ConfigValDisablerImpl getValue() { return (ConfigValDisablerImpl) getConfigVal(); }
 
     @Override
     public void reset() {
         super.reset();
-        ConfigValDisablerImpl val = (ConfigValDisablerImpl) getConfigVal();
+        ConfigValDisablerImpl val = getValue();
         val.reset();
-        isDisabled = val.isDisabled();
         val.reloadCache();
+        isDisabled = val.isDisabled();
     }
 
-    @Override public void reloadCache() {
-        super.reloadCache();
-        getConfigVal().reloadCache();
+    @Override
+    public void reloadCache() {
+        getValue().reloadCache();
+        isDisabled = getValue().isDisabled();
     }
 }

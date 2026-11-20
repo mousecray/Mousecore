@@ -26,12 +26,12 @@ import java.util.function.Function;
 public abstract class ConfigValSimpleListLogicalImpl<T extends LogicalType<?>> extends ConfigValSimpleListImpl<T> implements ConfigValSimpleListLogical<T> {
     @SafeVarargs
     public ConfigValSimpleListLogicalImpl(
-            boolean isConditional,
+            boolean isConditional, boolean isUnique,
             @Nullable Function<String, T> valCreator,
             SimpleListType<T> defaultValue, SimpleListType<T> disabledValue,
             @Nullable Constraint<? extends CustomType<?>>[] constraints,
             @Nullable PredefinedValue<SimpleListType<T>>... configureValues
     ) {
-        super(isConditional, valCreator, defaultValue, disabledValue, constraints, configureValues);
+        super(isConditional, isUnique, valCreator, defaultValue, disabledValue, constraints, configureValues);
     }
 }
