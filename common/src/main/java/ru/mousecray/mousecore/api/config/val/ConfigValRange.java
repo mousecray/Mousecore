@@ -1,7 +1,7 @@
-/****************************************************************************
+/*******************************************************************************
  * Copyright © 2026 mousecray
  * Licensed under the GNU Lesser General Public License, Version 3.0
- *************************************************************************** */
+ ******************************************************************************/
 
 package ru.mousecray.mousecore.api.config.val;
 
@@ -26,6 +26,7 @@ public interface ConfigValRange extends ConfigNumberVal<RangeType> {
     double getSpan();
 
     RangeContainer<DecimalType> getBoundaryRange();
+    RangeContainer<DecimalType> getSpanRange();
 
     boolean contains(double val);
     boolean contains(Number val);

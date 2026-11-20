@@ -45,6 +45,7 @@ public final class ConfigDictionaryBuilder {
         return new ConfigDictionaryBuilder(Objects.requireNonNull(owner), Objects.requireNonNull(currentLanguage));
     }
 
+    //TODO: Specific brackets for range type
     public ConfigDictionaryBuilder setDefaultForLanguage() {
         switch (currentLanguage) {
             case RU_RU:
