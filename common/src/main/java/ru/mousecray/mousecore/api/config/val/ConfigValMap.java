@@ -1,7 +1,7 @@
-/****************************************************************************
+/*******************************************************************************
  * Copyright © 2026 mousecray
  * Licensed under the GNU Lesser General Public License, Version 3.0
- *************************************************************************** */
+ ******************************************************************************/
 
 package ru.mousecray.mousecore.api.config.val;
 
@@ -15,5 +15,6 @@ public interface ConfigValMap<K extends CustomType<?>, V extends CustomType<?>> 
     IValType getKeyType();
     IValType getValueType();
     Map<K, V> getMap();
+
     void setMap(Map<K, V> map);
 }

@@ -1,7 +1,7 @@
-/****************************************************************************
+/*******************************************************************************
  * Copyright © 2026 mousecray
  * Licensed under the GNU Lesser General Public License, Version 3.0
- *************************************************************************** */
+ ******************************************************************************/
 
 package ru.mousecray.mousecore.api.config.val;
 
@@ -13,5 +13,6 @@ import java.util.List;
 public interface ConfigValMatrix extends ConfigVal<SimpleMatrixType> {
     List<IValType> getSchema();
     double[][] getAs2DArray();
+
     void setMatrix(double[][] data);
 }

@@ -1,9 +1,7 @@
-/*
- * ******************************************************************************
- *  * Copyright © 2026 mousecray
- *  * Licensed under the GNU Lesser General Public License, Version 3.0
- *  *****************************************************************************
- */
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
 
 package ru.mousecray.mousecore.core.config.val.base.list;
 
@@ -23,7 +21,7 @@ import java.util.function.Function;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
-public abstract class ConfigValSimpleListOtherImpl<T extends OtherType<?>> extends ConfigValSimpleListImpl<T> implements ConfigValSimpleListOther<T> {
+public class ConfigValSimpleListOtherImpl<T extends OtherType<?>> extends ConfigValSimpleListImpl<T> implements ConfigValSimpleListOther<T> {
     @SafeVarargs
     public ConfigValSimpleListOtherImpl(
             boolean isConditional, boolean isUnique,

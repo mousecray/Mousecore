@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ ******************************************************************************/
+
 package ru.mousecray.mousecore.core.config.val.base.list;
 
 import ru.mousecray.mousecore.api.VariableValue;
@@ -24,7 +29,7 @@ import static ru.mousecray.mousecore.api.VariableValue.create;
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
-public abstract class ConfigValSimpleListNumberImpl<T extends NumberType<?>> extends ConfigValSimpleListImpl<T> implements ConfigValSimpleListNumber<T> {
+public class ConfigValSimpleListNumberImpl<T extends NumberType<?>> extends ConfigValSimpleListImpl<T> implements ConfigValSimpleListNumber<T> {
     private final RangeContainer<T> range;
 
     @SafeVarargs
@@ -37,8 +42,7 @@ public abstract class ConfigValSimpleListNumberImpl<T extends NumberType<?>> ext
             @Nullable PredefinedValue<SimpleListType<T>>... configureValues
     ) {
         super(
-                isConditional, isUnique,
-                valCreator,
+                isConditional, isUnique, valCreator,
                 checkValue(range, defaultValue, "defaultValue"),
                 checkValue(range, disabledValue, "disabledValue"),
                 constraints, configureValues
@@ -61,7 +65,6 @@ public abstract class ConfigValSimpleListNumberImpl<T extends NumberType<?>> ext
     @Override public VariableValue<T> getMinValue() { return range.isEmpty() ? create() : create(range.getMinValue()); }
     @Override public VariableValue<T> getMaxValue() { return range.isEmpty() ? create() : create(range.getMaxValue()); }
 
-    @SuppressWarnings("DataFlowIssue")
     @Override
     protected ConditionalValType<T> adaptListValue(ConditionalValType<T> value) {
         T innerNumber = value.getValue();
@@ -71,7 +74,7 @@ public abstract class ConfigValSimpleListNumberImpl<T extends NumberType<?>> ext
                         .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("ConfigValueSimpleListNumber '{0}' got value that not valid. It was adapted",
-                                owner.getFullInternalName());
+                                owner != null ? owner.getFullInternalName() : "unknown");
             }
             return value.createType(range.getNearValue(innerNumber), value.isAnti());
         }
