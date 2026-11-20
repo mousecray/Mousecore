@@ -6,11 +6,11 @@
 package ru.mousecray.mousecore.core.config.build.val.number;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.val.ConfigValTime;
+import ru.mousecray.mousecore.api.config.val.number.ConfigValTime;
 import ru.mousecray.mousecore.api.customtype.values.number.TimeType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigNumberValueBuilder;
-import ru.mousecray.mousecore.core.config.val.ConfigValTimeImpl;
+import ru.mousecray.mousecore.core.config.val.number.ConfigValTimeImpl;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;

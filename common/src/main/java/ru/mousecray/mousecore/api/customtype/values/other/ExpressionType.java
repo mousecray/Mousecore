@@ -81,7 +81,7 @@ public final class ExpressionType extends OtherType<String> {
     public boolean hasVariables()                                                             { return !variables.isEmpty(); }
 
     public void validateVariables(Collection<String> allowedVariables) throws ValueFormatException {
-        Objects.requireNonNull(allowedVariables, "Allowed variables collection cannot be null");
+        Objects.requireNonNull(allowedVariables, "Allowed variables container cannot be null");
         for (String var : variables) {
             if (!allowedVariables.contains(var)) {
                 throw new ValueFormatException("Unknown variable '{" + var + "}' in expression '" + value

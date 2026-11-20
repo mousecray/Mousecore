@@ -6,12 +6,12 @@
 package ru.mousecray.mousecore.core.config.build.val.vec3;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.val.ConfigValBlockPos;
+import ru.mousecray.mousecore.api.config.val.vec3.ConfigValBlockPos;
 import ru.mousecray.mousecore.api.customtype.values.number.IntegralType;
 import ru.mousecray.mousecore.api.customtype.values.vec3.BlockPosType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigVector3Builder;
-import ru.mousecray.mousecore.core.config.val.ConfigValBlockPosImpl;
+import ru.mousecray.mousecore.core.config.val.vec3.ConfigValBlockPosImpl;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;

@@ -5,11 +5,11 @@
 
 package ru.mousecray.mousecore.core.config.build.val.container;
 
-import ru.mousecray.mousecore.api.config.val.ConfigValNBT;
+import ru.mousecray.mousecore.api.config.val.container.ConfigValNBT;
 import ru.mousecray.mousecore.api.customtype.values.collection.NBTType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigValueBuilder;
-import ru.mousecray.mousecore.core.config.val.ConfigValNBTImpl;
+import ru.mousecray.mousecore.core.config.val.container.ConfigValNBTImpl;
 
 import java.util.function.Consumer;
 

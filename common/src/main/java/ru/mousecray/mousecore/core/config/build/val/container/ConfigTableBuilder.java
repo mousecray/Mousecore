@@ -5,12 +5,12 @@
 
 package ru.mousecray.mousecore.core.config.build.val.container;
 
-import ru.mousecray.mousecore.api.config.val.ConfigValTable;
+import ru.mousecray.mousecore.api.config.val.container.ConfigValTable;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.customtype.values.collection.SimpleTableType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigValueBuilder;
-import ru.mousecray.mousecore.core.config.val.ConfigValTableImpl;
+import ru.mousecray.mousecore.core.config.val.container.ConfigValTableImpl;
 
 import java.util.List;
 import java.util.function.Consumer;

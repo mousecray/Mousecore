@@ -8,11 +8,11 @@
 package ru.mousecray.mousecore.core.config.build.val.minecraft;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.val.ConfigValEffect;
+import ru.mousecray.mousecore.api.config.val.minecraft.ConfigValEffect;
 import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftEffectType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigValueBuilder;
-import ru.mousecray.mousecore.core.config.val.ConfigValEffectImpl;
+import ru.mousecray.mousecore.core.config.val.minecraft.ConfigValEffectImpl;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;

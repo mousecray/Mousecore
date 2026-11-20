@@ -8,11 +8,11 @@
 package ru.mousecray.mousecore.core.config.build.val.minecraft;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.val.ConfigValItemStack;
+import ru.mousecray.mousecore.api.config.val.minecraft.ConfigValItemStack;
 import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftItemStackType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigValueBuilder;
-import ru.mousecray.mousecore.core.config.val.ConfigValItemStackImpl;
+import ru.mousecray.mousecore.core.config.val.minecraft.ConfigValItemStackImpl;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;

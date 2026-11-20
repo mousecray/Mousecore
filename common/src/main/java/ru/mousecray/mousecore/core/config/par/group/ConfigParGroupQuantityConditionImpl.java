@@ -17,9 +17,9 @@ import ru.mousecray.mousecore.api.customtype.values.number.RandomQuantityType;
 import ru.mousecray.mousecore.api.error.UnsupportedValException;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;
-import ru.mousecray.mousecore.core.config.val.ConfigValConditionImpl;
-import ru.mousecray.mousecore.core.config.val.ConfigValRandomQuantityImpl;
 import ru.mousecray.mousecore.core.config.val.base.ConfigValListImpl;
+import ru.mousecray.mousecore.core.config.val.logic.ConfigValConditionImpl;
+import ru.mousecray.mousecore.core.config.val.number.ConfigValRandomQuantityImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

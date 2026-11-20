@@ -11,7 +11,7 @@ import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.utils.ConfigLocaleType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.val.ConfigValCondition;
+import ru.mousecray.mousecore.api.config.val.logic.ConfigValCondition;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.ListType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
@@ -22,7 +22,7 @@ import ru.mousecray.mousecore.api.utils.MouseLogic;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.utils.PredefinedValueImpl;
-import ru.mousecray.mousecore.core.config.val.ConfigValConditionImpl;
+import ru.mousecray.mousecore.core.config.val.logic.ConfigValConditionImpl;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;

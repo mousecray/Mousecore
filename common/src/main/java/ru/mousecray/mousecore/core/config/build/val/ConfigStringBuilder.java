@@ -8,11 +8,11 @@
 package ru.mousecray.mousecore.core.config.build.val;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.val.ConfigValString;
+import ru.mousecray.mousecore.api.config.val.other.ConfigValString;
 import ru.mousecray.mousecore.api.customtype.values.other.StringType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigValueBuilder;
-import ru.mousecray.mousecore.core.config.val.ConfigValStringImpl;
+import ru.mousecray.mousecore.core.config.val.other.ConfigValStringImpl;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;

@@ -9,11 +9,11 @@ package ru.mousecray.mousecore.core.config.build.val.minecraft;
 
 import net.minecraft.sounds.SoundEvents;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.val.ConfigValSound;
+import ru.mousecray.mousecore.api.config.val.minecraft.ConfigValSound;
 import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftSoundType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigValueBuilder;
-import ru.mousecray.mousecore.core.config.val.ConfigValSoundImpl;
+import ru.mousecray.mousecore.core.config.val.minecraft.ConfigValSoundImpl;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;

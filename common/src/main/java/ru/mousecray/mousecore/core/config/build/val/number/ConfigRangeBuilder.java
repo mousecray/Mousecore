@@ -1,14 +1,14 @@
 package ru.mousecray.mousecore.core.config.build.val.number;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.val.ConfigValRange;
+import ru.mousecray.mousecore.api.config.val.number.ConfigValRange;
 import ru.mousecray.mousecore.api.customtype.range.Range;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
 import ru.mousecray.mousecore.api.customtype.values.number.DecimalType;
 import ru.mousecray.mousecore.api.customtype.values.number.RangeType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigNumberValueBuilder;
-import ru.mousecray.mousecore.core.config.val.ConfigValRangeImpl;
+import ru.mousecray.mousecore.core.config.val.number.ConfigValRangeImpl;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;

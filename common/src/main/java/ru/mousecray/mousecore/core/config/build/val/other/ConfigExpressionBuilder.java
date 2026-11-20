@@ -6,11 +6,11 @@
 package ru.mousecray.mousecore.core.config.build.val.other;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.val.ConfigValExpression;
+import ru.mousecray.mousecore.api.config.val.other.ConfigValExpression;
 import ru.mousecray.mousecore.api.customtype.values.other.ExpressionType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigValueBuilder;
-import ru.mousecray.mousecore.core.config.val.ConfigValExpressionImpl;
+import ru.mousecray.mousecore.core.config.val.other.ConfigValExpressionImpl;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashSet;

@@ -17,7 +17,7 @@ import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;
 import ru.mousecray.mousecore.core.config.utils.PredefinedValueImpl;
-import ru.mousecray.mousecore.core.config.val.ConfigValDisablerImpl;
+import ru.mousecray.mousecore.core.config.val.logic.ConfigValDisablerImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

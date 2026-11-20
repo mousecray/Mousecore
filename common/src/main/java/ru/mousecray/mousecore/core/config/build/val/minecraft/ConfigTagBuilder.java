@@ -6,12 +6,12 @@
 package ru.mousecray.mousecore.core.config.build.val.minecraft;
 
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.val.ConfigValTag;
+import ru.mousecray.mousecore.api.config.val.minecraft.ConfigValTag;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.customtype.values.minecraft.MinecraftTagType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigValueBuilder;
-import ru.mousecray.mousecore.core.config.val.ConfigValTagImpl;
+import ru.mousecray.mousecore.core.config.val.minecraft.ConfigValTagImpl;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
