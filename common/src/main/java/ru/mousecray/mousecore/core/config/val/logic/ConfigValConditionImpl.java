@@ -198,6 +198,7 @@ public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigValOt
 
     @Override
     protected VariableValue<ConditionType<ListType<?, V>, V>> parseValue(@Nullable String value) {
+        /*It is compiled into the code as a PredefinedValue. It will return the correct value even before this method is executed.*/
         return VariableValue.create();
     }
 
