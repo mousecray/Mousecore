@@ -1,16 +1,18 @@
-/*******************************************************************************
+/*
+ * ***************************************************************************
  * Copyright © 2026 mousecray
  * Licensed under the GNU Lesser General Public License, Version 3.0
- ******************************************************************************/
+ * **************************************************************************
+ */
 
-package ru.mousecray.mousecore.core.config.val.base.list;
+package ru.mousecray.mousecore.core.config.val.container.list;
 
 import ru.mousecray.mousecore.api.VariableValue;
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleListNumber;
+import ru.mousecray.mousecore.api.config.val.container.list.ConfigValSimpleListNumber;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.NumberType;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
@@ -18,6 +20,7 @@ import ru.mousecray.mousecore.api.customtype.values.collection.SimpleListType;
 import ru.mousecray.mousecore.api.customtype.values.logic.ConditionalValType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
+import ru.mousecray.mousecore.core.config.val.base.ConfigValSimpleListImpl;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -30,7 +30,7 @@ import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;
 import ru.mousecray.mousecore.core.config.par.group.ConfigParGroupQuantityConditionImpl;
 import ru.mousecray.mousecore.core.config.utils.ConstraintImpl;
 import ru.mousecray.mousecore.core.config.utils.PredefinedValueImpl;
-import ru.mousecray.mousecore.core.config.val.base.list.ConfigValSimpleListImpl;
+import ru.mousecray.mousecore.core.config.val.base.ConfigValSimpleListImpl;
 import ru.mousecray.mousecore.core.config.val.logic.ConfigValConditionImpl;
 import ru.mousecray.mousecore.core.config.val.number.ConfigValRandomQuantityImpl;
 

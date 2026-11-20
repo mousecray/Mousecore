@@ -7,7 +7,7 @@
 
 package ru.mousecray.mousecore.core.config.build.val.list;
 
-import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleList;
+import ru.mousecray.mousecore.api.config.val.base.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.customtype.NumberType;
 import ru.mousecray.mousecore.api.customtype.Vector3Type;
 import ru.mousecray.mousecore.api.customtype.range.Range;
@@ -18,7 +18,7 @@ import ru.mousecray.mousecore.api.customtype.values.logic.ConditionalValType;
 import ru.mousecray.mousecore.api.error.IncorrectOperationException;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigSimpleListBuilder;
-import ru.mousecray.mousecore.core.config.val.base.list.ConfigValSimpleListVector3Impl;
+import ru.mousecray.mousecore.core.config.val.container.list.ConfigValSimpleListVector3Impl;
 
 import java.util.ArrayList;
 import java.util.Collections;

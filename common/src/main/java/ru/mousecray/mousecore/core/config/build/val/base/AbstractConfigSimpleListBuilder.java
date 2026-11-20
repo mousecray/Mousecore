@@ -2,7 +2,7 @@ package ru.mousecray.mousecore.core.config.build.val.base;
 
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleList;
+import ru.mousecray.mousecore.api.config.val.base.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.customtype.values.collection.SimpleListType;

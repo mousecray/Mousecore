@@ -1,4 +1,11 @@
-package ru.mousecray.mousecore.core.config.val.base.list;
+/*
+ * ***************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ * **************************************************************************
+ */
+
+package ru.mousecray.mousecore.core.config.val.base;
 
 import ru.mousecray.mousecore.api.VariableValue;
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
@@ -7,12 +14,11 @@ import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.config.utils.ConfigLocaleType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
-import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleList;
+import ru.mousecray.mousecore.api.config.val.base.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.values.collection.SimpleListType;
 import ru.mousecray.mousecore.api.customtype.values.logic.ConditionalValType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
-import ru.mousecray.mousecore.core.config.val.base.ConfigValListImpl;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;

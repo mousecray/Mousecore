@@ -1,6 +1,6 @@
 package ru.mousecray.mousecore.core.config.build.val;
 
-import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleList;
+import ru.mousecray.mousecore.api.config.val.base.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.LogicalType;
 import ru.mousecray.mousecore.api.customtype.NumberType;

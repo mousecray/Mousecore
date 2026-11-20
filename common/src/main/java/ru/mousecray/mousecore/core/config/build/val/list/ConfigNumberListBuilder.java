@@ -1,13 +1,13 @@
 package ru.mousecray.mousecore.core.config.build.val.list;
 
-import ru.mousecray.mousecore.api.config.val.base.list.ConfigValSimpleList;
+import ru.mousecray.mousecore.api.config.val.base.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.customtype.NumberType;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.customtype.values.collection.SimpleListType;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.val.base.AbstractConfigSimpleListNumberBuilder;
-import ru.mousecray.mousecore.core.config.val.base.list.ConfigValSimpleListNumberImpl;
+import ru.mousecray.mousecore.core.config.val.container.list.ConfigValSimpleListNumberImpl;
 
 import java.util.Collections;
 import java.util.function.Consumer;
