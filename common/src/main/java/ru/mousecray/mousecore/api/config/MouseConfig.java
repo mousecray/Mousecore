@@ -14,7 +14,11 @@ import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
-import ru.mousecray.mousecore.api.config.val.base.ConfigListVal;
+import ru.mousecray.mousecore.api.config.val.base.ConfigValSimpleList;
+import ru.mousecray.mousecore.api.config.val.container.list.ConfigValSimpleListLogical;
+import ru.mousecray.mousecore.api.config.val.container.list.ConfigValSimpleListNumber;
+import ru.mousecray.mousecore.api.config.val.container.list.ConfigValSimpleListOther;
+import ru.mousecray.mousecore.api.config.val.container.list.ConfigValSimpleListVector3;
 import ru.mousecray.mousecore.api.config.val.logic.ConfigValCondition;
 import ru.mousecray.mousecore.api.config.val.logic.ConfigValPlusMinus;
 import ru.mousecray.mousecore.api.config.val.number.ConfigValDecimal;
@@ -22,8 +26,7 @@ import ru.mousecray.mousecore.api.config.val.number.ConfigValIntegral;
 import ru.mousecray.mousecore.api.config.val.number.ConfigValPercent;
 import ru.mousecray.mousecore.api.config.val.number.ConfigValRandomQuantity;
 import ru.mousecray.mousecore.api.config.val.other.ConfigValString;
-import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.ListType;
+import ru.mousecray.mousecore.api.customtype.*;
 import ru.mousecray.mousecore.api.log.MouseLogger;
 
 import javax.annotation.Nonnull;
@@ -42,12 +45,12 @@ public interface MouseConfig {
     @Nullable ConfigValPercent getPercentVal(@Nullable String fullName);
 
     @Nullable <TYPE extends CustomType<?>> ConfigValCondition<TYPE> getConditionVal(@Nullable String fullName);
-    @Nullable <
-            LIST_VAL extends CustomType<?>,
-            VAL extends CustomType<?>,
-            TYPE extends ListType<LIST_VAL, VAL>
-            >
-    ConfigListVal<LIST_VAL, VAL, TYPE> getListVal(@Nullable String fullName);
+
+    @Nullable <T extends CustomType<?>> ConfigValSimpleList<T> getListVal(@Nullable String fullName);
+    @Nullable <T extends NumberType<?>> ConfigValSimpleListNumber<T> getNumberListVal(@Nullable String fullName);
+    @Nullable <T extends LogicalType<?>> ConfigValSimpleListLogical<T> getLogicalListVal(@Nullable String fullName);
+    @Nullable <T extends OtherType<?>> ConfigValSimpleListOther<T> getOtherListVal(@Nullable String fullName);
+    @Nullable <N extends NumberType<?>, T extends Vector3Type<N, T>> ConfigValSimpleListVector3<N, T> getVectorListVal(@Nullable String fullName);
 
     <T extends CustomType<?>, D extends ConfigParGroup<T>> D getGroup(@Nullable String fullName);
 

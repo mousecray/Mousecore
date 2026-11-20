@@ -16,11 +16,15 @@ import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
+import ru.mousecray.mousecore.api.config.val.base.ConfigValSimpleList;
+import ru.mousecray.mousecore.api.config.val.container.list.ConfigValSimpleListLogical;
+import ru.mousecray.mousecore.api.config.val.container.list.ConfigValSimpleListNumber;
+import ru.mousecray.mousecore.api.config.val.container.list.ConfigValSimpleListOther;
+import ru.mousecray.mousecore.api.config.val.container.list.ConfigValSimpleListVector3;
 import ru.mousecray.mousecore.api.config.val.number.ConfigValRandomQuantity;
 import ru.mousecray.mousecore.api.config.val.other.ConfigValString;
 import ru.mousecray.mousecore.api.container.ImmutableDisplayNameMap;
-import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.ListType;
+import ru.mousecray.mousecore.api.customtype.*;
 import ru.mousecray.mousecore.api.log.MouseLogger;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.core.config.io.ConfigIOThread;
@@ -30,7 +34,6 @@ import ru.mousecray.mousecore.core.config.par.ConfigParImpl;
 import ru.mousecray.mousecore.core.config.par.group.ConfigParGroupImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectBaseImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectImpl;
-import ru.mousecray.mousecore.core.config.val.base.ConfigValListImpl;
 import ru.mousecray.mousecore.core.config.val.logic.ConfigValConditionImpl;
 import ru.mousecray.mousecore.core.config.val.logic.ConfigValPlusMinusImpl;
 import ru.mousecray.mousecore.core.config.val.number.ConfigValDecimalImpl;
@@ -239,12 +242,39 @@ public class MouseConfigImpl implements MouseConfig {
         return getValue(fullName);
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable @Override
-    public <LIST_VAL extends CustomType<?>,
-            VAL extends CustomType<?>,
-            TYPE extends ListType<LIST_VAL, VAL>
-            > ConfigValListImpl<LIST_VAL, VAL, TYPE> getListVal(@Nullable String fullName) {
-        return getValue(fullName);
+    public <T extends CustomType<?>> ConfigValSimpleList<T> getListVal(@Nullable String fullName) {
+        ConfigVal<? extends CustomType<?>> val = getVal(fullName);
+        return val instanceof ConfigValSimpleList<?> list ? (ConfigValSimpleList<T>) list : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable @Override
+    public <T extends NumberType<?>> ConfigValSimpleListNumber<T> getNumberListVal(@Nullable String fullName) {
+        ConfigVal<? extends CustomType<?>> val = getVal(fullName);
+        return val instanceof ConfigValSimpleListNumber<?> list ? (ConfigValSimpleListNumber<T>) list : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable @Override
+    public <T extends LogicalType<?>> ConfigValSimpleListLogical<T> getLogicalListVal(@Nullable String fullName) {
+        ConfigVal<? extends CustomType<?>> val = getVal(fullName);
+        return val instanceof ConfigValSimpleListLogical<?> list ? (ConfigValSimpleListLogical<T>) list : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable @Override
+    public <T extends OtherType<?>> ConfigValSimpleListOther<T> getOtherListVal(@Nullable String fullName) {
+        ConfigVal<? extends CustomType<?>> val = getVal(fullName);
+        return val instanceof ConfigValSimpleListOther<?> list ? (ConfigValSimpleListOther<T>) list : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable @Override
+    public <N extends NumberType<?>, T extends Vector3Type<N, T>> ConfigValSimpleListVector3<N, T> getVectorListVal(@Nullable String fullName) {
+        ConfigVal<? extends CustomType<?>> val = getVal(fullName);
+        return val instanceof ConfigValSimpleListVector3<?, ?> list ? (ConfigValSimpleListVector3<N, T>) list : null;
     }
 
     @SuppressWarnings("unchecked") @Nullable @Override
