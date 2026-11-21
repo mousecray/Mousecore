@@ -27,19 +27,17 @@ public interface ConfigSectBase {
     void setDisabled(boolean disabled);
 
     @Nonnull ConfigSide getSide();
-    @Nonnull EnumSet<ConfigState> getManualStates();
-    @Nonnull EnumSet<ConfigState> getEffectiveStates();
+    @Nonnull EnumSet<ConfigState> getStates();
     boolean hasState(ConfigState state);
     boolean isFrozen();
     boolean isNew();
-    
+
     boolean isThreadSafe();
 
     boolean hasChildren();
     boolean canBeDisabled();
     boolean isDisabled();
     boolean isSupportChildren();
-    <T extends ConfigSectBase> boolean isSupportChild(T child);
     boolean hasChild(String name);
     boolean hasChildByDisplayName(String name);
     boolean isLoaded();

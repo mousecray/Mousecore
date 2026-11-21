@@ -1,8 +1,8 @@
 /*
- * ***************************************************************************
- * Copyright © 2026 mousecray
- * Licensed under the GNU Lesser General Public License, Version 3.0
- * **************************************************************************
+ * ******************************************************************************
+ *  * Copyright © 2026 mousecray
+ *  * Licensed under the GNU Lesser General Public License, Version 3.0
+ *  *****************************************************************************
  */
 
 package ru.mousecray.mousecore.core.config.sect;
@@ -10,7 +10,6 @@ package ru.mousecray.mousecore.core.config.sect;
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.config.par.ConfigParBase;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
-import ru.mousecray.mousecore.api.config.utils.ConfigEnvironment;
 import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.config.utils.ConfigState;
 import ru.mousecray.mousecore.api.container.ImmutableDisplayNameMap;
@@ -19,6 +18,7 @@ import ru.mousecray.mousecore.api.log.MouseLogger;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.core.config.MouseConfigImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;
+import ru.mousecray.mousecore.core.config.utils.ConfigEnvironmentController;
 import ru.mousecray.mousecore.core.config.utils.ConfigListenerDispatcher;
 
 import javax.annotation.Nonnull;
@@ -81,21 +81,21 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
     }
 
     @Nonnull @Override
-    public EnumSet<ConfigState> getEffectiveStates() {
+    public EnumSet<ConfigState> getStates() {
         EnumSet<ConfigState> result = getManualStates();
         if (isNew()) result.add(ConfigState.NEW);
         if (isFrozen()) result.add(ConfigState.FROZEN);
         return result;
     }
 
-    @Nonnull @Override
-    public EnumSet<ConfigState> getManualStates() {
+    @Nonnull
+    protected EnumSet<ConfigState> getManualStates() {
         return manualStates.isEmpty() ? EnumSet.noneOf(ConfigState.class) : EnumSet.copyOf(manualStates);
     }
 
     @Override public boolean isNew()                       { return isNewState; }
-    @Override public boolean isFrozen()                    { return isStructurallyDisabled || getSide().isFrozenIn(ConfigEnvironment.getCurrent()); }
-    @Override public boolean hasState(ConfigState state)   { return getEffectiveStates().contains(state); }
+    @Override public boolean isFrozen()                    { return isStructurallyDisabled || getSide().isFrozenIn(ConfigEnvironmentController.getCurrent()); }
+    @Override public boolean hasState(ConfigState state)   { return getStates().contains(state); }
     public void markNew(boolean isNew)                     { isNewState = isNew; }
     public void setExplicitSide(@Nullable ConfigSide side) { explicitSide = side; }
     public boolean hasExplicitSide()                       { return explicitSide != null; }
@@ -105,7 +105,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         refreshThreadSafeFlag();
     }
 
-    public void setThreadSafeByParent(boolean value) {
+    protected void setThreadSafeByParent(boolean value) {
         threadSafeByParent = value;
         refreshThreadSafeFlag();
     }
@@ -146,12 +146,12 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         try { return action.get(); } finally { lock.readLock().unlock(); }
     }
 
-    @Override public boolean hasChildren()                                      { return isSupportChildren() && children != null && !children.isEmpty(); }
-    @Override public boolean canBeDisabled()                                    { return canBeDisabled || canBeDisabledByParent; }
-    public boolean isStructurallyDisabled()                                     { return isStructurallyDisabled; }
-    @Override public boolean isDisabled()                                       { return isDisabled || isStructurallyDisabled; }
+    @Override public boolean hasChildren()                            { return isSupportChildren() && children != null && !children.isEmpty(); }
+    @Override public boolean canBeDisabled()                          { return canBeDisabled || canBeDisabledByParent; }
+    public boolean isStructurallyDisabled()                           { return isStructurallyDisabled; }
+    @Override public boolean isDisabled()                             { return isDisabled || isStructurallyDisabled; }
 
-    @Override public <T extends ConfigSectBase> boolean isSupportChild(T child) { return true; }
+    public <T extends ConfigSectBase> boolean isSupportChild(T child) { return true; }
 
     private boolean checkChildren() {
         if (!isSupportChildren()) throw new UnsupportedOperationException("This ConfigSection cannot contains children");
@@ -161,25 +161,29 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         } else return false;
     }
 
-    @Override public boolean hasChildByDisplayName(String name) {
+    @Override
+    public boolean hasChildByDisplayName(String name) {
         Objects.requireNonNull(name);
         if (checkChildren()) return false;
         else return children.containsByDisplayName(name);
     }
 
-    @Nullable @Override public ConfigSectBaseImpl getChildByDisplayName(String name) {
+    @Nullable @Override
+    public ConfigSectBaseImpl getChildByDisplayName(String name) {
         Objects.requireNonNull(name);
         if (checkChildren()) return null;
         else return children.getByDisplayName(name);
     }
 
-    @Override public boolean hasChild(String name) {
+    @Override
+    public boolean hasChild(String name) {
         Objects.requireNonNull(name);
         if (checkChildren()) return false;
         else return children.containsByInternalName(name);
     }
 
-    @Nullable @Override public ConfigSectBaseImpl getChild(String name) {
+    @Nullable @Override
+    public ConfigSectBaseImpl getChild(String name) {
         Objects.requireNonNull(name);
         if (checkChildren()) return null;
         else return children.getByInternalName(name);
@@ -235,7 +239,6 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         if (hasChildren()) children.values().forEach(c -> c.setCanBeDisabledByParent(effective));
     }
 
-    @SuppressWarnings("DataFlowIssue")
     public void removeChild(DisplayName name) {
         Objects.requireNonNull(name);
         if (!checkChildren()) {

@@ -9,7 +9,7 @@ package ru.mousecray.mousecore.api.config;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.config.io.IOFuture;
-import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
+import ru.mousecray.mousecore.api.config.par.group.*;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
@@ -40,6 +40,7 @@ import java.util.List;
 
 public interface MouseConfig {
     @Nullable <T extends CustomType<?>, D extends ConfigVal<T>> D getValue(@Nullable String fullName);
+
     @Nullable ConfigValPlusMinus getBooleanVal(@Nullable String fullName);
     @Nullable ConfigValDecimal getDecimalVal(@Nullable String fullName);
     @Nullable ConfigValIntegral getIntegerVal(@Nullable String fullName);
@@ -85,6 +86,10 @@ public interface MouseConfig {
     @Nullable <N extends NumberType<?>, T extends Vector3Type<N, T>> ConfigValSimpleListVector3<N, T> getVectorListVal(@Nullable String fullName);
 
     <T extends CustomType<?>, D extends ConfigParGroup<T>> D getGroup(@Nullable String fullName);
+    @Nullable <VAL extends CustomType<?>, TARGET extends CustomType<?>> ConfigParGroupConditional<VAL, TARGET> getConditionalGroup(@Nullable String fullName);
+    @Nullable <VAL extends CustomType<?>, TARGET extends CustomType<?>> ConfigParGroupBranch<VAL, TARGET> getBranchGroup(@Nullable String fullName);
+    @Nullable <VAL extends CustomType<?>> ConfigParGroupPhase<VAL> getPhaseGroup(@Nullable String fullName);
+    @Nullable <T extends CustomType<?>, CONTEXT extends CustomType<?>> ConfigParGroupTransformer<T, CONTEXT> getTransformerGroup(@Nullable String fullName);
 
     ConfigSect getSection(DisplayName name);
     @Nullable ConfigSectBase getSectionBase(@Nullable String fullName);

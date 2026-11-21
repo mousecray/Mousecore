@@ -12,7 +12,7 @@ import ru.mousecray.mousecore.api.config.io.ConfigIOResultType;
 import ru.mousecray.mousecore.api.config.io.IOFuture;
 import ru.mousecray.mousecore.api.config.par.ConfigPar;
 import ru.mousecray.mousecore.api.config.par.ConfigParBase;
-import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
+import ru.mousecray.mousecore.api.config.par.group.*;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
@@ -297,32 +297,41 @@ public class MouseConfigImpl implements MouseConfig {
         return null;
     }
 
-    @SuppressWarnings({ "DataFlowIssue", "SpellCheckingInspection" }) @Nullable
+    @Nullable
     private ConfigParGroup<? extends CustomType<?>> getGroup0(@Nullable String fullName) {
-        if (fullName == null) return null;
-        fullName = MouseStrings.trimWith(fullName, true, '.');
-        if (fullName.isEmpty()) return null;
-
-        String[]                                splitted = Objects.requireNonNull(fullName).split("\\.");
-        ConfigSectBase                          section  = null;
-        ConfigParGroup<? extends CustomType<?>> group    = null;
-        for (int i = 0, splittedLength = splitted.length; i < splittedLength; ++i) {
-            group = null;
-            if (i > 0 && section == null) break;
-            String s = MouseStrings.trimWith(splitted[i], true, '\t');
-            if (section == null) section = sections.getByInternalName(s);
-            else {
-                if (section instanceof ConfigSectImpl) section = section.getChild(s);
-                else if (section instanceof ConfigParGroupImpl) group = (ConfigParGroup<? extends CustomType<?>>) section;
-            }
-        }
-        return group;
+        ConfigSectBase section = getSectionBase(fullName);
+        return section instanceof ConfigParGroup<?> group ? group : null;
     }
 
-    @SuppressWarnings("unchecked") @Override
+    @SuppressWarnings("unchecked") @Nullable @Override
     public <T extends CustomType<?>, D extends ConfigParGroup<T>> D getGroup(@Nullable String fullName) {
         try { return (D) getGroup0(fullName); } catch (ClassCastException ignore) { return null; }
     }
+
+    @SuppressWarnings("unchecked") @Nullable @Override
+    public <VAL extends CustomType<?>, TARGET extends CustomType<?>> ConfigParGroupConditional<VAL, TARGET> getConditionalGroup(@Nullable String fullName) {
+        ConfigParGroup<?> group = getGroup0(fullName);
+        return group instanceof ConfigParGroupConditional<?, ?> g ? (ConfigParGroupConditional<VAL, TARGET>) g : null;
+    }
+
+    @SuppressWarnings("unchecked") @Nullable @Override
+    public <VAL extends CustomType<?>, TARGET extends CustomType<?>> ConfigParGroupBranch<VAL, TARGET> getBranchGroup(@Nullable String fullName) {
+        ConfigParGroup<?> group = getGroup0(fullName);
+        return group instanceof ConfigParGroupBranch<?, ?> g ? (ConfigParGroupBranch<VAL, TARGET>) g : null;
+    }
+
+    @SuppressWarnings("unchecked") @Nullable @Override
+    public <VAL extends CustomType<?>> ConfigParGroupPhase<VAL> getPhaseGroup(@Nullable String fullName) {
+        ConfigParGroup<?> group = getGroup0(fullName);
+        return group instanceof ConfigParGroupPhase<?> g ? (ConfigParGroupPhase<VAL>) g : null;
+    }
+
+    @SuppressWarnings("unchecked") @Nullable @Override
+    public <T extends CustomType<?>, CONTEXT extends CustomType<?>> ConfigParGroupTransformer<T, CONTEXT> getTransformerGroup(@Nullable String fullName) {
+        ConfigParGroup<?> group = getGroup0(fullName);
+        return group instanceof ConfigParGroupTransformer<?, ?> g ? (ConfigParGroupTransformer<T, CONTEXT>) g : null;
+    }
+
 
     @Nullable @Override public ConfigValPlusMinusImpl getBooleanVal(@Nullable String fullName)                { return getValue(fullName); }
     @Nullable @Override public ConfigValDecimalImpl getDecimalVal(@Nullable String fullName)                  { return getValue(fullName); }

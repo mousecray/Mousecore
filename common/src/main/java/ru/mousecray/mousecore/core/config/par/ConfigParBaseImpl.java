@@ -62,7 +62,10 @@ public abstract class ConfigParBaseImpl<T extends CustomType<?>> extends ConfigS
         }
     }
 
-    @Nullable @Override public ConfigVal getValByDisplayName(String name) { return values.getByDisplayName(name); }
+    @Nullable @Override
+    public ConfigVal<? extends CustomType<?>> getValByDisplayName(String name) {
+        return values.getByDisplayName(name);
+    }
 
     @Override
     public void onReset() {
@@ -97,11 +100,11 @@ public abstract class ConfigParBaseImpl<T extends CustomType<?>> extends ConfigS
         });
     }
 
-    @Nonnull @Override public ImmutableDisplayNameMap<ConfigVal<?>> getValues()               { return new ImmutableDisplayNameMap<>(values); }
+    @Nonnull @Override public ImmutableDisplayNameMap<ConfigVal<?>> getValues()     { return new ImmutableDisplayNameMap<>(values); }
 
-    @Override public boolean isSupportChildren()                                              { return false; }
-    @Override public boolean isSupportChild(ConfigSectBase child)                             { return false; }
-    @Override public boolean isSupportAdditionalValue(ConfigVal<? extends CustomType<?>> val) { return true; }
+    @Override public boolean isSupportChildren()                                    { return false; }
+    @Override public boolean isSupportChild(ConfigSectBase child)                   { return false; }
+    public boolean isSupportAdditionalValue(ConfigVal<? extends CustomType<?>> val) { return true; }
 
     @Nullable @Override
     public final ConfigVal<? extends CustomType<?>> getConfigVal(String internalName) {
@@ -116,9 +119,11 @@ public abstract class ConfigParBaseImpl<T extends CustomType<?>> extends ConfigS
     @SuppressWarnings({ "DataFlowIssue", "unchecked" }) @Nonnull @Override
     public final ConfigValImpl<T> getConfigVal() { return (ConfigValImpl<T>) getConfigVal(firstValName); }
 
-    @Override public int getCapacity()  { return values.getSize(); }
+    @Override public int getCapacity() { return values.getSize(); }
 
-    public void markDirty()             { if (config != null && config.isBuilt()) config.markDirty(this); }
+    public void markDirty() {
+        if (config != null && config.isBuilt()) config.markDirty(this);
+    }
 
     @Override public IValType getType() { return getConfigVal().getType(); }
 }

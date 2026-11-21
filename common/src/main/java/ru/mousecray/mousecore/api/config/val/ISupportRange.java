@@ -8,7 +8,6 @@
 package ru.mousecray.mousecore.api.config.val;
 
 import ru.mousecray.mousecore.api.VariableValue;
-import ru.mousecray.mousecore.api.config.utils.ConfigLocaleType;
 import ru.mousecray.mousecore.api.customtype.NumberType;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
 
@@ -17,7 +16,4 @@ public interface ISupportRange<T extends NumberType<?>> {
     RangeContainer<T> getRange();
     VariableValue<T> getMinValue();
     VariableValue<T> getMaxValue();
-
-    default ILocaleType getRangeLocaleType() { return ConfigLocaleType.RANGE; }
-    default boolean saveRange()              { return true; }
 }

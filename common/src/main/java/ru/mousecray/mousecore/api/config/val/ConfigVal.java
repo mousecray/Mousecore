@@ -45,7 +45,8 @@ public interface ConfigVal<V extends CustomType<?>> {
     MouseConfig getConfig();
 
     ConfigSide getSide();
-    EnumSet<ConfigState> getEffectiveStates();
+    EnumSet<ConfigState> getStates();
+    boolean hasState(ConfigState state);
     boolean isFrozen();
     boolean isNew();
 
@@ -57,5 +58,4 @@ public interface ConfigVal<V extends CustomType<?>> {
     default void addServerListener(ConfigValueListener<V> listener) { addListener(ConfigThreadPolicy.SERVER_THREAD, listener); }
     default void addAsyncListener(ConfigValueListener<V> listener)  { addListener(ConfigThreadPolicy.IMMEDIATE, listener); }
     boolean removeListener(ConfigValueListener<V> listener);
-    void clearListeners();
 }

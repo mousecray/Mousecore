@@ -10,7 +10,6 @@ package ru.mousecray.mousecore.core.config.utils;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.ConfigChangeListener;
 import ru.mousecray.mousecore.api.config.MouseConfig;
-import ru.mousecray.mousecore.api.config.utils.ConfigEnvironment;
 import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.config.utils.ConfigThreadPolicy;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
@@ -161,7 +160,7 @@ public final class ConfigListenerDispatcher {
         return switch (side) {
             case CLIENT -> ConfigThreadPolicy.CLIENT_THREAD;
             case SERVER -> ConfigThreadPolicy.SERVER_THREAD;
-            case SYNCED, COMMON -> switch (ConfigEnvironment.getCurrent()) {
+            case SYNCED, COMMON -> switch (ConfigEnvironmentController.getCurrent()) {
                 case DEDICATED_SERVER -> ConfigThreadPolicy.SERVER_THREAD;
                 case MULTIPLAYER_CLIENT -> ConfigThreadPolicy.CLIENT_THREAD;
                 case SINGLEPLAYER -> PlatformHelper.getInstance().isClientSide()

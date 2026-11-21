@@ -21,12 +21,10 @@ public interface ConfigParBase<T extends CustomType<?>> extends ConfigSectBase {
     IValType getType();
     int getCapacity();
 
-    boolean isSupportAdditionalValue(ConfigVal<? extends CustomType<?>> val);
-
     @Nonnull ConfigVal<T> getConfigVal();
     @Nullable ConfigVal<? extends CustomType<?>> getConfigVal(String internalName);
     @Nullable ConfigVal<? extends CustomType<?>> getConfigVal(DisplayName name);
-    @Nullable ConfigVal getValByDisplayName(String name);
+    @Nullable ConfigVal<? extends CustomType<?>> getValByDisplayName(String name);
 
     @Nonnull ImmutableDisplayNameMap<ConfigVal<?>> getValues();
 }

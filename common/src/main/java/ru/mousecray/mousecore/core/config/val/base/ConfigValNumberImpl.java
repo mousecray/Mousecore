@@ -8,8 +8,10 @@ package ru.mousecray.mousecore.core.config.val.base;
 import ru.mousecray.mousecore.api.VariableValue;
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mousecore.api.config.utils.ConfigLocaleType;
 import ru.mousecray.mousecore.api.config.utils.Constraint;
 import ru.mousecray.mousecore.api.config.utils.PredefinedValue;
+import ru.mousecray.mousecore.api.config.val.ILocaleType;
 import ru.mousecray.mousecore.api.config.val.base.ConfigNumberVal;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.NumberType;
@@ -82,6 +84,9 @@ public abstract class ConfigValNumberImpl<
     @Override public RangeContainer<T> getRange()   { return range; }
     @Override public VariableValue<T> getMinValue() { return getRange().isEmpty() ? create() : create(getRange().getMinValue()); }
     @Override public VariableValue<T> getMaxValue() { return getRange().isEmpty() ? create() : create(getRange().getMaxValue()); }
+
+    protected ILocaleType getRangeLocaleType()      { return ConfigLocaleType.RANGE; }
+    protected boolean saveRange()                   { return true; }
 
     @Override
     protected T adaptValue(T value) {

@@ -103,14 +103,16 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
         lastNotifiedValue = value;
     }
 
-    public void markNew(boolean isNew)    { isNewState = isNew; }
-    @Override public ConfigSide getSide() { return owner != null ? owner.getSide() : ConfigSide.COMMON; }
-    @Override public boolean isNew()      { return isNewState || (owner != null && owner.isNew()); }
-    @Override public boolean isFrozen()   { return constrainedDisabled || (owner != null && owner.isFrozen()); }
+    public void markNew(boolean isNew)                   { isNewState = isNew; }
+    @Override public ConfigSide getSide()                { return owner != null ? owner.getSide() : ConfigSide.COMMON; }
+    @Override public boolean isNew()                     { return isNewState || (owner != null && owner.isNew()); }
+    @Override public boolean isFrozen()                  { return constrainedDisabled || (owner != null && owner.isFrozen()); }
+    @Override public boolean hasState(ConfigState state) { return getStates().contains(state); }
+
 
     @Override
-    public EnumSet<ConfigState> getEffectiveStates() {
-        EnumSet<ConfigState> result = owner != null ? owner.getEffectiveStates() : EnumSet.noneOf(ConfigState.class);
+    public EnumSet<ConfigState> getStates() {
+        EnumSet<ConfigState> result = owner != null ? owner.getStates() : EnumSet.noneOf(ConfigState.class);
         if (isNew()) result.add(ConfigState.NEW);
         if (isFrozen()) result.add(ConfigState.FROZEN);
         return result;
@@ -707,7 +709,6 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
         }
     }
 
-    @Override
     public void clearListeners() {
         synchronized (listeners) {
             int count = listeners.size();

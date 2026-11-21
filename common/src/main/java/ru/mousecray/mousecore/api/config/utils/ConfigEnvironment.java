@@ -7,22 +7,28 @@
 
 package ru.mousecray.mousecore.api.config.utils;
 
-import javax.annotation.Nonnull;
-import java.util.Objects;
-
+/**
+ * Describes the environment in which the current config instance is operating.
+ *
+ * <p>Used to decide how config changes should be handled in different runtime
+ * contexts (single-player, dedicated server, or multiplayer client).</p>
+ *
+ * @see ConfigThreadPolicy
+ */
 public enum ConfigEnvironment {
+
+    /**
+     * Single-player game, main menu, or local testing.
+     */
     SINGLEPLAYER,
+
+    /**
+     * Dedicated server (a dedicated server JVM).
+     */
     DEDICATED_SERVER,
-    MULTIPLAYER_CLIENT;
 
-    private static volatile ConfigEnvironment current = SINGLEPLAYER;
-
-    @Nonnull
-    public static ConfigEnvironment getCurrent() {
-        return current;
-    }
-
-    public static void setCurrent(@Nonnull ConfigEnvironment environment) {
-        current = Objects.requireNonNull(environment);
-    }
+    /**
+     * A client connected to a remote server (multiplayer or LAN client).
+     */
+    MULTIPLAYER_CLIENT
 }
