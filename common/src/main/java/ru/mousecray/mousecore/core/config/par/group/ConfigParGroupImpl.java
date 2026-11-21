@@ -1,9 +1,16 @@
+/*
+ * ***************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ * **************************************************************************
+ */
+
 package ru.mousecray.mousecore.core.config.par.group;
 
 import org.apache.commons.lang3.tuple.Pair;
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.par.ConfigParGroup;
+import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.core.config.MouseConfigImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;

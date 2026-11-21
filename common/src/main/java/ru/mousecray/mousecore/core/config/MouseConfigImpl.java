@@ -11,7 +11,7 @@ import ru.mousecray.mousecore.api.config.io.ConfigIOResultType;
 import ru.mousecray.mousecore.api.config.io.IOFuture;
 import ru.mousecray.mousecore.api.config.par.ConfigPar;
 import ru.mousecray.mousecore.api.config.par.ConfigParBase;
-import ru.mousecray.mousecore.api.config.par.ConfigParGroup;
+import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;

@@ -13,7 +13,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import ru.mousecray.mousecore.api.VariableValue;
 import ru.mousecray.mousecore.api.config.par.ConfigPar;
 import ru.mousecray.mousecore.api.config.par.ConfigParBase;
-import ru.mousecray.mousecore.api.config.par.ConfigParGroup;
+import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;

@@ -27,7 +27,15 @@ public enum ConfigLocaleType implements ILocaleType {
     NONE_VARIANT("None"),
     LIST_VARIANT("Use List"),
     RULE_MODIFIER_CONDITIONAL("[!] before value - opposite"),
-    RULE_MODIFIER_UNIQUE("Duplicates are not allowed");
+    RULE_MODIFIER_UNIQUE("Duplicates are not allowed"),
+    GROUP_RULE("Rule"),
+    GROUP_FILTER_LIST("Filter List"),
+    GROUP_VALUE("Value"),
+    GROUP_RANGE("Range"),
+    GROUP_MATCH_VALUE("Match Value"),
+    GROUP_ELSE_VALUE("Else Value"),
+    GROUP_REPLACEMENT("Replacement"),
+    GROUP_FALLBACK("Fallback");
 
     private final String displayName;
     ConfigLocaleType(@Nonnull String displayName)     { this.displayName = Objects.requireNonNull(displayName); }

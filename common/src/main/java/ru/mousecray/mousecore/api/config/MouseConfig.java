@@ -9,7 +9,7 @@ package ru.mousecray.mousecore.api.config;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.config.io.IOFuture;
-import ru.mousecray.mousecore.api.config.par.ConfigParGroup;
+import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;

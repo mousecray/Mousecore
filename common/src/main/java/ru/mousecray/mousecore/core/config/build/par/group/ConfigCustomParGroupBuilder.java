@@ -9,7 +9,7 @@ package ru.mousecray.mousecore.core.config.build.par.group;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.par.ConfigParGroup;
+import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -23,7 +23,7 @@ public abstract class ConfigCustomParGroupBuilder<VAL extends CustomType<?>, BUI
     protected abstract ConfigParGroup<VAL> createGroup(DisplayName groupName);
 
     public final BUILDER buildGroup() {
-        ConfigParGroup<? extends CustomType<?>> val = createGroup(parBuilder.name);
+        ConfigParGroup<VAL> val = createGroup(parBuilder.name);
         Objects.requireNonNull(val);
         parBuilder.setGroup(val);
         return parBuilder;

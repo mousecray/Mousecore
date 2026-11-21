@@ -9,45 +9,42 @@ package ru.mousecray.mousecore.core.config.build.par.group;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
-import ru.mousecray.mousecore.api.config.par.ConfigParGroup;
+import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
-import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.type.ValType;
+import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.core.config.build.MouseConfigBuilder;
+import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
+import ru.mousecray.mousecore.core.config.build.struct.ConfigDisablerBuilder;
+import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
-public final class ConfigParameterGroupBuilder<T extends CustomType<?>> {
-    public final MouseConfigBuilder configBuilder;
-    public final String             path;
-    public final DisplayName        name;
-    boolean canBeDisabled;
-    @Nullable    String         comment;
-    public final ValType        valType;
-    public final Class<T>       typeClass;
-    private      ConfigParGroup group;
+public final class ConfigParameterGroupBuilder<T extends CustomType<?>> extends AbstractConfigChildBuilder {
+    public final IValType              valType;
+    public final Class<T>              typeClass;
+    private      ConfigParGroup<T>     group;
+    private      ConfigParDisablerImpl disabler;
 
     private ConfigParameterGroupBuilder(
             MouseConfigBuilder configBuilder, String path, DisplayName name,
-            ValType valType, Class<T> typeClass
+            IValType valType, Class<T> typeClass
     ) {
-        this.configBuilder = configBuilder;
-        this.path = path;
-        this.name = name;
+        super(configBuilder, path, name);
         this.valType = valType;
         this.typeClass = typeClass;
     }
 
     public static <T extends CustomType<?>> ConfigParameterGroupBuilder<T> create(
-            MouseConfigBuilder configBuilder, String path, DisplayName name, ValType valType, Class<T> typeClass
+            MouseConfigBuilder configBuilder, String path, DisplayName name, IValType valType, Class<T> typeClass
     ) {
         return new ConfigParameterGroupBuilder<>(
                 Objects.requireNonNull(configBuilder),
@@ -58,54 +55,123 @@ public final class ConfigParameterGroupBuilder<T extends CustomType<?>> {
         );
     }
 
-    public ConfigParameterGroupQuantityConditionBuilder<T> createQuantityConditionGroup() {
-        return ConfigParameterGroupQuantityConditionBuilder.create(this);
+    @Override
+    public ConfigParameterGroupBuilder<T> setComment(@Nullable String comment) {
+        this.comment = comment;
+        return this;
     }
 
-    public <T2 extends ConfigCustomParGroupBuilder<T, ConfigParameterGroupBuilder<T>>> T2 createGroup(T2 builder) {
+    @Override
+    public ConfigParameterGroupBuilder<T> setCanBeDisabled() {
+        canBeDisabled = true;
+        return this;
+    }
+
+    @Override
+    public void addDisabler(ConfigParDisablerImpl par) {
+        disabler = par;
+        canBeDisabled = true;
+    }
+
+    @Nullable public ConfigParDisablerImpl getDisabler() { return disabler; }
+    @Nullable public String getComment()                 { return comment; }
+
+    public ConfigDisablerBuilder<ConfigParameterGroupBuilder<T>> createDisabler(String displayName) {
+        return ConfigDisablerBuilder.create(this, Objects.requireNonNull(displayName), false);
+    }
+
+    public ConfigDisablerBuilder<ConfigParameterGroupBuilder<T>> createDisabler() {
+        return ConfigDisablerBuilder.create(this, "Disabler", true);
+    }
+
+    public <TARGET extends CustomType<?>> ConfigConditionalGroupBuilder<T, TARGET> createConditional(
+            IValType targetType, Class<TARGET> targetClass, @Nullable Function<String, TARGET> targetCreator
+    ) {
+        return new ConfigConditionalGroupBuilder<>(this, targetType, targetClass, targetCreator);
+    }
+
+    public <TARGET extends CustomType<?>> ConfigConditionalGroupBuilder<T, TARGET> createConditional(
+            IValType targetType, Class<TARGET> targetClass
+    ) {
+        return createConditional(targetType, targetClass, null);
+    }
+
+    public <TARGET extends CustomType<?>> ConfigBranchGroupBuilder<T, TARGET> createBranch(
+            IValType targetType, Class<TARGET> targetClass, @Nullable Function<String, TARGET> targetCreator
+    ) {
+        return new ConfigBranchGroupBuilder<>(this, targetType, targetClass, targetCreator);
+    }
+
+    public <TARGET extends CustomType<?>> ConfigBranchGroupBuilder<T, TARGET> createBranch(
+            IValType targetType, Class<TARGET> targetClass
+    ) {
+        return createBranch(targetType, targetClass, null);
+    }
+
+    public ConfigPhaseGroupBuilder<T> createPhase() {
+        return new ConfigPhaseGroupBuilder<>(this);
+    }
+
+    public <CONTEXT extends CustomType<?>> ConfigTransformerGroupBuilder<T, CONTEXT> createTransformer(
+            IValType contextType, Class<CONTEXT> contextClass, @Nullable Function<String, CONTEXT> contextCreator
+    ) {
+        return new ConfigTransformerGroupBuilder<>(this, contextType, contextClass, contextCreator);
+    }
+
+    public <CONTEXT extends CustomType<?>> ConfigTransformerGroupBuilder<T, CONTEXT> createTransformer(
+            IValType contextType, Class<CONTEXT> contextClass
+    ) {
+        return createTransformer(contextType, contextClass, null);
+    }
+
+    public <T2 extends ConfigCustomParGroupBuilder<T, ConfigParameterGroupBuilder<T>>> T2 createCustomGroup(T2 builder) {
         Objects.requireNonNull(builder);
         builder.parBuilder = this;
         return builder;
     }
 
-    public void setGroup(ConfigParGroup group) {
+    @SuppressWarnings("unchecked")
+    public void setGroup(ConfigParGroup<?> group) {
         if (this.group != null && configBuilder.logger != null) {
             configBuilder.logger.atWarn()
                     .withPrefix(LogPrefixes.CONFIG)
                     .withStyle(ConsoleColor.YELLOW_BG)
-                    .log("Value '{0}' in ConfigParGroupImpl '{1}' was overwritten by ConfigParGroupImpl '{2}'",
+                    .log("Group '{0}' in ConfigParameterGroup '{1}' was overwritten by '{2}'",
                             this.group.getFullInternalName(), getFullName(), group.getFullInternalName());
         }
-        this.group = group;
+        this.group = (ConfigParGroup<T>) group;
     }
 
     public MouseConfigBuilder buildParameterGroup() {
-        if (group == null) throw new IllegalStateException("ConfigParameterGroup doesn't contain par");
-        String               parentPath = path.substring(0, path.length() - 1);
-        List<ConfigSectBase> list       = configBuilder.sections.get(parentPath.substring(0, parentPath.lastIndexOf('.') + 1));
-        ConfigSectBase       parent     = null;
-        for (ConfigSectBase base : list) {
-            if (base.getName().getInternalName().equals(parentPath.substring(parentPath.lastIndexOf(".") + 1))) {
-                parent = base;
+        if (group == null) throw new IllegalStateException("ConfigParameterGroup '" + getFullName() + "' doesn't contain a group");
+
+        if (path.length() > 1) {
+            String parentPath      = path.substring(0, path.length() - 1);
+            int    lastDot         = parentPath.lastIndexOf('.');
+            String grandParentPath = lastDot >= 0 ? parentPath.substring(0, lastDot + 1) : ".";
+            String parentName      = lastDot >= 0 ? parentPath.substring(lastDot + 1) : parentPath;
+
+            List<ConfigSectBase> parentSections = configBuilder.sections.get(grandParentPath);
+            if (parentSections != null) {
+                for (ConfigSectBase base : parentSections) {
+                    if (base.getName().getInternalName().equals(parentName)) {
+                        if (base.canBeDisabled() != canBeDisabled) {
+                            canBeDisabled = base.canBeDisabled();
+                            if (configBuilder.logger != null && !configBuilder.autoDisable) {
+                                configBuilder.logger.atWarn()
+                                        .withPrefix(LogPrefixes.CONFIG)
+                                        .withStyle(ConsoleColor.YELLOW_BG)
+                                        .log("Parent section of ConfigParameterGroup '{0}' has 'canBeDisabled={1}'. Group updated to match",
+                                                getFullName(), canBeDisabled);
+                            }
+                        }
+                        break;
+                    }
+                }
             }
         }
-        if (parent != null && parent.canBeDisabled() != canBeDisabled) {
-            canBeDisabled = parent.canBeDisabled();
-            if (configBuilder.logger != null && !configBuilder.autoDisable) {
-                configBuilder.logger.atWarn()
-                        .withPrefix(LogPrefixes.CONFIG)
-                        .withStyle(ConsoleColor.YELLOW_BG)
-                        .log("The Parent section of ConfigParameterGroup '{0}' has flag 'canBeDisabled' " +
-                                        "other then the ConfigParameterGroup value. " +
-                                        "The value of ConfigParameterGroup has been changed",
-                                group.getFullInternalName(), getFullName(), group.getFullInternalName());
-            }
-        }
+
         configBuilder.putParameter(path, group);
         return configBuilder;
     }
-
-    public @Nullable ConfigDictionary getDictionary() { return configBuilder.dictionary; }
-    public boolean hasDictionary()                    { return configBuilder.dictionary != null; }
-    String getFullName()                              { return path + name.getInternalName(); }
 }

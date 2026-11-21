@@ -1,3 +1,10 @@
+/*
+ * ***************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ * **************************************************************************
+ */
+
 package ru.mousecray.mousecore.core.config.build.struct;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -101,6 +108,15 @@ public final class ConfigDictionaryBuilder {
                 setLocaleForValType(ValType.MINECRAFT_ENCHANTMENT, "Зачарование Minecraft");
                 setLocaleForValType(ValType.MINECRAFT_PARTICLE, "Частица Minecraft");
                 setLocaleForValType(ValType.MINECRAFT_SOUND, "Звук Minecraft");
+
+                setLocaleForLocale(ConfigLocaleType.GROUP_RULE, "Правило");
+                setLocaleForLocale(ConfigLocaleType.GROUP_FILTER_LIST, "Список фильтрации");
+                setLocaleForLocale(ConfigLocaleType.GROUP_VALUE, "Значение");
+                setLocaleForLocale(ConfigLocaleType.GROUP_RANGE, "Диапазон");
+                setLocaleForLocale(ConfigLocaleType.GROUP_MATCH_VALUE, "Значение при совпадении");
+                setLocaleForLocale(ConfigLocaleType.GROUP_ELSE_VALUE, "Значение иначе");
+                setLocaleForLocale(ConfigLocaleType.GROUP_REPLACEMENT, "Замена");
+                setLocaleForLocale(ConfigLocaleType.GROUP_FALLBACK, "По-умолчанию");
                 return this;
 
             case EN_US:
@@ -165,6 +181,15 @@ public final class ConfigDictionaryBuilder {
                 setLocaleForValType(ValType.MINECRAFT_ENCHANTMENT, "Minecraft Enchantment");
                 setLocaleForValType(ValType.MINECRAFT_PARTICLE, "Minecraft Particle");
                 setLocaleForValType(ValType.MINECRAFT_SOUND, "Minecraft Sound");
+
+                setLocaleForLocale(ConfigLocaleType.GROUP_RULE, "Rule");
+                setLocaleForLocale(ConfigLocaleType.GROUP_FILTER_LIST, "Filter List");
+                setLocaleForLocale(ConfigLocaleType.GROUP_VALUE, "Value");
+                setLocaleForLocale(ConfigLocaleType.GROUP_RANGE, "Range");
+                setLocaleForLocale(ConfigLocaleType.GROUP_MATCH_VALUE, "Match Value");
+                setLocaleForLocale(ConfigLocaleType.GROUP_ELSE_VALUE, "Else Value");
+                setLocaleForLocale(ConfigLocaleType.GROUP_REPLACEMENT, "Replacement");
+                setLocaleForLocale(ConfigLocaleType.GROUP_FALLBACK, "Fallback");
                 return this;
         }
     }

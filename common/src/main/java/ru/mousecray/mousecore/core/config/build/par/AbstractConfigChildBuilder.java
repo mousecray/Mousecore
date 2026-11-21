@@ -16,8 +16,8 @@ import javax.annotation.Nullable;
 
 public abstract class AbstractConfigChildBuilder {
     public final        MouseConfigBuilder configBuilder;
-    protected final     String             path;
-    protected final     DisplayName        name;
+    public final        String             path;
+    public final        DisplayName        name;
     protected           boolean            canBeDisabled;
     protected @Nullable String             comment;
 
