@@ -85,7 +85,7 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
         private ConstraintType type;
         private String         path;
 
-        BuilderImpl() { }
+        public BuilderImpl() { }
 
         @Override public DisabledBuilderImpl setDisabledType(String path) {
             this.path = Objects.requireNonNull(path);
@@ -100,30 +100,30 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
         }
 
         public final class DisabledBuilderImpl implements Constraint.Builder.DisabledBuilder {
-            private DisabledBuilderImpl()                                                    { }
+            private DisabledBuilderImpl() { }
 
             @Override
-            public DisabledBuilderEquality<LogicalType<?>> setLogicalType()                  { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.LOGICAL); }
-            @Override public DisabledBuilderNumberImpl setNumberType()                       { return new DisabledBuilderNumberImpl(); }
+            public DisabledBuilderEquality<LogicalType<?>> setLogicalType() { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.LOGICAL); }
+            @Override public DisabledBuilderNumberImpl setNumberType() { return new DisabledBuilderNumberImpl(); }
             @Override
-            public DisabledBuilderEquality<StringType> setStringType()                       { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.STRING); }
-            @Override public DisabledBuilderEquality<EnumType<?>> setEnumType()              { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.ENUM); }
+            public DisabledBuilderEquality<StringType> setStringType() { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.STRING); }
+            @Override public DisabledBuilderEquality<EnumType<?>> setEnumType() { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.ENUM); }
             @Override
-            public DisabledBuilderEquality<ColorType> setColorType()                         { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.COLOR); }
+            public DisabledBuilderEquality<ColorType> setColorType() { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.COLOR); }
             @Override
-            public DisabledBuilderEquality<Vector3Type<?, ?>> setVectorType()                { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.VECTOR); }
+            public DisabledBuilderEquality<Vector3Type<?, ?>> setVectorType() { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.VECTOR); }
             @Override
-            public DisabledBuilderEquality<RegexType> setPatternType()                       { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.PATTERN); }
+            public DisabledBuilderEquality<RegexType> setPatternType() { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.PATTERN); }
             @Override
-            public DisabledBuilderEquality<ExpressionType> setExpressionType()               { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.EXPRESSION); }
+            public DisabledBuilderEquality<ExpressionType> setExpressionType() { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.EXPRESSION); }
             @Override
-            public DisabledBuilderEquality<OtherType<?>> setMinecraftType()                  { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.MINECRAFT); }
+            public DisabledBuilderEquality<OtherType<?>> setMinecraftType() { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.MINECRAFT); }
             @Override
-            public DisabledBuilderEquality<CustomType<?>> setContainerType()                 { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.CONTAINER); }
+            public DisabledBuilderEquality<CustomType<?>> setContainerType() { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.CONTAINER); }
             @Override
-            public DisabledBuilderEquality<ConditionType<?, ?>> setConditionType()           { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.CONDITION); }
+            public DisabledBuilderEquality<ConditionType<?, ?>> setConditionType() { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.CONDITION); }
             @Override
-            public DisabledBuilderEquality<OtherType<?>> setOtherType()                      { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.OTHER); }
+            public DisabledBuilderEquality<OtherType<?>> setOtherType() { return new DisabledBuilderEqualityImpl<>(ValTypeCategory.OTHER); }
         }
 
         public final class DisabledBuilderEqualityImpl<BASE extends CustomType<?>> implements Constraint.Builder.DisabledBuilderEquality<BASE> {
@@ -215,30 +215,30 @@ public final class ConstraintImpl<T extends CustomType<?>> implements Constraint
         }
 
         public final class RelationBuilderImpl implements Constraint.Builder.RelationBuilder {
-            private RelationBuilderImpl()                                                    { }
+            private RelationBuilderImpl() { }
 
             @Override
-            public RelationBuilderEquality<LogicalType<?>> setLogicalType()                  { return new RelationBuilderEqualityImpl<>(ValTypeCategory.LOGICAL); }
-            @Override public RelationBuilderNumberImpl setNumberType()                       { return new RelationBuilderNumberImpl(); }
+            public RelationBuilderEquality<LogicalType<?>> setLogicalType() { return new RelationBuilderEqualityImpl<>(ValTypeCategory.LOGICAL); }
+            @Override public RelationBuilderNumberImpl setNumberType() { return new RelationBuilderNumberImpl(); }
             @Override
-            public RelationBuilderEquality<StringType> setStringType()                       { return new RelationBuilderEqualityImpl<>(ValTypeCategory.STRING); }
-            @Override public RelationBuilderEquality<EnumType<?>> setEnumType()              { return new RelationBuilderEqualityImpl<>(ValTypeCategory.ENUM); }
+            public RelationBuilderEquality<StringType> setStringType() { return new RelationBuilderEqualityImpl<>(ValTypeCategory.STRING); }
+            @Override public RelationBuilderEquality<EnumType<?>> setEnumType() { return new RelationBuilderEqualityImpl<>(ValTypeCategory.ENUM); }
             @Override
-            public RelationBuilderEquality<ColorType> setColorType()                         { return new RelationBuilderEqualityImpl<>(ValTypeCategory.COLOR); }
+            public RelationBuilderEquality<ColorType> setColorType() { return new RelationBuilderEqualityImpl<>(ValTypeCategory.COLOR); }
             @Override
-            public RelationBuilderEquality<Vector3Type<?, ?>> setVectorType()                { return new RelationBuilderEqualityImpl<>(ValTypeCategory.VECTOR); }
+            public RelationBuilderEquality<Vector3Type<?, ?>> setVectorType() { return new RelationBuilderEqualityImpl<>(ValTypeCategory.VECTOR); }
             @Override
-            public RelationBuilderEquality<RegexType> setPatternType()                       { return new RelationBuilderEqualityImpl<>(ValTypeCategory.PATTERN); }
+            public RelationBuilderEquality<RegexType> setPatternType() { return new RelationBuilderEqualityImpl<>(ValTypeCategory.PATTERN); }
             @Override
-            public RelationBuilderEquality<ExpressionType> setExpressionType()               { return new RelationBuilderEqualityImpl<>(ValTypeCategory.EXPRESSION); }
+            public RelationBuilderEquality<ExpressionType> setExpressionType() { return new RelationBuilderEqualityImpl<>(ValTypeCategory.EXPRESSION); }
             @Override
-            public RelationBuilderEquality<OtherType<?>> setMinecraftType()                  { return new RelationBuilderEqualityImpl<>(ValTypeCategory.MINECRAFT); }
+            public RelationBuilderEquality<OtherType<?>> setMinecraftType() { return new RelationBuilderEqualityImpl<>(ValTypeCategory.MINECRAFT); }
             @Override
-            public RelationBuilderEquality<CustomType<?>> setContainerType()                 { return new RelationBuilderEqualityImpl<>(ValTypeCategory.CONTAINER); }
+            public RelationBuilderEquality<CustomType<?>> setContainerType() { return new RelationBuilderEqualityImpl<>(ValTypeCategory.CONTAINER); }
             @Override
-            public RelationBuilderEquality<ConditionType<?, ?>> setConditionType()           { return new RelationBuilderEqualityImpl<>(ValTypeCategory.CONDITION); }
+            public RelationBuilderEquality<ConditionType<?, ?>> setConditionType() { return new RelationBuilderEqualityImpl<>(ValTypeCategory.CONDITION); }
             @Override
-            public RelationBuilderEquality<OtherType<?>> setOtherType()                      { return new RelationBuilderEqualityImpl<>(ValTypeCategory.OTHER); }
+            public RelationBuilderEquality<OtherType<?>> setOtherType() { return new RelationBuilderEqualityImpl<>(ValTypeCategory.OTHER); }
         }
 
         public final class RelationBuilderEqualityImpl<BASE extends CustomType<?>> implements Constraint.Builder.RelationBuilderEquality<BASE> {
