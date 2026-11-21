@@ -1,3 +1,10 @@
+/*
+ * ***************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ * **************************************************************************
+ */
+
 package ru.mousecray.mousecore.core.config.par;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -19,10 +26,10 @@ public class ConfigParImpl<T extends CustomType<?>> extends ConfigParBaseImpl<T>
         super(name, canBeDisabled, Pair.of(name, value), null, comment);
     }
 
-    @Override
-    public boolean canBeDisabled() { return super.canBeDisabled() || getConfigVal().hasDisablingConstraints(); }
-    @Override
-    public boolean isDisabled() { return isDisabled || isStructurallyDisabled || getConfigVal().isConstrainedDisabled(); }
+    @Override public boolean canBeDisabled() { return super.canBeDisabled() || getConfigVal().hasDisablingConstraints(); }
+    @Override public boolean isFrozen()      { return super.isFrozen() || getConfigVal().isConstrainedDisabled(); }
+    @Override public boolean isDisabled()    { return isDisabled || isStructurallyDisabled || getConfigVal().isConstrainedDisabled(); }
 
-    @Override public boolean isSupportAdditionalValue(ConfigVal<? extends CustomType<?>> val) { return false; }
+    @Override
+    public boolean isSupportAdditionalValue(ConfigVal<? extends CustomType<?>> val) { return false; }
 }

@@ -13,7 +13,10 @@ import ru.mousecray.mousecore.api.utils.MouseUtils;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -28,17 +31,23 @@ public abstract class ListType<VAL extends CustomType<?>, T extends CustomType<?
             .thenEqualing(ListType::getList);
 
     @Nullable private final Function<String, T> valCreator;
-    private final           List<VAL>           list = new ArrayList<>();
+    private final           List<VAL>           list;
     private final           IValType            listComponentType;
 
     protected ListType(IValType listComponentType, @Nullable Function<String, T> valCreator) {
-        this.valCreator = valCreator;
-        this.listComponentType = listComponentType;
+        this(listComponentType, valCreator, Collections.emptyList());
     }
 
     protected ListType(IValType listComponentType, @Nullable Function<String, T> valCreator, List<VAL> values) {
-        this(listComponentType, valCreator);
-        list.addAll(Objects.requireNonNull(values));
+        this.valCreator = valCreator;
+        this.listComponentType = Objects.requireNonNull(listComponentType);
+        Objects.requireNonNull(values);
+        if (values.isEmpty()) list = Collections.emptyList();
+        else {
+            List<VAL> copy = new ArrayList<>(values.size());
+            for (VAL v : values) if (v != null) copy.add(v);
+            list = Collections.unmodifiableList(copy);
+        }
     }
 
     public IValType getListComponentValType()            { return listComponentType; }
@@ -46,28 +55,59 @@ public abstract class ListType<VAL extends CustomType<?>, T extends CustomType<?
     protected abstract <TYPE extends ListType<VAL, T>> TYPE createType(List<VAL> list);
 
     protected List<VAL> getList()                        { return list; }
+    public List<VAL> asList()                            { return list; }
     @Nullable public Function<String, T> getValCreator() { return valCreator; }
 
-    public boolean addValue(VAL value)                   { return list.add(value); }
-    public boolean removeValue(VAL value)                { return list.remove(value); }
-    public void clear()                                  { list.clear(); }
+    public int size()                                    { return list.size(); }
     public boolean isEmpty()                             { return list.isEmpty(); }
     public VAL getValue(int index)                       { return list.get(index); }
 
-    public boolean containsValue(@Nullable VAL value)    { return list.contains(value); }
+    public <TYPE extends ListType<VAL, T>> TYPE withAdded(VAL value) {
+        Objects.requireNonNull(value);
+        List<VAL> next = new ArrayList<>(list.size() + 1);
+        next.addAll(list);
+        next.add(value);
+        return createType(next);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <TYPE extends ListType<VAL, T>> TYPE withRemoved(@Nullable VAL value) {
+        if (value == null || !list.contains(value)) return (TYPE) this;
+        List<VAL> next = new ArrayList<>(list);
+        next.remove(value);
+        return createType(next);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <TYPE extends ListType<VAL, T>> TYPE withCleared() {
+        return list.isEmpty() ? (TYPE) this : createType(Collections.emptyList());
+    }
+
+    public boolean containsValue(@Nullable VAL value) { return value != null && list.contains(value); }
 
     public abstract boolean containsOriginalValue(@Nullable T value);
 
-    public void forEach(Consumer<VAL> func)              { list.forEach(func); }
+    public void forEach(Consumer<VAL> func)           { list.forEach(func); }
 
+    @SuppressWarnings("unchecked")
     public <TYPE extends ListType<VAL, T>> TYPE map(Function<VAL, VAL> func) {
-        return createType(MouseCollections.map(func, false, list));
+        if (list.isEmpty()) return (TYPE) this;
+        boolean   changed = false;
+        List<VAL> next    = new ArrayList<>(list.size());
+        for (VAL elem : list) {
+            VAL mapped = func.apply(elem);
+            if (mapped != null) {
+                if (mapped != elem && !Objects.equals(mapped, elem)) changed = true;
+                next.add(mapped);
+            } else changed = true;
+        }
+        return changed ? createType(next) : (TYPE) this;
     }
 
     @Override
     public String toString() {
         return list.stream()
-                .map(v -> v.toString())
+                .map(Object::toString)
                 .collect(Collectors.joining(", "));
     }
 
@@ -76,28 +116,12 @@ public abstract class ListType<VAL extends CustomType<?>, T extends CustomType<?
 
     @Override public int hashCode() { return Objects.hash(listComponentType, list, valCreator); }
 
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public int compareTo(ListType<VAL, T> o) {
         if (o == this) return 0;
 
-        int result = Integer.compare(list.size(), o.list.size());
-
-        if (result == 0) {
-            List<Comparable> l1 = new ArrayList<>(list);
-            Collections.sort(l1);
-            List<Comparable> l2 = new ArrayList<>(o.list);
-            Collections.sort(l2);
-
-            ListIterator<Comparable> e1 = l1.listIterator();
-            ListIterator<Comparable> e2 = l2.listIterator();
-            while (e1.hasNext() && e2.hasNext()) {
-                Comparable o1 = e1.next(), o2 = e2.next();
-                if (o1 != null && o2 != null) {
-                    result = o1.compareTo(o2);
-                    if (result != 0) return result;
-                }
-            }
-        }
+        int result = MouseCollections.compare(list, o.list);
 
         if (result == 0) {
             if (valCreator == o.valCreator) return 0;

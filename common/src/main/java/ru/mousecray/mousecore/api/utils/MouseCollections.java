@@ -126,4 +126,29 @@ public final class MouseCollections {
             return a.length - b.length;
         } else return a == null ? -1 : 1;
     }
+
+    public static <T extends Comparable<?>> int compare(@Nullable List<T> a, @Nullable List<T> b) {
+        if (a == b) return 0;
+        else if (a != null && b != null) {
+            int result = Integer.compare(a.size(), b.size());
+            if (result == 0) {
+                List<Comparable> l1 = new ArrayList<>(a);
+                Collections.sort(l1);
+                List<Comparable> l2 = new ArrayList<>(b);
+                Collections.sort(l2);
+
+                ListIterator<Comparable> e1 = l1.listIterator();
+                ListIterator<Comparable> e2 = l2.listIterator();
+
+                while (e1.hasNext() && e2.hasNext()) {
+                    Comparable o1 = e1.next(), o2 = e2.next();
+                    if (o1 != null && o2 != null) {
+                        result = o1.compareTo(o2);
+                        if (result != 0) return result;
+                    }
+                }
+            }
+            return result;
+        } else return a == null ? -1 : 1;
+    }
 }

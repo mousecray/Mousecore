@@ -32,19 +32,20 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 
 @ParametersAreNonnullByDefault
 @MethodReturnsNonnullByDefault
 @FieldsAreNonnullByDefault
 public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigValOtherImpl<ConditionType<ListType<?, V>, V>> implements ConfigValCondition<V> {
-    @Nullable protected final String                   pathToParList;
-    @Nullable protected       Supplier<ListType<?, V>> listSupplier;
-    @Nullable private         ListType<?, V>           cachedList;
-    protected final           IValType                 listComponentType;
-    @Nullable protected final String                   stringAny;
-    @Nullable protected final String                   stringNone;
-    @Nullable protected final String                   stringUseList;
+    @Nullable protected final    String                   pathToParList;
+    @Nullable protected volatile Supplier<ListType<?, V>> listSupplier;
+    @Nullable private volatile   ListType<?, V>           cachedList;
+    protected final              IValType                 listComponentType;
+    @Nullable protected final    String                   stringAny;
+    @Nullable protected final    String                   stringNone;
+    @Nullable protected final    String                   stringUseList;
 
     @SafeVarargs
     private ConfigValConditionImpl(
@@ -119,6 +120,7 @@ public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigValOt
         );
     }
 
+    @SafeVarargs
     @Nullable
     protected static <V extends CustomType<?>> PredefinedValue<ConditionType<ListType<?, V>, V>>[] genValues(
             boolean tv, boolean lv,
@@ -133,7 +135,6 @@ public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigValOt
                         ConditionType.NONE(
                                 stringNone != null ? stringNone : ConfigLocaleType.NONE_VARIANT.getDisplayName()
                         )
-
                 ),
                 true, predefinedValues
         );
@@ -141,46 +142,30 @@ public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigValOt
         List<PredefinedValue<ConditionType<ListType<?, V>, V>>> list = new ArrayList<>();
         if (tv) {
             list.add(new PredefinedValueImpl<>("+",
-                    ConditionType.ANY(
-                            stringAny != null ? stringAny : ConfigLocaleType.ANY_VARIANT.getDisplayName()
-                    )
-            ));
+                    ConditionType.ANY(stringAny != null ? stringAny : ConfigLocaleType.ANY_VARIANT.getDisplayName())));
             list.add(new PredefinedValueImpl<>("-",
-                    ConditionType.NONE(
-                            stringNone != null ? stringNone : ConfigLocaleType.NONE_VARIANT.getDisplayName()
-                    )
-            ));
+                    ConditionType.NONE(stringNone != null ? stringNone : ConfigLocaleType.NONE_VARIANT.getDisplayName())));
         }
         if (additionalThreshold != null) {
             for (Pair<String, String> pair : additionalThreshold) {
                 list.add(new PredefinedValueImpl<>(pair.getLeft(),
-                        ConditionType.ANY(
-                                stringAny != null ? stringAny : ConfigLocaleType.ANY_VARIANT.getDisplayName()
-                        )
-                ));
+                        ConditionType.ANY(stringAny != null ? stringAny : ConfigLocaleType.ANY_VARIANT.getDisplayName())));
                 list.add(new PredefinedValueImpl<>(pair.getRight(),
-                        ConditionType.NONE(
-                                stringNone != null ? stringNone : ConfigLocaleType.NONE_VARIANT.getDisplayName()
-                        )
-                ));
+                        ConditionType.NONE(stringNone != null ? stringNone : ConfigLocaleType.NONE_VARIANT.getDisplayName())));
             }
         }
         if (lv) {
-            list.add(
-                    new PredefinedValueImpl<>("*", ConditionType.create(
-                            (l, val) -> l != null && l.containsOriginalValue(val),
-                            stringUseList != null ? stringUseList : ConfigLocaleType.LIST_VARIANT.getDisplayName()
-                    ))
-            );
+            list.add(new PredefinedValueImpl<>("*", ConditionType.create(
+                    (l, val) -> l != null && l.containsOriginalValue(val),
+                    stringUseList != null ? stringUseList : ConfigLocaleType.LIST_VARIANT.getDisplayName()
+            )));
         }
         if (additionalUseList != null) {
             for (String s : additionalUseList) {
-                list.add(
-                        new PredefinedValueImpl<>(s, ConditionType.create(
-                                (l, val) -> l != null && l.containsOriginalValue(val),
-                                stringUseList != null ? stringUseList : ConfigLocaleType.LIST_VARIANT.getDisplayName()
-                        ))
-                );
+                list.add(new PredefinedValueImpl<>(s, ConditionType.create(
+                        (l, val) -> l != null && l.containsOriginalValue(val),
+                        stringUseList != null ? stringUseList : ConfigLocaleType.LIST_VARIANT.getDisplayName()
+                )));
             }
         }
         return list.isEmpty() ? predefinedValues
@@ -189,42 +174,53 @@ public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigValOt
 
     @Nullable @Override public String getPathToParList()        { return pathToParList; }
     @Override public IValType getListComponentType()            { return listComponentType; }
-
     @Nullable public Supplier<ListType<?, V>> getListSupplier() { return listSupplier; }
 
-    @Override public boolean test(V value) {
-        return getValue().test(listSupplier != null ? listSupplier.get() : null, value);
+    @Override
+    public boolean test(V value) {
+        ReentrantReadWriteLock lock = getSyncLock();
+        if (lock == null) {
+            Supplier<ListType<?, V>> sup = listSupplier;
+            return getEffectiveValue().test(sup != null ? sup.get() : null, value);
+        }
+        lock.readLock().lock();
+        try {
+            Supplier<ListType<?, V>> sup = listSupplier;
+            return getEffectiveValue().test(sup != null ? sup.get() : null, value);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     protected VariableValue<ConditionType<ListType<?, V>, V>> parseValue(@Nullable String value) {
-        /*It is compiled into the code as a PredefinedValue. It will return the correct value even before this method is executed.*/
+        /* It is compiled into the code as a PredefinedValue. It will return the correct value even before this method is executed. */
         return VariableValue.create();
     }
 
-    @SuppressWarnings({ "DataFlowIssue", "unchecked" }) @Override public void reloadCache() {
-        super.reloadCache();
+    @SuppressWarnings({ "DataFlowIssue", "unchecked", "rawtypes" })
+    @Override
+    public void onReloadCache() {
+        super.onReloadCache();
 
         if (cachedList != null) cachedList = null;
 
         if (pathToParList != null) {
             ConfigValSimpleList<CustomType<?>> list = getConfig().getListVal(pathToParList);
-            if (list != null) {
-                if (listComponentType == list.getListComponentType()) {
-                    ListType var = list.getList();
-                    cachedList = (ListType<?, V>) var;
-                    listSupplier = () -> cachedList;
-                    return;
-                }
+            if (list != null && listComponentType == list.getListComponentType()) {
+                ListType var = list.getList();
+                cachedList = (ListType<?, V>) var;
+                listSupplier = () -> cachedList;
+                return;
             }
             if (hasLogger()) {
                 getLogger().atWarn()
                         .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("'{0}' is not found or incompatible type for ConfigValCondition '{1}'",
-                                pathToParList, owner.getName());
+                                pathToParList, owner != null ? owner.getName() : "unknown");
             }
-        } else {
+        } else if (listSupplier != null) {
             ListType<?, V> list = listSupplier.get();
             if (list != null) cachedList = list;
             else if (hasLogger()) {
@@ -232,7 +228,7 @@ public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigValOt
                         .withPrefix(LogPrefixes.CONFIG)
                         .withStyle(ConsoleColor.YELLOW_BG)
                         .log("listSupplier returns null for ConfigValCondition '{0}'",
-                                owner.getName());
+                                owner != null ? owner.getName() : "unknown");
             }
         }
     }

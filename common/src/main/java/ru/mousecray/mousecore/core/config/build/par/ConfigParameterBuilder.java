@@ -10,6 +10,7 @@ package ru.mousecray.mousecore.core.config.build.par;
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
+import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
@@ -127,6 +128,30 @@ public final class ConfigParameterBuilder extends AbstractConfigChildBuilder {
         return builder;
     }
 
+    @Override
+    public ConfigParameterBuilder setSide(@Nullable ConfigSide side) {
+        super.setSide(side);
+        return this;
+    }
+
+    @Override
+    public ConfigParameterBuilder markDeprecated() {
+        super.markDeprecated();
+        return this;
+    }
+
+    @Override
+    public ConfigParameterBuilder markUnused() {
+        super.markUnused();
+        return this;
+    }
+
+    @Override
+    public ConfigParameterBuilder markExperimental() {
+        super.markExperimental();
+        return this;
+    }
+
     public void setValue(ConfigVal value) {
         Objects.requireNonNull(value);
         if (this.value != null && configBuilder.logger != null) {
@@ -138,6 +163,12 @@ public final class ConfigParameterBuilder extends AbstractConfigChildBuilder {
                     );
         }
         this.value = (ConfigValImpl<?>) value;
+    }
+
+    @Override
+    public ConfigParameterBuilder setThreadSafe() {
+        super.setThreadSafe();
+        return this;
     }
 
     public MouseConfigBuilder buildParameter() {
@@ -171,7 +202,10 @@ public final class ConfigParameterBuilder extends AbstractConfigChildBuilder {
             }
         }
 
-        configBuilder.putParameter(path, new ConfigParImpl(name, canBeDisabled, value, comment));
+        ConfigParImpl<?> par = new ConfigParImpl<>(name, canBeDisabled, value, comment);
+        applyMetadata(par);
+        configBuilder.putParameter(path, par);
+
         return configBuilder;
     }
 }

@@ -15,12 +15,15 @@ import ru.mousecray.mousecore.api.config.val.ConfigVal;
 import ru.mousecray.mousecore.api.container.ImmutableDisplayNameMap;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
+import ru.mousecray.mousecore.core.config.MouseConfigImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectBaseImpl;
+import ru.mousecray.mousecore.core.config.utils.ConfigListenerDispatcher;
 import ru.mousecray.mousecore.core.config.val.ConfigValImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -48,19 +51,50 @@ public abstract class ConfigParBaseImpl<T extends CustomType<?>> extends ConfigS
         }
     }
 
+    @Override
+    public void setConfig(@Nullable MouseConfigImpl config) {
+        MouseConfigImpl prev = this.config;
+        super.setConfig(config);
+        if (prev != config && config != null) {
+            values.values().forEach(val -> {
+                if (val instanceof ConfigValImpl<?> impl) impl.onConfigAttached(config);
+            });
+        }
+    }
+
     @Nullable @Override public ConfigVal getValByDisplayName(String name) { return values.getByDisplayName(name); }
 
     @Override
-    public void reset() {
-        super.reset();
-        values.values().forEach(ConfigVal::reset);
-        reloadCache();
+    public void onReset() {
+        super.onReset();
+        values.values().forEach(val -> {
+            if (val instanceof ConfigValImpl<?> impl) impl.onReset();
+            else val.reset();
+        });
     }
 
     @Override
-    public void reloadCache() {
-        super.reloadCache();
-        values.values().forEach(val -> { if (val instanceof ConfigValImpl<?> impl) impl.reloadCache(); });
+    public void onReloadCache() {
+        super.onReloadCache();
+        values.values().forEach(val -> {
+            if (val instanceof ConfigValImpl<?> impl) impl.onReloadCache();
+        });
+    }
+
+    @Override
+    public void onSyncListeners() {
+        super.onSyncListeners();
+        values.values().forEach(val -> {
+            if (val instanceof ConfigValImpl<?> impl) impl.onSyncListeners();
+        });
+    }
+
+    @Override
+    public void onCollectChanges(List<ConfigListenerDispatcher.PendingValueNotification<?>> out) {
+        super.onCollectChanges(out);
+        values.values().forEach(val -> {
+            if (val instanceof ConfigValImpl<?> impl) impl.onCollectChanges(out);
+        });
     }
 
     @Nonnull @Override public ImmutableDisplayNameMap<ConfigVal<?>> getValues()               { return new ImmutableDisplayNameMap<>(values); }
@@ -70,25 +104,21 @@ public abstract class ConfigParBaseImpl<T extends CustomType<?>> extends ConfigS
     @Override public boolean isSupportAdditionalValue(ConfigVal<? extends CustomType<?>> val) { return true; }
 
     @Nullable @Override
-    public final ConfigVal<? extends CustomType<?>> getConfigVal(String internalName) { return getCapacity() > 0 ? values.getByInternalName(internalName) : null; }
+    public final ConfigVal<? extends CustomType<?>> getConfigVal(String internalName) {
+        return getCapacity() > 0 ? values.getByInternalName(internalName) : null;
+    }
 
     @Nullable @Override
-    public final ConfigVal<? extends CustomType<?>> getConfigVal(DisplayName name) { return getCapacity() > 0 ? values.get(name) : null; }
+    public final ConfigVal<? extends CustomType<?>> getConfigVal(DisplayName name) {
+        return getCapacity() > 0 ? values.get(name) : null;
+    }
 
     @SuppressWarnings({ "DataFlowIssue", "unchecked" }) @Nonnull @Override
     public final ConfigValImpl<T> getConfigVal() { return (ConfigValImpl<T>) getConfigVal(firstValName); }
 
-    @Override
-    public int getCapacity() { return values.getSize(); }
-    public void markDirty() {
-        if (config != null && config.isBuilt())
-            config.markDirty(this);
-    }
+    @Override public int getCapacity()  { return values.getSize(); }
 
-    @Override
-    public IValType getType() { return getConfigVal().getType(); }
+    public void markDirty()             { if (config != null && config.isBuilt()) config.markDirty(this); }
 
-    @Override public void setDisabledStructurally(boolean disabled) {
-        super.setDisabledStructurally(disabled);
-    }
+    @Override public IValType getType() { return getConfigVal().getType(); }
 }

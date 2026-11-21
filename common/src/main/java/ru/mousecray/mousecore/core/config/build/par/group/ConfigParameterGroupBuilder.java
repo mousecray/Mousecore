@@ -11,6 +11,7 @@ import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
+import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
@@ -19,6 +20,7 @@ import ru.mousecray.mousecore.core.config.build.MouseConfigBuilder;
 import ru.mousecray.mousecore.core.config.build.par.AbstractConfigChildBuilder;
 import ru.mousecray.mousecore.core.config.build.struct.ConfigDisablerBuilder;
 import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;
+import ru.mousecray.mousecore.core.config.sect.ConfigSectBaseImpl;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -124,10 +126,34 @@ public final class ConfigParameterGroupBuilder<T extends CustomType<?>> extends 
         return createTransformer(contextType, contextClass, null);
     }
 
-    public <T2 extends ConfigCustomParGroupBuilder<T, ConfigParameterGroupBuilder<T>>> T2 createCustomGroup(T2 builder) {
+    public <T2 extends ConfigCustomParGroupBuilder<T, ConfigParameterGroupBuilder<T>>> T2 createGroup(T2 builder) {
         Objects.requireNonNull(builder);
         builder.parBuilder = this;
         return builder;
+    }
+
+    @Override
+    public ConfigParameterGroupBuilder<T> setSide(@Nullable ConfigSide side) {
+        super.setSide(side);
+        return this;
+    }
+
+    @Override
+    public ConfigParameterGroupBuilder<T> markDeprecated() {
+        super.markDeprecated();
+        return this;
+    }
+
+    @Override
+    public ConfigParameterGroupBuilder<T> markUnused() {
+        super.markUnused();
+        return this;
+    }
+
+    @Override
+    public ConfigParameterGroupBuilder<T> markExperimental() {
+        super.markExperimental();
+        return this;
     }
 
     @SuppressWarnings("unchecked")
@@ -140,6 +166,12 @@ public final class ConfigParameterGroupBuilder<T extends CustomType<?>> extends 
                             this.group.getFullInternalName(), getFullName(), group.getFullInternalName());
         }
         this.group = (ConfigParGroup<T>) group;
+    }
+
+    @Override
+    public ConfigParameterGroupBuilder<T> setThreadSafe() {
+        super.setThreadSafe();
+        return this;
     }
 
     public MouseConfigBuilder buildParameterGroup() {
@@ -171,6 +203,7 @@ public final class ConfigParameterGroupBuilder<T extends CustomType<?>> extends 
             }
         }
 
+        if (group instanceof ConfigSectBaseImpl groupImpl) applyMetadata(groupImpl);
         configBuilder.putParameter(path, group);
         return configBuilder;
     }

@@ -118,7 +118,7 @@ public final class ConfigConditionalGroupBuilder<VAL extends CustomType<?>, TARG
         ConfigValConditionImpl<TARGET> condVal = new ConfigValConditionImpl<>(
                 targetValType, null, true,
                 ConditionType.ANY(anyStr),
-                (ConditionType) ConditionType.NONE(noneStr),
+                ConditionType.NONE(noneStr),
                 listPar != null ? listPar.getRight()::getValue : null,
                 anyStr, noneStr, listStr,
                 hasDictionary() ? getDictionary().getDefThresholdForType(ValType.SIMPLE_CONDITION) : null,

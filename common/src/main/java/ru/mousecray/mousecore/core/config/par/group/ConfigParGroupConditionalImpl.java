@@ -65,9 +65,11 @@ public class ConfigParGroupConditionalImpl<VAL extends CustomType<?>, TARGET ext
     @SuppressWarnings("unchecked")
     @Override
     public VAL getValue(@Nullable TARGET conditionTarget) {
-        if (isDisabled()) return fallbackValue;
-        ConfigValConditionImpl<TARGET> cond = (ConfigValConditionImpl<TARGET>) getConfigVal(conditionParName);
-        return (cond != null && cond.test(conditionTarget)) ? getMainValue() : fallbackValue;
+        return readLocked(() -> {
+            if (isDisabled()) return fallbackValue;
+            ConfigValConditionImpl<TARGET> cond = (ConfigValConditionImpl<TARGET>) getConfigVal(conditionParName);
+            return (cond != null && cond.test(conditionTarget)) ? getMainValue() : fallbackValue;
+        });
     }
 
     @Override public VAL getMainValue()     { return getConfigVal().getValue(); }

@@ -15,6 +15,7 @@ import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.config.utils.ConfigLang;
+import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.api.log.MouseLogger;
@@ -45,6 +46,8 @@ public final class MouseConfigBuilder {
     public                 boolean                                 autoDisable     = false;
     private                int                                     syncSecInterval = 0;
     private                int                                     saveSecInterval = 0;
+    private                ConfigSide                              defaultSide     = ConfigSide.COMMON;
+    private                boolean                                 threadSafe      = false;
 
     private MouseConfigBuilder(String name, String folderName, @Nullable MouseLogger logger) {
         this.name = name;
@@ -61,9 +64,11 @@ public final class MouseConfigBuilder {
         return ConfigDictionaryBuilder.create(this, currentLanguage);
     }
 
-    /**
-     * All disabling state while config building will be applied to children automatically without console warning
-     */
+    public MouseConfigBuilder setDefaultSide(ConfigSide side) {
+        defaultSide = Objects.requireNonNull(side);
+        return this;
+    }
+
     public MouseConfigBuilder setAutoDisable() {
         autoDisable = true;
         return this;
@@ -76,6 +81,11 @@ public final class MouseConfigBuilder {
 
     public MouseConfigBuilder enableConfigAutoSaving(int secInterval) {
         saveSecInterval = secInterval;
+        return this;
+    }
+
+    public MouseConfigBuilder setThreadSafe() {
+        threadSafe = true;
         return this;
     }
 
@@ -133,13 +143,15 @@ public final class MouseConfigBuilder {
 
     public MouseConfigImpl buildConfig() {
         MouseConfigImpl config = new MouseConfigImpl(folderName, name, logger,
-                dictionary == null ? new ConfigDictionaryImpl(ConfigLang.EN_US) : dictionary, syncSecInterval, saveSecInterval);
+                dictionary == null ? new ConfigDictionaryImpl(ConfigLang.EN_US) : dictionary, syncSecInterval, saveSecInterval,
+                defaultSide, threadSafe);
         sections.forEach((path, list) -> list.stream().filter(base -> !config.putForPath(path, base)).forEach(base -> {
             throw new IllegalStateException("MouseConfigBuilder got value with non-existent path (Value: \"" +
                     base.getName().getInternalName() + "\", Path: \"" + path + "\"");
         }));
         config.markBuilt(true);
         config.reloadCache();
+        config.syncListeners();
         return config;
     }
 }

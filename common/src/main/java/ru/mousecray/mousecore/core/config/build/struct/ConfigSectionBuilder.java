@@ -2,6 +2,7 @@ package ru.mousecray.mousecore.core.config.build.struct;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
 import ru.mousecray.mousecore.core.config.build.MouseConfigBuilder;
@@ -64,8 +65,39 @@ public final class ConfigSectionBuilder extends AbstractConfigChildBuilder {
         canBeDisabled = true;
     }
 
+    @Override
+    public ConfigSectionBuilder setSide(@Nullable ConfigSide side) {
+        super.setSide(side);
+        return this;
+    }
+
+    @Override
+    public ConfigSectionBuilder markDeprecated() {
+        super.markDeprecated();
+        return this;
+    }
+
+    @Override
+    public ConfigSectionBuilder markUnused() {
+        super.markUnused();
+        return this;
+    }
+
+    @Override
+    public ConfigSectionBuilder markExperimental() {
+        super.markExperimental();
+        return this;
+    }
+
+    @Override
+    public ConfigSectionBuilder setThreadSafe() {
+        super.setThreadSafe();
+        return this;
+    }
+
     public MouseConfigBuilder buildSection() {
         ConfigSectImpl section = new ConfigSectImpl(name, canBeDisabled, disablePar, comment);
+        applyMetadata(section);
         configBuilder.putSection(path, section);
         return configBuilder;
     }

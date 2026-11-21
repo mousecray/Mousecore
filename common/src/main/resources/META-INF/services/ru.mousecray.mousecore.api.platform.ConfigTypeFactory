@@ -5,4 +5,4 @@
 #  ******************************************************************************/
 #
 
-ru.mousecray.mousecore.core.config.utils.ConfigTypeFactoryImpl
+ru.mousecray.mousecore.core.platform.ConfigTypeFactoryImpl

@@ -1,3 +1,10 @@
+/*
+ * ***************************************************************************
+ * Copyright © 2026 mousecray
+ * Licensed under the GNU Lesser General Public License, Version 3.0
+ * **************************************************************************
+ */
+
 package ru.mousecray.mousecore.core.config.val.base;
 
 import ru.mousecray.mousecore.api.anno.FieldsAreNonnullByDefault;
@@ -47,18 +54,45 @@ public abstract class ConfigValListImpl<
     @Nullable protected Function<String, VAL> getValCreator()  { return valCreator; }
 
     @Override public T getList()                               { return getValue(); }
+    @Override public void setList(T value)                     { setValue(value); }
+    @Override public int size()                                { return getList().size(); }
     @Override public void forEachList(Consumer<LIST_VAL> func) { getList().forEach(func); }
-    @Override public void clearList()                          { getList().clear(); }
     @Override public boolean isEmptyList()                     { return getList().isEmpty(); }
-    @Override public boolean removeListValue(LIST_VAL value)   { return getList().removeValue(adaptListValue(value)); }
-    @Override public boolean addListValue(LIST_VAL value)      { return getList().addValue(adaptListValue(value)); }
     @Override public boolean containsValue(LIST_VAL value)     { return getList().containsValue(value); }
     @Override public boolean containsOriginalValue(VAL value)  { return getList().containsOriginalValue(value); }
 
-    protected void setList(T value)                            { setValue(value); }
+    @Override
+    public void clearList() {
+        writeLocked(() -> {
+            T current = getList();
+            if (!current.isEmpty()) setList(current.withCleared());
+        });
+    }
 
-    protected LIST_VAL adaptListValue(LIST_VAL value)          { return value; }
+    @Override
+    public boolean addListValue(LIST_VAL value) {
+        return writeLockedResult(() -> {
+            T current = getList();
+            T updated = current.withAdded(adaptListValue(value));
+            if (updated == current || updated.equals(current)) return false;
+            setList(updated);
+            return true;
+        });
+    }
 
-    @Override protected T adaptValue(T value)                  { return super.adaptValue(value.map(this::adaptListValue)); }
-    @Override protected boolean saveDisabledValue()            { return false; }
+    @Override
+    public boolean removeListValue(LIST_VAL value) {
+        return writeLockedResult(() -> {
+            T current = getList();
+            T updated = current.withRemoved(adaptListValue(value));
+            if (updated == current || updated.equals(current)) return false;
+            setList(updated);
+            return true;
+        });
+    }
+
+    protected LIST_VAL adaptListValue(LIST_VAL value) { return value; }
+
+    @Override protected T adaptValue(T value)         { return super.adaptValue(value.map(this::adaptListValue)); }
+    @Override protected boolean saveDisabledValue()   { return false; }
 }

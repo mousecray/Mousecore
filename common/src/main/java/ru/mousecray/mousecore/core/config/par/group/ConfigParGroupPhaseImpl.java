@@ -61,13 +61,11 @@ public class ConfigParGroupPhaseImpl<VAL extends CustomType<?>>
 
     @Override
     public VAL select(double number) {
-        if (isDisabled()) return getFallbackValue();
-        for (PhaseSlot<VAL> slot : phaseSlots) {
-            if (slot.rangeVal().contains(number)) {
-                return slot.valueVal().getValue();
-            }
-        }
-        return getFallbackValue();
+        return readLocked(() -> {
+            if (isDisabled()) return getFallbackValue();
+            for (PhaseSlot<VAL> slot : phaseSlots) if (slot.rangeVal().contains(number)) return slot.valueVal().getValue();
+            return getFallbackValue();
+        });
     }
 
     @Override

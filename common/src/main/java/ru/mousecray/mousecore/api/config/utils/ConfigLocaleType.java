@@ -35,7 +35,19 @@ public enum ConfigLocaleType implements ILocaleType {
     GROUP_MATCH_VALUE("Match Value"),
     GROUP_ELSE_VALUE("Else Value"),
     GROUP_REPLACEMENT("Replacement"),
-    GROUP_FALLBACK("Fallback");
+    GROUP_FALLBACK("Fallback"),
+    STATE("State"),
+    STATE_FROZEN("Frozen"),
+    STATE_NEW("New"),
+    STATE_DEPRECATED("Deprecated"),
+    STATE_UNUSED("Unused"),
+    STATE_EXPERIMENTAL("Experimental"),
+    SIDE("Side"),
+    SIDE_CLIENT("Client"),
+    SIDE_SERVER("Server"),
+    SIDE_SYNCED("Synced"),
+    SIDE_COMMON("Common"),
+    SCHEMA_VERSION("Schema Version");
 
     private final String displayName;
     ConfigLocaleType(@Nonnull String displayName)     { this.displayName = Objects.requireNonNull(displayName); }

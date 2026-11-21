@@ -7,6 +7,8 @@
 
 package ru.mousecray.mousecore.api.config.utils;
 
+import ru.mousecray.mousecore.api.platform.ConfigTypeFactory;
+
 public interface PredefinedValue<T> {
     String getDisplayName();
     T getValue();

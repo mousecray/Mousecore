@@ -13,6 +13,8 @@ import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
+import ru.mousecray.mousecore.api.config.utils.ConfigSide;
+import ru.mousecray.mousecore.api.config.utils.ConfigThreadPolicy;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
 import ru.mousecray.mousecore.api.config.val.base.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.config.val.container.*;
@@ -90,6 +92,15 @@ public interface MouseConfig {
 
     List<ConfigSectBase> getByDeep(int deep);
     List<ConfigSectBase> getChildrenRecursively();
+
+    @Nonnull ConfigSide getDefaultSide();
+
+    boolean isThreadSafe();
+
+    void addChangeListener(ConfigThreadPolicy policy, ConfigChangeListener listener);
+    default void addChangeListener(ConfigChangeListener listener)      { addChangeListener(ConfigThreadPolicy.AUTO, listener); }
+    default void addAsyncChangeListener(ConfigChangeListener listener) { addChangeListener(ConfigThreadPolicy.IMMEDIATE, listener); }
+    boolean removeChangeListener(ConfigChangeListener listener);
 
     boolean isBuilt();
     boolean isLoaded();

@@ -115,8 +115,8 @@ public final class ConfigTransformerGroupBuilder<T extends CustomType<?>, CONTEX
 
         ConfigValConditionImpl<CONTEXT> condVal = new ConfigValConditionImpl<>(
                 contextValType, null, true,
-                (ConditionType) ConditionType.ANY(anyStr),
-                (ConditionType) ConditionType.NONE(noneStr),
+                ConditionType.ANY(anyStr),
+                ConditionType.NONE(noneStr),
                 listPar != null ? listPar.getRight()::getValue : null,
                 anyStr, noneStr, listStr,
                 hasDictionary() ? getDictionary().getDefThresholdForType(ValType.SIMPLE_CONDITION) : null,

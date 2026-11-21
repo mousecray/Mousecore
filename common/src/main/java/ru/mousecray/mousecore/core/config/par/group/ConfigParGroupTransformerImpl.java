@@ -63,9 +63,11 @@ public class ConfigParGroupTransformerImpl<T extends CustomType<?>, CONTEXT exte
     @Override
     public T transform(T original, @Nullable CONTEXT context) {
         Objects.requireNonNull(original, "Original value cannot be null");
-        if (isDisabled()) return original;
-        ConfigValConditionImpl<CONTEXT> cond = (ConfigValConditionImpl<CONTEXT>) getConfigVal(conditionParName);
-        return (cond != null && cond.test(context)) ? getReplacement() : original;
+        return readLocked(() -> {
+            if (isDisabled()) return original;
+            ConfigValConditionImpl<CONTEXT> cond = (ConfigValConditionImpl<CONTEXT>) getConfigVal(conditionParName);
+            return (cond != null && cond.test(context)) ? getReplacement() : original;
+        });
     }
 
     @Override public T getMainValue()   { return getConfigVal().getValue(); }

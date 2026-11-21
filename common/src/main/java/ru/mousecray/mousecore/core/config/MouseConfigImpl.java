@@ -6,6 +6,7 @@
 package ru.mousecray.mousecore.core.config;
 
 import ru.mousecray.mousecore.api.DisplayName;
+import ru.mousecray.mousecore.api.config.ConfigChangeListener;
 import ru.mousecray.mousecore.api.config.MouseConfig;
 import ru.mousecray.mousecore.api.config.io.ConfigIOResultType;
 import ru.mousecray.mousecore.api.config.io.IOFuture;
@@ -15,6 +16,8 @@ import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
+import ru.mousecray.mousecore.api.config.utils.ConfigSide;
+import ru.mousecray.mousecore.api.config.utils.ConfigThreadPolicy;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
 import ru.mousecray.mousecore.api.config.val.base.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.config.val.container.list.ConfigValSimpleListLogical;
@@ -34,6 +37,7 @@ import ru.mousecray.mousecore.core.config.par.ConfigParImpl;
 import ru.mousecray.mousecore.core.config.par.group.ConfigParGroupImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectBaseImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectImpl;
+import ru.mousecray.mousecore.core.config.utils.ConfigListenerDispatcher;
 import ru.mousecray.mousecore.core.config.val.container.*;
 import ru.mousecray.mousecore.core.config.val.logic.ConfigValConditionImpl;
 import ru.mousecray.mousecore.core.config.val.logic.ConfigValPlusMinusImpl;
@@ -54,6 +58,9 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,7 +72,6 @@ public class MouseConfigImpl implements MouseConfig {
     protected final          ImmutableDisplayNameMap.Mutable<ConfigSectImpl> sections      = new ImmutableDisplayNameMap.Mutable<>();
     public final             ConfigParser                                    parser;
     public @Nullable         MouseLogger                                     logger;
-    protected                boolean                                         loaded;
     protected final @Nonnull ConfigDictionary                                dictionary;
     protected final          int                                             syncSecInterval;
     protected final          int                                             saveSecInterval;
@@ -74,7 +80,16 @@ public class MouseConfigImpl implements MouseConfig {
     public volatile          long                                            lastSyncSec;
     public volatile          long                                            lastSaveSec;
     public final             List<ConfigParBase>                             dirtySections = new ArrayList<>();
-    private                  boolean                                         built;
+
+    @Nonnull protected final ConfigSide defaultSide;
+
+    protected volatile         boolean                loaded;
+    private volatile           boolean                built;
+    protected final            boolean                threadSafe;
+    @Nullable private volatile ReentrantReadWriteLock syncLock;
+
+    private final CopyOnWriteArrayList<ConfigListenerDispatcher.GlobalListenerEntry> globalListeners = new CopyOnWriteArrayList<>();
+    private final AtomicInteger                                                      totalListeners  = new AtomicInteger(0);
 
     public MouseConfigImpl(String folderName, String name, ConfigDictionary dictionary) {
         this(folderName, name, null, dictionary, 0, 0);
@@ -84,14 +99,50 @@ public class MouseConfigImpl implements MouseConfig {
             String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
             int autoSyncSecInterval, int autoSaveSecInterval
     ) {
+        this(folderName, name, logger, dictionary, autoSyncSecInterval, autoSaveSecInterval, ConfigSide.COMMON);
+    }
+
+    public MouseConfigImpl(
+            String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
+            int autoSyncSecInterval, int autoSaveSecInterval, ConfigSide defaultSide
+    ) {
+        this(folderName, name, logger, dictionary, autoSyncSecInterval, autoSaveSecInterval, defaultSide, false);
+    }
+
+    public MouseConfigImpl(
+            String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
+            int autoSyncSecInterval, int autoSaveSecInterval, ConfigSide defaultSide, boolean threadSafe
+    ) {
         this.name = name;
         path = new File(".", folderName);
         parser = new ConfigParser(this, logger);
         this.logger = logger;
         this.dictionary = Objects.requireNonNull(dictionary);
+        this.defaultSide = Objects.requireNonNull(defaultSide);
+        this.threadSafe = threadSafe;
+        if (threadSafe) syncLock = new ReentrantReadWriteLock();
         syncSecInterval = Math.max(autoSyncSecInterval, 0);
         saveSecInterval = Math.max(autoSaveSecInterval, 0);
         if (isEnableAutoSync() || isEnableAutoSave()) ConfigIOThread.getInstance().registerConfig(this);
+    }
+
+    @Nonnull @Override public ConfigSide getDefaultSide() { return defaultSide; }
+    @Override public boolean isThreadSafe()               { return threadSafe; }
+    @Nullable public ReentrantReadWriteLock getSyncLock() { return syncLock; }
+
+    @Nonnull
+    public ReentrantReadWriteLock getOrCreateSyncLock() {
+        ReentrantReadWriteLock lock = syncLock;
+        if (lock == null) {
+            synchronized (this) {
+                lock = syncLock;
+                if (lock == null) {
+                    lock = new ReentrantReadWriteLock();
+                    syncLock = lock;
+                }
+            }
+        }
+        return lock;
     }
 
     public boolean isDirty(@Nullable ConfigParBase par) {
@@ -104,6 +155,24 @@ public class MouseConfigImpl implements MouseConfig {
     @Override public boolean isBuilt()         { return built; }
 
     public void addSection(ConfigSectImpl section) {
+        if (built) {
+            ReentrantReadWriteLock                                     lock = getSyncLock();
+            List<ConfigListenerDispatcher.PendingValueNotification<?>> batch;
+            if (lock != null) lock.writeLock().lock();
+            try {
+                putSectionDirect(section);
+                reloadCacheDirect();
+                batch = collectChangesIfListening();
+            } finally {
+                if (lock != null) lock.writeLock().unlock();
+            }
+            dispatchChanges(batch);
+        } else {
+            putSectionDirect(section);
+        }
+    }
+
+    private void putSectionDirect(ConfigSectImpl section) {
         ImmutableDisplayNameMap.Entry<ConfigSectImpl> prev = sections.put(section.getName(), Objects.requireNonNull(section));
         if (prev != null) {
             if (logger != null) {
@@ -116,14 +185,13 @@ public class MouseConfigImpl implements MouseConfig {
                 List<ConfigParBase<? extends CustomType<?>>> children = getChildrenRecursivelyInternal(list)
                         .stream()
                         .filter(val -> val instanceof ConfigParBaseImpl)
-                        .map(val -> ((ConfigParBase<? extends CustomType<?>>) val))
+                        .map(val -> (ConfigParBase<? extends CustomType<?>>) val)
                         .collect(Collectors.toList());
                 synchronized (dirtySections) { dirtySections.removeAll(children); }
             }
         }
         section.setDeep(0);
         section.setConfig(this);
-        reloadCache();
 
         if (built) {
             ArrayList<ConfigSectBase> list = new ArrayList<>();
@@ -131,7 +199,7 @@ public class MouseConfigImpl implements MouseConfig {
             List<ConfigParBase<? extends CustomType<?>>> children = getChildrenRecursivelyInternal(list)
                     .stream()
                     .filter(val -> val instanceof ConfigParBaseImpl)
-                    .map(val -> ((ConfigParBase<? extends CustomType<?>>) val))
+                    .map(val -> (ConfigParBase<? extends CustomType<?>>) val)
                     .collect(Collectors.toList());
             synchronized (dirtySections) { dirtySections.addAll(children); }
         }
@@ -141,6 +209,25 @@ public class MouseConfigImpl implements MouseConfig {
     @Override public boolean hasSection(DisplayName name)    { return sections.contains(Objects.requireNonNull(name)); }
 
     public void removeSection(DisplayName name) {
+        if (built) {
+            ReentrantReadWriteLock                                     lock  = getSyncLock();
+            List<ConfigListenerDispatcher.PendingValueNotification<?>> batch = null;
+            if (lock != null) lock.writeLock().lock();
+            try {
+                if (removeSectionDirect(name)) {
+                    reloadCacheDirect();
+                    batch = collectChangesIfListening();
+                }
+            } finally {
+                if (lock != null) lock.writeLock().unlock();
+            }
+            dispatchChanges(batch);
+        } else {
+            removeSectionDirect(name);
+        }
+    }
+
+    private boolean removeSectionDirect(DisplayName name) {
         ImmutableDisplayNameMap.Entry<ConfigSectImpl> remove = sections.remove(Objects.requireNonNull(name));
         if (remove != null && built) {
             ArrayList<ConfigSectBase> list = new ArrayList<>();
@@ -148,11 +235,12 @@ public class MouseConfigImpl implements MouseConfig {
             List<ConfigParBase<? extends CustomType<?>>> children = getChildrenRecursivelyInternal(list)
                     .stream()
                     .filter(val -> val instanceof ConfigParBaseImpl)
-                    .map(val -> ((ConfigParBase<? extends CustomType<?>>) val))
+                    .map(val -> (ConfigParBase<? extends CustomType<?>>) val)
                     .collect(Collectors.toList());
             synchronized (dirtySections) { dirtySections.removeAll(children); }
-            reloadCache();
+            return true;
         }
+        return false;
     }
 
     @SuppressWarnings("DataFlowIssue") @Nullable @Override
@@ -268,7 +356,6 @@ public class MouseConfigImpl implements MouseConfig {
 
     @Nullable @Override public ConfigValNBTImpl getNBTVal(@Nullable String fullName)                          { return getValue(fullName); }
     @Nullable @Override public ConfigValTupleImpl getTupleVal(@Nullable String fullName)                      { return getValue(fullName); }
-
     @Nullable @Override public ConfigValTableImpl getTableVal(@Nullable String fullName)                      { return getValue(fullName); }
     @Nullable @Override public ConfigValMatrixImpl getMatrixVal(@Nullable String fullName)                    { return getValue(fullName); }
 
@@ -350,16 +437,58 @@ public class MouseConfigImpl implements MouseConfig {
         return output;
     }
 
-    @Override
-    public void reset() {
-        sections.forEach((key, value) -> value.reset());
-        reloadCache();
+    // ==================== Единый жизненный цикл и быстрые хелперы ====================
+
+    public void reloadCacheDirect() {
+        sections.forEach((key, value) -> value.setDisabledStructurally(false));
+        sections.forEach((key, value) -> value.onReloadCache());
     }
 
     public void reloadCache() {
         if (!built) return;
-        sections.forEach((key, value) -> value.setDisabledStructurally(false));
-        sections.forEach((key, value) -> value.reloadCache());
+        ReentrantReadWriteLock                                     lock = getSyncLock();
+        List<ConfigListenerDispatcher.PendingValueNotification<?>> batch;
+        if (lock != null) lock.writeLock().lock();
+        try {
+            reloadCacheDirect();
+            batch = collectChangesIfListening();
+        } finally {
+            if (lock != null) lock.writeLock().unlock();
+        }
+        dispatchChanges(batch);
+    }
+
+    public void syncListeners() {
+        sections.forEach((key, value) -> value.onSyncListeners());
+    }
+
+    @Nullable
+    public List<ConfigListenerDispatcher.PendingValueNotification<?>> collectChangesIfListening() {
+        if (!hasAnyListeners()) return null;
+        List<ConfigListenerDispatcher.PendingValueNotification<?>> batch = new ArrayList<>();
+        sections.forEach((key, value) -> value.onCollectChanges(batch));
+        return batch;
+    }
+
+    public void dispatchChanges(@Nullable List<ConfigListenerDispatcher.PendingValueNotification<?>> batch) {
+        if (batch != null && !batch.isEmpty()) {
+            ConfigListenerDispatcher.dispatch(this, batch, List.copyOf(globalListeners), logger);
+        }
+    }
+
+    @Override
+    public void reset() {
+        ReentrantReadWriteLock                                     lock = getSyncLock();
+        List<ConfigListenerDispatcher.PendingValueNotification<?>> batch;
+        if (lock != null) lock.writeLock().lock();
+        try {
+            sections.forEach((key, value) -> value.onReset());
+            reloadCacheDirect();
+            batch = collectChangesIfListening();
+        } finally {
+            if (lock != null) lock.writeLock().unlock();
+        }
+        dispatchChanges(batch);
     }
 
     @Override
@@ -368,12 +497,22 @@ public class MouseConfigImpl implements MouseConfig {
     }
 
     public IOResultImpl loadInternal() {
-        IOResultImpl result = parser.readFile();
-        if (result.getType() == ConfigIOResultType.SUCCESS) {
-            loaded = true;
-            lastSyncTime = LocalTime.now();
-            reloadCache();
+        ReentrantReadWriteLock                                     lock  = getSyncLock();
+        List<ConfigListenerDispatcher.PendingValueNotification<?>> batch = null;
+        IOResultImpl                                               result;
+        if (lock != null) lock.writeLock().lock();
+        try {
+            result = parser.readFile();
+            if (result.getType() == ConfigIOResultType.SUCCESS) {
+                loaded = true;
+                lastSyncTime = LocalTime.now();
+                reloadCacheDirect();
+                batch = collectChangesIfListening();
+            }
+        } finally {
+            if (lock != null) lock.writeLock().unlock();
         }
+        dispatchChanges(batch);
         return result;
     }
 
@@ -383,13 +522,19 @@ public class MouseConfigImpl implements MouseConfig {
     }
 
     public IOResultImpl saveInternal(boolean markUnloaded) {
-        IOResultImpl result = parser.writeFile();
-        if (result.getType() == ConfigIOResultType.SUCCESS) {
-            synchronized (dirtySections) { dirtySections.clear(); }
-            lastSaveTime = LocalTime.now();
+        ReentrantReadWriteLock lock = getSyncLock();
+        if (lock != null) lock.readLock().lock();
+        try {
+            IOResultImpl result = parser.writeFile();
+            if (result.getType() == ConfigIOResultType.SUCCESS) {
+                synchronized (dirtySections) { dirtySections.clear(); }
+                lastSaveTime = LocalTime.now();
+            }
+            loaded = !markUnloaded;
+            return result;
+        } finally {
+            if (lock != null) lock.readLock().unlock();
         }
-        loaded = !markUnloaded;
-        return result;
     }
 
     void write(Consumer<ConfigSectBaseImpl> startAction, Consumer<ConfigSectBaseImpl> endAction) {
@@ -438,7 +583,11 @@ public class MouseConfigImpl implements MouseConfig {
     @Nullable @Override public MouseLogger getLogger()         { return logger; }
 
     public void markDirty(ConfigParBase par) {
-        if (par.getConfig() == this && built) synchronized (dirtySections) { dirtySections.add(par); }
+        if (par.getConfig() == this && built) {
+            synchronized (dirtySections) {
+                if (!dirtySections.contains(par)) dirtySections.add(par);
+            }
+        }
     }
 
     @Override
@@ -449,6 +598,34 @@ public class MouseConfigImpl implements MouseConfig {
     public void update(long sec) {
         if (isEnableAutoSync() && (sec - lastSyncSec) % syncSecInterval == 0) ConfigIOThread.getInstance().addLoadAction(this);
         if (isEnableAutoSave() && (sec - lastSaveSec) % saveSecInterval == 0) ConfigIOThread.getInstance().addSaveAction(this);
+    }
+
+    // ==================== Слушатели ====================
+
+    public void adjustListenerCount(int delta) { totalListeners.addAndGet(delta); }
+    public boolean hasAnyListeners()           { return totalListeners.get() > 0; }
+    public boolean hasGlobalListeners()        { return !globalListeners.isEmpty(); }
+
+    @Override
+    public void addChangeListener(ConfigThreadPolicy policy, ConfigChangeListener listener) {
+        Objects.requireNonNull(policy);
+        Objects.requireNonNull(listener);
+        synchronized (globalListeners) {
+            globalListeners.add(new ConfigListenerDispatcher.GlobalListenerEntry(policy, listener));
+            adjustListenerCount(1);
+        }
+    }
+
+    @Override
+    public boolean removeChangeListener(ConfigChangeListener listener) {
+        Objects.requireNonNull(listener);
+        synchronized (globalListeners) {
+            int     before  = globalListeners.size();
+            boolean removed = globalListeners.removeIf(e -> e.listener().equals(listener));
+            int     delta   = globalListeners.size() - before;
+            if (delta != 0) adjustListenerCount(delta);
+            return removed;
+        }
     }
 
     @Override

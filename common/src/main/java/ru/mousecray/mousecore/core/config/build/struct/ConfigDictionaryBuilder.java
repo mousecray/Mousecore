@@ -117,6 +117,19 @@ public final class ConfigDictionaryBuilder {
                 setLocaleForLocale(ConfigLocaleType.GROUP_ELSE_VALUE, "Значение иначе");
                 setLocaleForLocale(ConfigLocaleType.GROUP_REPLACEMENT, "Замена");
                 setLocaleForLocale(ConfigLocaleType.GROUP_FALLBACK, "По-умолчанию");
+
+                setLocaleForLocale(ConfigLocaleType.STATE, "Состояние");
+                setLocaleForLocale(ConfigLocaleType.STATE_FROZEN, "Заморожено");
+                setLocaleForLocale(ConfigLocaleType.STATE_NEW, "Новое");
+                setLocaleForLocale(ConfigLocaleType.STATE_DEPRECATED, "Устарело");
+                setLocaleForLocale(ConfigLocaleType.STATE_UNUSED, "Не используется");
+                setLocaleForLocale(ConfigLocaleType.STATE_EXPERIMENTAL, "Экспериментально");
+                setLocaleForLocale(ConfigLocaleType.SIDE, "Сторона");
+                setLocaleForLocale(ConfigLocaleType.SIDE_CLIENT, "Клиент");
+                setLocaleForLocale(ConfigLocaleType.SIDE_SERVER, "Сервер");
+                setLocaleForLocale(ConfigLocaleType.SIDE_SYNCED, "Синхронизируемый");
+                setLocaleForLocale(ConfigLocaleType.SIDE_COMMON, "Общий");
+                setLocaleForLocale(ConfigLocaleType.SCHEMA_VERSION, "Версия схемы");
                 return this;
 
             case EN_US:
@@ -190,6 +203,19 @@ public final class ConfigDictionaryBuilder {
                 setLocaleForLocale(ConfigLocaleType.GROUP_ELSE_VALUE, "Else Value");
                 setLocaleForLocale(ConfigLocaleType.GROUP_REPLACEMENT, "Replacement");
                 setLocaleForLocale(ConfigLocaleType.GROUP_FALLBACK, "Fallback");
+
+                setLocaleForLocale(ConfigLocaleType.STATE, "State");
+                setLocaleForLocale(ConfigLocaleType.STATE_FROZEN, "Frozen");
+                setLocaleForLocale(ConfigLocaleType.STATE_NEW, "New");
+                setLocaleForLocale(ConfigLocaleType.STATE_DEPRECATED, "Deprecated");
+                setLocaleForLocale(ConfigLocaleType.STATE_UNUSED, "Unused");
+                setLocaleForLocale(ConfigLocaleType.STATE_EXPERIMENTAL, "Experimental");
+                setLocaleForLocale(ConfigLocaleType.SIDE, "Side");
+                setLocaleForLocale(ConfigLocaleType.SIDE_CLIENT, "Client");
+                setLocaleForLocale(ConfigLocaleType.SIDE_SERVER, "Server");
+                setLocaleForLocale(ConfigLocaleType.SIDE_SYNCED, "Synced");
+                setLocaleForLocale(ConfigLocaleType.SIDE_COMMON, "Common");
+                setLocaleForLocale(ConfigLocaleType.SCHEMA_VERSION, "Schema Version");
                 return this;
         }
     }

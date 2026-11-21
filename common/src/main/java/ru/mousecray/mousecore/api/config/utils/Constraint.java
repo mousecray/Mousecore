@@ -7,12 +7,12 @@
 
 package ru.mousecray.mousecore.api.config.utils;
 
-import ru.mousecray.mousecore.api.customtype.CustomType;
-import ru.mousecray.mousecore.api.customtype.LogicalType;
-import ru.mousecray.mousecore.api.customtype.NumberType;
-import ru.mousecray.mousecore.api.customtype.OtherType;
+import ru.mousecray.mousecore.api.customtype.*;
 import ru.mousecray.mousecore.api.customtype.range.RangeContainer;
 import ru.mousecray.mousecore.api.customtype.type.ValTypeCategory;
+import ru.mousecray.mousecore.api.customtype.values.logic.ConditionType;
+import ru.mousecray.mousecore.api.customtype.values.other.*;
+import ru.mousecray.mousecore.api.platform.ConfigTypeFactory;
 
 import javax.annotation.Nullable;
 
@@ -25,7 +25,6 @@ public interface Constraint<T extends CustomType<?>> {
     @Nullable T getVal();
     @Nullable RangeContainer<?> getRange();
 
-
     enum ConstraintType {DISABLED, RELATION}
 
     enum ConstraintConditionType {DISABLED, LESS, MORE, EQUAL, NOT_EQUAL, LESS_OR_EQUAL, MORE_OR_EQUAL, IN_RANGE}
@@ -37,17 +36,26 @@ public interface Constraint<T extends CustomType<?>> {
         RelationBuilder setRelationType(String path);
 
         interface DisabledBuilder {
-            DisabledBuilderLogical setLogicalType();
+            DisabledBuilderEquality<LogicalType<?>> setLogicalType();
             DisabledBuilderNumber setNumberType();
-            DisabledBuilderOther setOtherType();
+            DisabledBuilderEquality<StringType> setStringType();
+            DisabledBuilderEquality<EnumType<?>> setEnumType();
+            DisabledBuilderEquality<ColorType> setColorType();
+            DisabledBuilderEquality<Vector3Type<?, ?>> setVectorType();
+            DisabledBuilderEquality<RegexType> setPatternType();
+            DisabledBuilderEquality<ExpressionType> setExpressionType();
+            DisabledBuilderEquality<OtherType<?>> setMinecraftType();
+            DisabledBuilderEquality<CustomType<?>> setContainerType();
+            DisabledBuilderEquality<ConditionType<?, ?>> setConditionType();
+            DisabledBuilderEquality<OtherType<?>> setOtherType();
         }
 
-        interface DisabledBuilderLogical {
-            <T extends LogicalType<?>> Constraint<T> setConditionDisabled();
-            <T extends LogicalType<?>> Constraint<T> setConditionEqual();
-            <T extends LogicalType<?>> Constraint<T> setConditionNotEqual();
-            <T extends LogicalType<?>> Constraint<T> setConditionEqual(T val);
-            <T extends LogicalType<?>> Constraint<T> setConditionNotEqual(T val);
+        interface DisabledBuilderEquality<BASE extends CustomType<?>> {
+            <T extends BASE> Constraint<T> setConditionDisabled();
+            <T extends BASE> Constraint<T> setConditionEqual();
+            <T extends BASE> Constraint<T> setConditionNotEqual();
+            <T extends BASE> Constraint<T> setConditionEqual(T val);
+            <T extends BASE> Constraint<T> setConditionNotEqual(T val);
         }
 
         interface DisabledBuilderNumber {
@@ -67,23 +75,24 @@ public interface Constraint<T extends CustomType<?>> {
             <T extends NumberType<?>> Constraint<T> setConditionRange(RangeContainer<T> range);
         }
 
-        interface DisabledBuilderOther {
-            <T extends OtherType<?>> Constraint<T> setConditionDisabled();
-            <T extends OtherType<?>> Constraint<T> setConditionEqual();
-            <T extends OtherType<?>> Constraint<T> setConditionNotEqual();
-            <T extends OtherType<?>> Constraint<T> setConditionEqual(T val);
-            <T extends OtherType<?>> Constraint<T> setConditionNotEqual(T val);
-        }
-
         interface RelationBuilder {
-            RelationBuilderLogical setLogicalType();
+            RelationBuilderEquality<LogicalType<?>> setLogicalType();
             RelationBuilderNumber setNumberType();
-            RelationBuilderOther setOtherType();
+            RelationBuilderEquality<StringType> setStringType();
+            RelationBuilderEquality<EnumType<?>> setEnumType();
+            RelationBuilderEquality<ColorType> setColorType();
+            RelationBuilderEquality<Vector3Type<?, ?>> setVectorType();
+            RelationBuilderEquality<RegexType> setPatternType();
+            RelationBuilderEquality<ExpressionType> setExpressionType();
+            RelationBuilderEquality<OtherType<?>> setMinecraftType();
+            RelationBuilderEquality<CustomType<?>> setContainerType();
+            RelationBuilderEquality<ConditionType<?, ?>> setConditionType();
+            RelationBuilderEquality<OtherType<?>> setOtherType();
         }
 
-        interface RelationBuilderLogical {
-            <T extends LogicalType<?>> Constraint<T> setConditionEqual();
-            <T extends LogicalType<?>> Constraint<T> setConditionNotEqual();
+        interface RelationBuilderEquality<BASE extends CustomType<?>> {
+            <T extends BASE> Constraint<T> setConditionEqual();
+            <T extends BASE> Constraint<T> setConditionNotEqual();
         }
 
         interface RelationBuilderNumber {
@@ -93,11 +102,6 @@ public interface Constraint<T extends CustomType<?>> {
             <T extends NumberType<?>> Constraint<T> setConditionLessOrEqual();
             <T extends NumberType<?>> Constraint<T> setConditionMore();
             <T extends NumberType<?>> Constraint<T> setConditionMoreOrEqual();
-        }
-
-        interface RelationBuilderOther {
-            <T extends OtherType<?>> Constraint<T> setConditionEqual();
-            <T extends OtherType<?>> Constraint<T> setConditionNotEqual();
         }
     }
 }

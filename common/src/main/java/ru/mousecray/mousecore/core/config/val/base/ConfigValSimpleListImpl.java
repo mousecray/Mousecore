@@ -18,6 +18,7 @@ import ru.mousecray.mousecore.api.config.val.base.ConfigValSimpleList;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.values.collection.SimpleListType;
 import ru.mousecray.mousecore.api.customtype.values.logic.ConditionalValType;
+import ru.mousecray.mousecore.api.customtype.values.logic.PlusMinusType;
 import ru.mousecray.mousecore.api.error.ValueFormatException;
 
 import javax.annotation.Nullable;
@@ -58,6 +59,16 @@ public abstract class ConfigValSimpleListImpl<T extends CustomType<?>>
 
     @Override public boolean isConditional() { return isConditional; }
     @Override public boolean isUnique()      { return isUnique; }
+
+    @Override
+    public boolean addOriginalValue(T value) {
+        return addListValue(ConditionalValType.create(value, PlusMinusType.FALSE));
+    }
+
+    @Override
+    public boolean removeOriginalValue(T value) {
+        return removeListValue(ConditionalValType.create(value, PlusMinusType.FALSE));
+    }
 
     @Override
     protected VariableValue<SimpleListType<T>> parseValue(@Nullable String value) {

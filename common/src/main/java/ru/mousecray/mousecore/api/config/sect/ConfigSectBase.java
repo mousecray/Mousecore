@@ -9,10 +9,13 @@ package ru.mousecray.mousecore.api.config.sect;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.config.MouseConfig;
+import ru.mousecray.mousecore.api.config.utils.ConfigSide;
+import ru.mousecray.mousecore.api.config.utils.ConfigState;
 import ru.mousecray.mousecore.api.container.ImmutableDisplayNameMap;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.EnumSet;
 
 public interface ConfigSectBase {
     @Nullable ConfigSectBase getChild(String name);
@@ -22,6 +25,15 @@ public interface ConfigSectBase {
     @Nonnull String getFullInternalName();
 
     void setDisabled(boolean disabled);
+
+    @Nonnull ConfigSide getSide();
+    @Nonnull EnumSet<ConfigState> getManualStates();
+    @Nonnull EnumSet<ConfigState> getEffectiveStates();
+    boolean hasState(ConfigState state);
+    boolean isFrozen();
+    boolean isNew();
+    
+    boolean isThreadSafe();
 
     boolean hasChildren();
     boolean canBeDisabled();
