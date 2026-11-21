@@ -10,6 +10,7 @@ package ru.mousecray.mousecore.core.config.build;
 import org.apache.commons.lang3.StringUtils;
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mousecore.api.config.migration.ConfigMigrationStep;
 import ru.mousecray.mousecore.api.config.par.ConfigParBase;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
@@ -26,6 +27,7 @@ import ru.mousecray.mousecore.core.config.build.par.ConfigParameterBuilder;
 import ru.mousecray.mousecore.core.config.build.par.group.ConfigParameterGroupBuilder;
 import ru.mousecray.mousecore.core.config.build.struct.ConfigDictionaryBuilder;
 import ru.mousecray.mousecore.core.config.build.struct.ConfigSectionBuilder;
+import ru.mousecray.mousecore.core.config.migration.ConfigMigrator;
 import ru.mousecray.mousecore.core.config.sync.ConfigSyncManager;
 import ru.mousecray.mousecore.core.config.utils.ConfigDictionaryImpl;
 
@@ -55,6 +57,9 @@ public final class MouseConfigBuilder {
     @Nullable public  ConfigDictionary        dictionary;
     @Nullable private ConfigLang              fixedLanguage    = null;
     @Nonnull private  ConfigLang              fallbackLanguage = ConfigLang.EN_US;
+
+    private       int            schemaVersion = 1;
+    private final ConfigMigrator migrator      = new ConfigMigrator();
 
     private MouseConfigBuilder(String name, String folderName, @Nullable MouseLogger logger) {
         this.name = name;
@@ -160,6 +165,17 @@ public final class MouseConfigBuilder {
         return ConfigParameterGroupBuilder.create(this, path, new DisplayName(name, displayName), valType, typeClass);
     }
 
+    public MouseConfigBuilder setSchemaVersion(int version) {
+        if (version < 1) throw new IllegalArgumentException("schemaVersion must be >= 1");
+        schemaVersion = version;
+        return this;
+    }
+
+    public MouseConfigBuilder addMigration(int fromVersion, int toVersion, ConfigMigrationStep step) {
+        migrator.addMigration(fromVersion, toVersion, step);
+        return this;
+    }
+
     public void putSection(String path, ConfigSect section) {
         sections.computeIfAbsent(path, k -> new ArrayList<>()).add(section);
     }
@@ -182,7 +198,8 @@ public final class MouseConfigBuilder {
 
         MouseConfigImpl config = new MouseConfigImpl(
                 folderName, name, logger, finalDict,
-                syncSecInterval, saveSecInterval, defaultSide, threadSafe, isDynamic
+                syncSecInterval, saveSecInterval, defaultSide, threadSafe, isDynamic,
+                schemaVersion, migrator
         );
 
         sections.forEach((path, list) -> list.stream().filter(base ->

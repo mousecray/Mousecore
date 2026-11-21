@@ -31,6 +31,7 @@ import ru.mousecray.mousecore.api.log.MouseLogger;
 import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.core.config.MouseConfigImpl;
+import ru.mousecray.mousecore.core.config.migration.ConfigStructureMeta;
 import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;
 import ru.mousecray.mousecore.core.config.sync.ConfigSyncSnapshot;
 import ru.mousecray.mousecore.core.config.utils.ConfigListenerDispatcher;
@@ -197,6 +198,12 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
         if (owner != null) {
             if (owner.isNew()) owner.markNew(false);
             owner.markDirty();
+            if (hasConfig()) {
+                ConfigStructureMeta meta = getConfig().getStructureMeta();
+                if (meta != null && meta.dismissNew(owner.getFullInternalName())) {
+                    meta.save(ConfigStructureMeta.getMetaFile(getConfig().getPath(), getConfig().getName()), getLogger());
+                }
+            }
         }
         return true;
     }

@@ -34,6 +34,8 @@ import ru.mousecray.mousecore.api.platform.PlatformHelper;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.core.config.io.ConfigIOThread;
 import ru.mousecray.mousecore.core.config.io.IOResultImpl;
+import ru.mousecray.mousecore.core.config.migration.ConfigMigrator;
+import ru.mousecray.mousecore.core.config.migration.ConfigStructureMeta;
 import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParImpl;
 import ru.mousecray.mousecore.core.config.par.group.ConfigParGroupImpl;
@@ -60,10 +62,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -98,6 +97,10 @@ public class MouseConfigImpl implements MouseConfig {
     private final CopyOnWriteArrayList<ConfigListenerDispatcher.GlobalListenerEntry> globalListeners = new CopyOnWriteArrayList<>();
     private final AtomicInteger                                                      totalListeners  = new AtomicInteger(0);
 
+    protected final            int                 schemaVersion;
+    protected final            ConfigMigrator      migrator;
+    @Nullable private volatile ConfigStructureMeta structureMeta;
+
     public MouseConfigImpl(String folderName, String name, ConfigDictionary dictionary) {
         this(folderName, name, null, dictionary, 0, 0);
     }
@@ -113,13 +116,17 @@ public class MouseConfigImpl implements MouseConfig {
             String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
             int autoSyncSecInterval, int autoSaveSecInterval, ConfigSide defaultSide
     ) {
-        this(folderName, name, logger, dictionary, autoSyncSecInterval, autoSaveSecInterval, defaultSide, false, false);
+        this(
+                folderName, name, logger, dictionary, autoSyncSecInterval, autoSaveSecInterval, defaultSide,
+                false, false, 1, new ConfigMigrator()
+        );
     }
 
     public MouseConfigImpl(
             String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
             int autoSyncSecInterval, int autoSaveSecInterval, ConfigSide defaultSide, boolean threadSafe,
-            boolean dynamicLanguage
+            boolean dynamicLanguage,
+            int schemaVersion, ConfigMigrator migrator
     ) {
         this.name = name;
         path = new File(".", folderName);
@@ -129,6 +136,8 @@ public class MouseConfigImpl implements MouseConfig {
         this.defaultSide = Objects.requireNonNull(defaultSide);
         this.threadSafe = threadSafe;
         this.dynamicLanguage = dynamicLanguage;
+        this.schemaVersion = Math.max(1, schemaVersion);
+        this.migrator = Objects.requireNonNull(migrator);
         if (threadSafe) syncLock = new ReentrantReadWriteLock();
         syncSecInterval = Math.max(autoSyncSecInterval, 0);
         saveSecInterval = Math.max(autoSaveSecInterval, 0);
@@ -708,7 +717,23 @@ public class MouseConfigImpl implements MouseConfig {
         return false;
     }
 
-    public boolean fileExists() { return new File(path, name + ".moc").exists(); }
+    public boolean fileExists()                             { return new File(path, name + ".moc").exists(); }
+
+    @Override public int getSchemaVersion()                 { return schemaVersion; }
+    public ConfigMigrator getMigrator()                     { return migrator; }
+    @Nullable public ConfigStructureMeta getStructureMeta() { return structureMeta; }
+    public void setStructureMeta(ConfigStructureMeta meta)  { structureMeta = meta; }
+
+    public Set<String> collectAllStructuralPaths() {
+        Set<String> paths = new TreeSet<>();
+        for (ConfigSectBase s : getChildrenRecursively()) {
+            paths.add(s.getFullInternalName());
+            if (s instanceof ConfigParBase<?> par) {
+                par.getValues().forEach((dn, v) -> paths.add(s.getFullInternalName() + "." + dn.getInternalName()));
+            }
+        }
+        return paths;
+    }
 
     @Override
     public boolean equals(Object o) {

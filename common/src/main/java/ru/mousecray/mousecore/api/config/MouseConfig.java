@@ -132,4 +132,6 @@ public interface MouseConfig {
     boolean isDynamicLanguage();
     void setLanguage(ConfigLang language);
     @SuppressWarnings("UnusedReturnValue") boolean refreshLanguage();
+
+    int getSchemaVersion();
 }
