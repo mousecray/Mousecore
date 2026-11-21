@@ -15,6 +15,7 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.core.config.MouseConfigImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;
+import ru.mousecray.mousecore.core.config.sync.ConfigSyncSnapshot;
 import ru.mousecray.mousecore.core.config.utils.ConfigListenerDispatcher;
 import ru.mousecray.mousecore.core.config.val.ConfigValImpl;
 
@@ -99,6 +100,7 @@ public abstract class ConfigParGroupImpl<T extends CustomType<?>> extends Config
                 if (lock != null) lock.writeLock().unlock();
             }
             config.dispatchChanges(batch);
+            config.broadcastSyncedIfNeeded();
         } else {
             ReentrantReadWriteLock lock = getSyncLock();
             if (lock != null) lock.writeLock().lock();
@@ -148,6 +150,25 @@ public abstract class ConfigParGroupImpl<T extends CustomType<?>> extends Config
     public void onCollectChanges(List<ConfigListenerDispatcher.PendingValueNotification<?>> out) {
         if (hasDisabler()) disablePar.onCollectChanges(out);
         super.onCollectChanges(out);
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    @Override
+    public void onClearNetworkOverride() {
+        if (hasDisabler()) disablePar.onClearNetworkOverride();
+        super.onClearNetworkOverride();
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    @Override
+    public void onCollectSyncedValues(Map<String, ConfigSyncSnapshot.SyncEntry> out) {
+        if (hasDisabler()) disablePar.onCollectSyncedValues(out);
+        String basePath = getFullInternalName();
+        values.forEach((displayName, val) -> {
+            if (val instanceof ConfigValImpl<?> impl && impl.getSide().isSynced()) {
+                out.put(basePath + "." + displayName.getInternalName(), impl.createSyncEntry());
+            }
+        });
     }
 
     @SuppressWarnings("DataFlowIssue")

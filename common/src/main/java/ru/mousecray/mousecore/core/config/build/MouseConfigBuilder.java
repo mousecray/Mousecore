@@ -25,6 +25,7 @@ import ru.mousecray.mousecore.core.config.build.par.ConfigParameterBuilder;
 import ru.mousecray.mousecore.core.config.build.par.group.ConfigParameterGroupBuilder;
 import ru.mousecray.mousecore.core.config.build.struct.ConfigDictionaryBuilder;
 import ru.mousecray.mousecore.core.config.build.struct.ConfigSectionBuilder;
+import ru.mousecray.mousecore.core.config.sync.ConfigSyncManager;
 import ru.mousecray.mousecore.core.config.utils.ConfigDictionaryImpl;
 
 import javax.annotation.Nullable;
@@ -152,6 +153,7 @@ public final class MouseConfigBuilder {
         config.markBuilt(true);
         config.reloadCache();
         config.syncListeners();
+        ConfigSyncManager.register(config);
         return config;
     }
 }

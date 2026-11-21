@@ -13,11 +13,13 @@ import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.core.config.MouseConfigImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParDisablerImpl;
+import ru.mousecray.mousecore.core.config.sync.ConfigSyncSnapshot;
 import ru.mousecray.mousecore.core.config.utils.ConfigListenerDispatcher;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @ParametersAreNonnullByDefault
@@ -89,6 +91,7 @@ public class ConfigSectImpl extends ConfigSectBaseImpl implements ConfigSect {
                 if (lock != null) lock.writeLock().unlock();
             }
             config.dispatchChanges(batch);
+            config.broadcastSyncedIfNeeded();
         } else {
             ReentrantReadWriteLock lock = getSyncLock();
             if (lock != null) lock.writeLock().lock();
@@ -144,6 +147,20 @@ public class ConfigSectImpl extends ConfigSectBaseImpl implements ConfigSect {
 
     @SuppressWarnings("DataFlowIssue")
     @Override
+    public void onClearNetworkOverride() {
+        if (hasDisabler()) disablePar.onClearNetworkOverride();
+        super.onClearNetworkOverride();
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    @Override
+    public void onCollectSyncedValues(Map<String, ConfigSyncSnapshot.SyncEntry> out) {
+        if (hasDisabler()) disablePar.onCollectSyncedValues(out);
+        super.onCollectSyncedValues(out);
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    @Override
     public void setDisabledStructurally(boolean parentDisabled) {
         isStructurallyDisabled = parentDisabled;
         if (hasDisabler()) {
@@ -157,7 +174,5 @@ public class ConfigSectImpl extends ConfigSectBaseImpl implements ConfigSect {
     @Override public boolean isSupportChildren() { return true; }
 
     @Override
-    public <T extends ConfigSectBase> boolean isSupportChild(T child) {
-        return child instanceof ConfigSectImpl || child instanceof ConfigParBaseImpl;
-    }
+    public <T extends ConfigSectBase> boolean isSupportChild(T child) { return child instanceof ConfigSectImpl || child instanceof ConfigParBaseImpl; }
 }

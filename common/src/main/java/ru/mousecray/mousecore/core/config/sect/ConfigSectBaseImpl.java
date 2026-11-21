@@ -18,6 +18,7 @@ import ru.mousecray.mousecore.api.log.MouseLogger;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.core.config.MouseConfigImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;
+import ru.mousecray.mousecore.core.config.sync.ConfigSyncSnapshot;
 import ru.mousecray.mousecore.core.config.utils.ConfigEnvironmentController;
 import ru.mousecray.mousecore.core.config.utils.ConfigListenerDispatcher;
 
@@ -105,7 +106,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         refreshThreadSafeFlag();
     }
 
-    protected void setThreadSafeByParent(boolean value) {
+    public void setThreadSafeByParent(boolean value) {
         threadSafeByParent = value;
         refreshThreadSafeFlag();
     }
@@ -117,10 +118,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         if (hasChildren()) children.values().forEach(c -> c.setThreadSafeByParent(effective));
     }
 
-    @Override
-    public boolean isThreadSafe() {
-        return effectiveThreadSafe;
-    }
+    @Override public boolean isThreadSafe() { return effectiveThreadSafe; }
 
     @Nullable
     public ReentrantReadWriteLock getSyncLock() {
@@ -215,9 +213,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
                     .filter(val -> val instanceof ConfigParBaseImpl)
                     .map(val -> (ConfigParBase<? extends CustomType<?>>) val)
                     .collect(Collectors.toList());
-            if (section instanceof ConfigParBaseImpl) {
-                parChildren.add((ConfigParBase<? extends CustomType<?>>) section);
-            }
+            if (section instanceof ConfigParBaseImpl) parChildren.add((ConfigParBase<? extends CustomType<?>>) section);
             synchronized (config.dirtySections) { config.dirtySections.addAll(parChildren); }
         }
     }
@@ -255,9 +251,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
                             .filter(val -> val instanceof ConfigParBaseImpl)
                             .map(val -> (ConfigParBase<? extends CustomType<?>>) val)
                             .collect(Collectors.toList());
-                    if (value instanceof ConfigParBaseImpl) {
-                        parChildren.add((ConfigParBase<? extends CustomType<?>>) value);
-                    }
+                    if (value instanceof ConfigParBaseImpl) parChildren.add((ConfigParBase<? extends CustomType<?>>) value);
                     synchronized (config.dirtySections) { config.dirtySections.removeAll(parChildren); }
                 }
             }
@@ -300,26 +294,21 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
                 if (lock != null) lock.writeLock().unlock();
             }
             config.dispatchChanges(batch);
+            config.broadcastSyncedIfNeeded();
         } else {
             ReentrantReadWriteLock lock = getSyncLock();
             if (lock != null) lock.writeLock().lock();
             try {
                 onReset();
                 onReloadCache();
-            } finally {
-                if (lock != null) lock.writeLock().unlock();
-            }
+            } finally { if (lock != null) lock.writeLock().unlock(); }
         }
     }
 
     public final void reloadCache() {
         ReentrantReadWriteLock lock = getSyncLock();
         if (lock != null) lock.writeLock().lock();
-        try {
-            onReloadCache();
-        } finally {
-            if (lock != null) lock.writeLock().unlock();
-        }
+        try { onReloadCache(); } finally { if (lock != null) lock.writeLock().unlock(); }
     }
 
     public void onReset() {
@@ -339,6 +328,14 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         if (hasChildren()) children.forEach((key, value) -> value.onCollectChanges(out));
     }
 
+    public void onClearNetworkOverride() {
+        if (hasChildren()) children.forEach((key, value) -> value.onClearNetworkOverride());
+    }
+
+    public void onCollectSyncedValues(Map<String, ConfigSyncSnapshot.SyncEntry> out) {
+        if (hasChildren()) children.forEach((key, value) -> value.onCollectSyncedValues(out));
+    }
+
     @Nonnull @Override public DisplayName getName()                             { return name; }
     @Nullable @Override public ConfigSectBase getParent()                       { return parent; }
     @Nullable @Override public String getComment()                              { return comment; }
@@ -351,10 +348,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
     public boolean hasLogger()                                                  { return config != null && config.getLogger() != null; }
     public void setParent(@Nullable ConfigSectBaseImpl parent)                  { this.parent = parent; }
 
-    @Override
-    public boolean isLoaded() {
-        return setByConfig && config != null && config.isLoaded();
-    }
+    @Override public boolean isLoaded()                                         { return setByConfig && config != null && config.isLoaded(); }
 
     public void setDisabledStructurally(boolean parentDisabled) {
         isStructurallyDisabled = parentDisabled;
@@ -373,19 +367,16 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
                 isDisabled = disabled;
                 config.reloadCacheDirect();
                 batch = config.collectChangesIfListening();
-            } finally {
-                if (lock != null) lock.writeLock().unlock();
-            }
+            } finally { if (lock != null) lock.writeLock().unlock(); }
             config.dispatchChanges(batch);
+            config.broadcastSyncedIfNeeded();
         } else {
             ReentrantReadWriteLock lock = getSyncLock();
             if (lock != null) lock.writeLock().lock();
             try {
                 isDisabled = disabled;
                 setDisabledStructurally(isStructurallyDisabled);
-            } finally {
-                if (lock != null) lock.writeLock().unlock();
-            }
+            } finally { if (lock != null) lock.writeLock().unlock(); }
         }
     }
 }

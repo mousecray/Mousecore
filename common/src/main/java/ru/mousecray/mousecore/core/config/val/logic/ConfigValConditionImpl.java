@@ -181,12 +181,12 @@ public class ConfigValConditionImpl<V extends CustomType<?>> extends ConfigValOt
         ReentrantReadWriteLock lock = getSyncLock();
         if (lock == null) {
             Supplier<ListType<?, V>> sup = listSupplier;
-            return getEffectiveValue().test(sup != null ? sup.get() : null, value);
+            return getEffectiveValueUnsafe().test(sup != null ? sup.get() : null, value);
         }
         lock.readLock().lock();
         try {
             Supplier<ListType<?, V>> sup = listSupplier;
-            return getEffectiveValue().test(sup != null ? sup.get() : null, value);
+            return getEffectiveValueUnsafe().test(sup != null ? sup.get() : null, value);
         } finally {
             lock.readLock().unlock();
         }

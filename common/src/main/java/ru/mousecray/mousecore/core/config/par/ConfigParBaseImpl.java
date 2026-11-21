@@ -17,6 +17,7 @@ import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
 import ru.mousecray.mousecore.core.config.MouseConfigImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectBaseImpl;
+import ru.mousecray.mousecore.core.config.sync.ConfigSyncSnapshot;
 import ru.mousecray.mousecore.core.config.utils.ConfigListenerDispatcher;
 import ru.mousecray.mousecore.core.config.val.ConfigValImpl;
 
@@ -98,6 +99,23 @@ public abstract class ConfigParBaseImpl<T extends CustomType<?>> extends ConfigS
         values.values().forEach(val -> {
             if (val instanceof ConfigValImpl<?> impl) impl.onCollectChanges(out);
         });
+    }
+
+    @Override
+    public void onClearNetworkOverride() {
+        super.onClearNetworkOverride();
+        values.values().forEach(val -> {
+            if (val instanceof ConfigValImpl<?> impl) impl.onClearNetworkOverride();
+        });
+    }
+
+    @Override
+    public void onCollectSyncedValues(Map<String, ConfigSyncSnapshot.SyncEntry> out) {
+        super.onCollectSyncedValues(out);
+        ConfigValImpl<T> impl = getConfigVal();
+        if (impl.getSide().isSynced()) {
+            out.put(getFullInternalName(), impl.createSyncEntry());
+        }
     }
 
     @Nonnull @Override public ImmutableDisplayNameMap<ConfigVal<?>> getValues()     { return new ImmutableDisplayNameMap<>(values); }

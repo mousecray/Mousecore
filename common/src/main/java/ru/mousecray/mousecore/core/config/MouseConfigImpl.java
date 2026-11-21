@@ -37,7 +37,10 @@ import ru.mousecray.mousecore.core.config.par.ConfigParImpl;
 import ru.mousecray.mousecore.core.config.par.group.ConfigParGroupImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectBaseImpl;
 import ru.mousecray.mousecore.core.config.sect.ConfigSectImpl;
+import ru.mousecray.mousecore.core.config.sync.ConfigSyncManager;
+import ru.mousecray.mousecore.core.config.sync.ConfigSyncSnapshot;
 import ru.mousecray.mousecore.core.config.utils.ConfigListenerDispatcher;
+import ru.mousecray.mousecore.core.config.val.ConfigValImpl;
 import ru.mousecray.mousecore.core.config.val.container.*;
 import ru.mousecray.mousecore.core.config.val.logic.ConfigValConditionImpl;
 import ru.mousecray.mousecore.core.config.val.logic.ConfigValPlusMinusImpl;
@@ -57,6 +60,7 @@ import java.io.File;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -167,6 +171,7 @@ public class MouseConfigImpl implements MouseConfig {
                 if (lock != null) lock.writeLock().unlock();
             }
             dispatchChanges(batch);
+            broadcastSyncedIfNeeded();
         } else {
             putSectionDirect(section);
         }
@@ -222,6 +227,7 @@ public class MouseConfigImpl implements MouseConfig {
                 if (lock != null) lock.writeLock().unlock();
             }
             dispatchChanges(batch);
+            broadcastSyncedIfNeeded();
         } else {
             removeSectionDirect(name);
         }
@@ -331,7 +337,6 @@ public class MouseConfigImpl implements MouseConfig {
         ConfigParGroup<?> group = getGroup0(fullName);
         return group instanceof ConfigParGroupTransformer<?, ?> g ? (ConfigParGroupTransformer<T, CONTEXT>) g : null;
     }
-
 
     @Nullable @Override public ConfigValPlusMinusImpl getBooleanVal(@Nullable String fullName)                { return getValue(fullName); }
     @Nullable @Override public ConfigValDecimalImpl getDecimalVal(@Nullable String fullName)                  { return getValue(fullName); }
@@ -455,8 +460,8 @@ public class MouseConfigImpl implements MouseConfig {
 
     public void reloadCache() {
         if (!built) return;
-        ReentrantReadWriteLock                                     lock = getSyncLock();
-        List<ConfigListenerDispatcher.PendingValueNotification<?>> batch;
+        ReentrantReadWriteLock                                     lock  = getSyncLock();
+        List<ConfigListenerDispatcher.PendingValueNotification<?>> batch = null;
         if (lock != null) lock.writeLock().lock();
         try {
             reloadCacheDirect();
@@ -487,8 +492,8 @@ public class MouseConfigImpl implements MouseConfig {
 
     @Override
     public void reset() {
-        ReentrantReadWriteLock                                     lock = getSyncLock();
-        List<ConfigListenerDispatcher.PendingValueNotification<?>> batch;
+        ReentrantReadWriteLock                                     lock  = getSyncLock();
+        List<ConfigListenerDispatcher.PendingValueNotification<?>> batch = null;
         if (lock != null) lock.writeLock().lock();
         try {
             sections.forEach((key, value) -> value.onReset());
@@ -498,6 +503,7 @@ public class MouseConfigImpl implements MouseConfig {
             if (lock != null) lock.writeLock().unlock();
         }
         dispatchChanges(batch);
+        broadcastSyncedIfNeeded();
     }
 
     @Override
@@ -522,6 +528,7 @@ public class MouseConfigImpl implements MouseConfig {
             if (lock != null) lock.writeLock().unlock();
         }
         dispatchChanges(batch);
+        broadcastSyncedIfNeeded();
         return result;
     }
 
@@ -546,37 +553,60 @@ public class MouseConfigImpl implements MouseConfig {
         }
     }
 
-    void write(Consumer<ConfigSectBaseImpl> startAction, Consumer<ConfigSectBaseImpl> endAction) {
-        sections.forEach((key, section) -> section.write(startAction, endAction));
+    // ==================== Сетевая синхронизация ====================
+
+    public ConfigSyncSnapshot collectNetworkSnapshot() {
+        Map<String, ConfigSyncSnapshot.SyncEntry> map  = new java.util.LinkedHashMap<>();
+        ReentrantReadWriteLock                    lock = getSyncLock();
+        if (lock != null) lock.readLock().lock();
+        try {
+            sections.forEach((key, value) -> value.onCollectSyncedValues(map));
+        } finally {
+            if (lock != null) lock.readLock().unlock();
+        }
+        return new ConfigSyncSnapshot(name, map);
     }
 
-    @SuppressWarnings("DataFlowIssue")
-    public boolean putForPath(@Nullable String path, ConfigSectBase base) {
-        Objects.requireNonNull(base);
-        if (path == null) path = "";
-        else path = MouseStrings.trimWith(path, true, '.');
-        if (path.isEmpty()) {
-            if (!(base instanceof ConfigSectImpl)) return false;
-            else {
-                addSection((ConfigSectImpl) base);
-                return true;
+    public void applyNetworkSnapshot(ConfigSyncSnapshot snapshot) {
+        ReentrantReadWriteLock                                     lock  = getSyncLock();
+        List<ConfigListenerDispatcher.PendingValueNotification<?>> batch = null;
+        if (lock != null) lock.writeLock().lock();
+        try {
+            for (Map.Entry<String, ConfigSyncSnapshot.SyncEntry> entry : snapshot.getEntries().entrySet()) {
+                ConfigVal<?> val = getVal(entry.getKey());
+                if (val instanceof ConfigValImpl<?> impl && impl.getSide().isSynced()) {
+                    impl.applySyncEntry(entry.getValue());
+                }
             }
+            reloadCacheDirect();
+            batch = collectChangesIfListening();
+        } finally {
+            if (lock != null) lock.writeLock().unlock();
         }
+        dispatchChanges(batch);
+    }
 
-        String[] splitted = path.split("\\.");
-
-        ConfigSectBaseImpl section = null;
-        for (int i = 0, splittedLength = splitted.length; i < splittedLength; ++i) {
-            if (i > 0 && section == null) break;
-            String s = MouseStrings.trimWith(splitted[i], true, '\t');
-            section = section == null ? sections.getByInternalName(s) : section.getChild(s);
+    public void revertNetworkOverrides() {
+        ReentrantReadWriteLock                                     lock  = getSyncLock();
+        List<ConfigListenerDispatcher.PendingValueNotification<?>> batch = null;
+        if (lock != null) lock.writeLock().lock();
+        try {
+            sections.forEach((key, value) -> value.onClearNetworkOverride());
+            reloadCacheDirect();
+            batch = collectChangesIfListening();
+        } finally {
+            if (lock != null) lock.writeLock().unlock();
         }
+        dispatchChanges(batch);
+    }
 
-        if (section != null) {
-            section.addChild(base);
-            reloadCache();
-            return true;
-        } else return false;
+    public void broadcastSyncedIfNeeded() {
+        ConfigSyncManager.broadcastIfServer(this);
+    }
+
+
+    void write(Consumer<ConfigSectBaseImpl> startAction, Consumer<ConfigSectBaseImpl> endAction) {
+        sections.forEach((key, section) -> section.write(startAction, endAction));
     }
 
     @Nonnull @Override public ConfigDictionary getDictionary() { return dictionary; }
@@ -609,8 +639,6 @@ public class MouseConfigImpl implements MouseConfig {
         if (isEnableAutoSave() && (sec - lastSaveSec) % saveSecInterval == 0) ConfigIOThread.getInstance().addSaveAction(this);
     }
 
-    // ==================== Слушатели ====================
-
     public void adjustListenerCount(int delta) { totalListeners.addAndGet(delta); }
     public boolean hasAnyListeners()           { return totalListeners.get() > 0; }
     public boolean hasGlobalListeners()        { return !globalListeners.isEmpty(); }
@@ -635,6 +663,37 @@ public class MouseConfigImpl implements MouseConfig {
             if (delta != 0) adjustListenerCount(delta);
             return removed;
         }
+    }
+
+    public String getSyncKey() { return name; }
+
+    @SuppressWarnings("DataFlowIssue")
+    public boolean putForPath(@Nullable String path, ConfigSectBase base) {
+        Objects.requireNonNull(base);
+        if (path == null) path = "";
+        else path = MouseStrings.trimWith(path, true, '.');
+        if (path.isEmpty()) {
+            if (!(base instanceof ConfigSectImpl)) return false;
+            else {
+                addSection((ConfigSectImpl) base);
+                return true;
+            }
+        }
+
+        String[] splitted = path.split("\\.");
+
+        ConfigSectBaseImpl section = null;
+        for (int i = 0, splittedLength = splitted.length; i < splittedLength; ++i) {
+            if (i > 0 && section == null) break;
+            String s = MouseStrings.trimWith(splitted[i], true, '\t');
+            section = section == null ? sections.getByInternalName(s) : section.getChild(s);
+        }
+
+        if (section != null) {
+            section.addChild(base);
+            reloadCache();
+            return true;
+        } else return false;
     }
 
     @Override

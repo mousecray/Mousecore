@@ -49,6 +49,7 @@ public interface ConfigVal<V extends CustomType<?>> {
     boolean hasState(ConfigState state);
     boolean isFrozen();
     boolean isNew();
+    boolean isSyncedFromServer();
 
     boolean isThreadSafe();
 

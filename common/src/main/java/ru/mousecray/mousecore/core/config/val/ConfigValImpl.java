@@ -32,6 +32,7 @@ import ru.mousecray.mousecore.api.utils.MouseCollections;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.core.config.MouseConfigImpl;
 import ru.mousecray.mousecore.core.config.par.ConfigParBaseImpl;
+import ru.mousecray.mousecore.core.config.sync.ConfigSyncSnapshot;
 import ru.mousecray.mousecore.core.config.utils.ConfigListenerDispatcher;
 import ru.mousecray.mousecore.core.config.val.base.ConfigValNumberImpl;
 
@@ -60,15 +61,21 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
      */
     protected final     List<Constraint<? extends CustomType<?>>> constraints     = new ArrayList<>();
 
-    protected volatile           boolean            isNewState;
-    protected volatile           boolean            setByConfig;
-    protected volatile           V                  value;
-    protected volatile           V                  constrainedValue;
-    protected volatile           boolean            constrainedDisabled;
+    protected volatile boolean isNewState;
+    protected volatile boolean setByConfig;
+    protected volatile V       value;
+    protected volatile V       constrainedValue;
+    protected volatile boolean constrainedDisabled;
+
     /**
      * Current predefined value if it specified in config
      */
     protected volatile @Nullable PredefinedValue<V> currentConfigure;
+
+    /**
+     * Network override from Server
+     */
+    protected volatile @Nullable V networkOverrideValue;
 
     private final              CopyOnWriteArrayList<ConfigListenerDispatcher.ValueListenerEntry<V>> listeners = new CopyOnWriteArrayList<>();
     @Nullable private volatile V                                                                    lastNotifiedValue;
@@ -86,18 +93,10 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
         constrainedValue = value;
 
         if (constraints != null) {
-            this.constraints.addAll(
-                    Arrays.stream(constraints)
-                            .filter(Objects::nonNull)
-                            .toList()
-            );
+            this.constraints.addAll(Arrays.stream(constraints).filter(Objects::nonNull).toList());
         }
         if (configureValues != null) {
-            this.configureValues.addAll(
-                    Arrays.stream(configureValues)
-                            .filter(Objects::nonNull)
-                            .toList()
-            );
+            this.configureValues.addAll(Arrays.stream(configureValues).filter(Objects::nonNull).toList());
         }
         currentConfigure = getCurrConfigureFromValue(value);
         lastNotifiedValue = value;
@@ -106,9 +105,9 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
     public void markNew(boolean isNew)                   { isNewState = isNew; }
     @Override public ConfigSide getSide()                { return owner != null ? owner.getSide() : ConfigSide.COMMON; }
     @Override public boolean isNew()                     { return isNewState || (owner != null && owner.isNew()); }
-    @Override public boolean isFrozen()                  { return constrainedDisabled || (owner != null && owner.isFrozen()); }
+    @Override public boolean isFrozen()                  { return constrainedDisabled || isSyncedFromServer() || (owner != null && owner.isFrozen()); }
     @Override public boolean hasState(ConfigState state) { return getStates().contains(state); }
-
+    @Override public boolean isSyncedFromServer()        { return networkOverrideValue != null; }
 
     @Override
     public EnumSet<ConfigState> getStates() {
@@ -153,16 +152,15 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
     @Override
     public final V getValue() {
         ReentrantReadWriteLock lock = getSyncLock();
-        if (lock == null) return getEffectiveValue();
+        if (lock == null) return getEffectiveValueUnsafe();
         lock.readLock().lock();
-        try {
-            return getEffectiveValue();
-        } finally {
-            lock.readLock().unlock();
-        }
+        try { return getEffectiveValueUnsafe(); } finally { lock.readLock().unlock(); }
     }
 
-    protected V getEffectiveValue()                                          { return isValueDisabled() ? disabledValue : constrainedValue; }
+    protected V getEffectiveValueUnsafe() {
+        if (networkOverrideValue != null) return networkOverrideValue;
+        return isValueDisabled() ? disabledValue : constrainedValue;
+    }
 
     @Override public final V getDisabledValue()                              { return disabledValue; }
     @Override public final V getDefaultValue()                               { return defaultValue; }
@@ -233,6 +231,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                 if (lock != null) lock.writeLock().unlock();
             }
             cfg.dispatchChanges(batch);
+            cfg.broadcastSyncedIfNeeded();
         } else {
             ReentrantReadWriteLock                                     lock    = getSyncLock();
             List<ConfigListenerDispatcher.PendingValueNotification<?>> pending = null;
@@ -245,9 +244,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
                         onCollectChanges(pending);
                     }
                 }
-            } finally {
-                if (lock != null) lock.writeLock().unlock();
-            }
+            } finally { if (lock != null) lock.writeLock().unlock(); }
             if (pending != null && !pending.isEmpty()) {
                 ConfigListenerDispatcher.dispatch(null, pending, Collections.emptyList(), hasLogger() ? getLogger() : null);
             }
@@ -309,8 +306,26 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
     }
 
     protected V processValueIfNotEqualConstraint(V value)         { return disabledValue; }
-
     @Nullable public String getRules(ConfigDictionary dictionary) { return dictionary.getRulesForType(getType()); }
+
+    public ConfigSyncSnapshot.SyncEntry createSyncEntry() {
+        return new ConfigSyncSnapshot.SyncEntry(isDisabled(), isDisabled() ? null : value.toString());
+    }
+
+    public void applySyncEntry(ConfigSyncSnapshot.SyncEntry entry) {
+        if (entry.disabled()) networkOverrideValue = disabledValue;
+        else if (entry.rawValue() != null) {
+            PredefinedValue<V> cVal = getCurrConfigureFromString(entry.rawValue());
+            if (canBeConfigured() && cVal != null) networkOverrideValue = cVal.getValue();
+            else {
+                VariableValue<V> parsed = parseValue(entry.rawValue());
+                if (parsed != null && parsed.isPresent()) networkOverrideValue = adaptValue(parsed.getValue());
+            }
+        } else networkOverrideValue = null;
+    }
+
+    public void onClearNetworkOverride() { networkOverrideValue = null; }
+
 
     @Override
     public void reset() {
@@ -320,23 +335,15 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
     public final void reloadCache() {
         ReentrantReadWriteLock lock = getSyncLock();
         if (lock != null) lock.writeLock().lock();
-        try {
-            onReloadCache();
-        } finally {
-            if (lock != null) lock.writeLock().unlock();
-        }
+        try { onReloadCache(); } finally { if (lock != null) lock.writeLock().unlock(); }
     }
 
-    public void onReset() {
-        applyValueDirect(defaultValue);
-    }
+    public void onReset()         { applyValueDirect(defaultValue); }
 
-    public void onSyncListeners() {
-        lastNotifiedValue = getEffectiveValue();
-    }
+    public void onSyncListeners() { lastNotifiedValue = getEffectiveValueUnsafe(); }
 
     public void onCollectChanges(List<ConfigListenerDispatcher.PendingValueNotification<?>> out) {
-        V current = getEffectiveValue();
+        V current = getEffectiveValueUnsafe();
         V prev    = lastNotifiedValue;
         if (prev == null) {
             lastNotifiedValue = current;
@@ -454,7 +461,7 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes" })
     private boolean applyDisabledSpecific(Constraint constraint, ConfigVal<? extends CustomType<?>> targetVal, ValTypeCategory category) {
         Constraint.ConstraintConditionType cond = constraint.getConditionType();
         if (category == NUMBER) {
@@ -772,25 +779,32 @@ public abstract class ConfigValImpl<V extends CustomType<?>> implements ConfigVa
     }
 
     private void logConstraintValNull(Constraint<? extends CustomType<?>> constraint) {
-        if (hasLogger()) logConstraintWarn(constraint, "but constraint val is null.");
+        if (hasLogger())
+            logConstraintWarn(constraint, "but constraint val is null.");
     }
     private void logConstraintRangeNull(Constraint<? extends CustomType<?>> constraint) {
-        if (hasLogger()) logConstraintWarn(constraint, "but constraint range is null.");
+        if (hasLogger())
+            logConstraintWarn(constraint, "but constraint range is null.");
     }
     private void logConstraintConditionNotValid(Constraint<? extends CustomType<?>> constraint) {
-        if (hasLogger()) logConstraintWarn(constraint, "but constraint conditional isn't valid.");
+        if (hasLogger())
+            logConstraintWarn(constraint, "but constraint conditional isn't valid.");
     }
     private void logConstraintIncompatibleTargetType(Constraint<? extends CustomType<?>> constraint) {
-        if (hasLogger()) logConstraintWarn(constraint, "that has incompatible type with target.");
+        if (hasLogger())
+            logConstraintWarn(constraint, "that has incompatible type with target.");
     }
     private void logConstraintIncompatibleOwnerType(Constraint<? extends CustomType<?>> constraint) {
-        if (hasLogger()) logConstraintWarn(constraint, "that has incompatible type with owner.");
+        if (hasLogger())
+            logConstraintWarn(constraint, "that has incompatible type with owner.");
     }
     private void logConstraintIncompatibleTargetValue(Constraint<? extends CustomType<?>> constraint) {
-        if (hasLogger()) logConstraintWarn(constraint, "but target value is incompatible.");
+        if (hasLogger())
+            logConstraintWarn(constraint, "but target value is incompatible.");
     }
     private void logConstraintConditionNotSupport(Constraint<? extends CustomType<?>> constraint) {
-        if (hasLogger()) logConstraintWarn(constraint, "but constraint conditional type isn't support.");
+        if (hasLogger())
+            logConstraintWarn(constraint, "but constraint conditional type isn't support.");
     }
 
     private void logConstraintWarn(Constraint<? extends CustomType<?>> constraint, String uniqueMessage) {
