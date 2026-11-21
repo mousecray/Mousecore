@@ -17,6 +17,10 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
 public interface ConfigDictionary {
+    @Nonnull ConfigLang getActiveLanguage();
+    void setActiveLanguage(ConfigLang language);
+    @Nonnull ConfigLang getFallbackLanguage();
+
     @Nonnull String getLocaleForType(IValType type);
     @Nullable String getRulesForType(IValType type);
     @Nullable ImmutableList<Pair<String, String>> getDefThresholdForType(IValType type);

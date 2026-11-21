@@ -11,6 +11,7 @@ import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.par.group.ConfigParGroup;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
+import ru.mousecray.mousecore.api.config.utils.ConfigLang;
 import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.customtype.CustomType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
@@ -59,7 +60,25 @@ public final class ConfigParameterGroupBuilder<T extends CustomType<?>> extends 
 
     @Override
     public ConfigParameterGroupBuilder<T> setComment(@Nullable String comment) {
-        this.comment = comment;
+        super.setComment(comment);
+        return this;
+    }
+
+    @Override
+    public ConfigParameterGroupBuilder<T> setComment(ConfigLang lang, String comment) {
+        super.setComment(lang, comment);
+        return this;
+    }
+
+    @Override
+    public ConfigParameterGroupBuilder<T> setDisplayName(String displayName) {
+        super.setDisplayName(displayName);
+        return this;
+    }
+
+    @Override
+    public ConfigParameterGroupBuilder<T> setDisplayName(ConfigLang lang, String name) {
+        super.setDisplayName(lang, name);
         return this;
     }
 

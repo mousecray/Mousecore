@@ -13,6 +13,7 @@ import ru.mousecray.mousecore.api.config.par.group.*;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
+import ru.mousecray.mousecore.api.config.utils.ConfigLang;
 import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.config.utils.ConfigThreadPolicy;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
@@ -125,5 +126,10 @@ public interface MouseConfig {
 
     void reset();
     IOFuture load();
-    IOFuture save(boolean markUnloaded);
+    @SuppressWarnings("UnusedReturnValue") IOFuture save(boolean markUnloaded);
+
+    @Nonnull ConfigLang getLanguage();
+    boolean isDynamicLanguage();
+    void setLanguage(ConfigLang language);
+    @SuppressWarnings("UnusedReturnValue") boolean refreshLanguage();
 }

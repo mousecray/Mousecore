@@ -12,7 +12,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import ru.mousecray.mousecore.api.platform.PlatformHelper;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Locale;
 
 public class FabricPlatformHelper extends PlatformHelper {
     private static volatile MinecraftServer currentServer;
@@ -50,5 +52,14 @@ public class FabricPlatformHelper extends PlatformHelper {
         if (server.isSameThread()) task.run();
         else server.execute(task);
         return true;
+    }
+
+    @Nonnull @Override
+    public String getGameLocale() {
+        if (isClientSide()) {
+            String clientLang = FabricClientExecutor.getLanguage();
+            if (clientLang != null) return clientLang;
+        }
+        return Locale.getDefault().toString().toLowerCase(Locale.ROOT);
     }
 }

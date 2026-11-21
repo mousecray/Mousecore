@@ -2,6 +2,7 @@ package ru.mousecray.mousecore.core.config.build.struct;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
+import ru.mousecray.mousecore.api.config.utils.ConfigLang;
 import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.log.ConsoleColor;
 import ru.mousecray.mousecore.api.log.LogPrefixes;
@@ -34,7 +35,25 @@ public final class ConfigSectionBuilder extends AbstractConfigChildBuilder {
 
     @Override
     public ConfigSectionBuilder setComment(@Nullable String comment) {
-        this.comment = comment;
+        super.setComment(comment);
+        return this;
+    }
+
+    @Override
+    public ConfigSectionBuilder setComment(ConfigLang lang, String comment) {
+        super.setComment(lang, comment);
+        return this;
+    }
+
+    @Override
+    public ConfigSectionBuilder setDisplayName(String displayName) {
+        super.setDisplayName(displayName);
+        return this;
+    }
+    
+    @Override
+    public ConfigSectionBuilder setDisplayName(ConfigLang lang, String name) {
+        super.setDisplayName(lang, name);
         return this;
     }
 

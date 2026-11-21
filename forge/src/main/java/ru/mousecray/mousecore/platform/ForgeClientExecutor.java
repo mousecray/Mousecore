@@ -24,4 +24,11 @@ final class ForgeClientExecutor {
         else mc.execute(task);
         return true;
     }
+
+    @SuppressWarnings("ConstantValue")
+    static String getLanguage() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc == null || mc.getLanguageManager() == null) return null;
+        return mc.getLanguageManager().getSelected();
+    }
 }

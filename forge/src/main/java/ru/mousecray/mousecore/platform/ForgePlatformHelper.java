@@ -15,6 +15,9 @@ import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import ru.mousecray.mousecore.api.platform.PlatformHelper;
 
+import javax.annotation.Nonnull;
+import java.util.Locale;
+
 public class ForgePlatformHelper extends PlatformHelper {
     @Override public String getPlatformName()           { return "Forge"; }
     @Override public boolean isModLoaded(String modId)  { return ModList.get().isLoaded(modId); }
@@ -42,5 +45,14 @@ public class ForgePlatformHelper extends PlatformHelper {
         if (server.isSameThread()) task.run();
         else server.execute(task);
         return true;
+    }
+
+    @Nonnull @Override
+    public String getGameLocale() {
+        if (isClientSide()) {
+            String clientLang = ForgeClientExecutor.getLanguage();
+            if (clientLang != null) return clientLang;
+        }
+        return Locale.getDefault().toString().toLowerCase(Locale.ROOT);
     }
 }

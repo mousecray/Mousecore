@@ -8,164 +8,124 @@ package ru.mousecray.mousecore.core.config.utils;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import ru.mousecray.mousecore.api.anno.MethodReturnsNonnullByDefault;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
 import ru.mousecray.mousecore.api.config.utils.ConfigLang;
 import ru.mousecray.mousecore.api.config.val.ILocaleType;
 import ru.mousecray.mousecore.api.customtype.type.IValType;
-import ru.mousecray.mousecore.api.utils.MouseStrings;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+@MethodReturnsNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ConfigDictionaryImpl implements ConfigDictionary {
-    @Nonnull protected final  ConfigLang                                          currentLanguage;
-    @Nullable protected final Map<ILocaleType, String>                            localeTypes;
-    @Nullable protected final Map<IValType, List<Pair<String, String>>>           defThreshold;
-    @Nullable protected final Map<IValType, List<String>>                         defUseList;
-    @Nullable protected final Map<IValType, List<Triple<String, String, String>>> defStandard;
-    @Nullable protected final Map<IValType, String>                               localizedValTypes;
-    @Nullable protected final Map<IValType, String>                               rulesValTypes;
+    @Nonnull private volatile ConfigLang activeLanguage;
+    @Nonnull private final    ConfigLang fallbackLanguage;
 
-    public ConfigDictionaryImpl(ConfigLang currentLanguage) {
-        this(currentLanguage, null, null, null, null, null, null);
+    private final Map<ConfigLang, Map<ILocaleType, String>>                            localeTypes;
+    private final Map<ConfigLang, Map<IValType, List<Pair<String, String>>>>           defThreshold;
+    private final Map<ConfigLang, Map<IValType, List<String>>>                         defUseList;
+    private final Map<ConfigLang, Map<IValType, List<Triple<String, String, String>>>> defStandard;
+    private final Map<ConfigLang, Map<IValType, String>>                               localizedValTypes;
+    private final Map<ConfigLang, Map<IValType, String>>                               rulesValTypes;
+
+    public ConfigDictionaryImpl(ConfigLang activeLanguage) {
+        this(activeLanguage, ConfigLang.EN_US,
+                new EnumMap<>(ConfigLang.class), new EnumMap<>(ConfigLang.class),
+                new EnumMap<>(ConfigLang.class), new EnumMap<>(ConfigLang.class),
+                new EnumMap<>(ConfigLang.class), new EnumMap<>(ConfigLang.class));
     }
 
     public ConfigDictionaryImpl(
-            ConfigLang currentLanguage, @Nullable Map<ILocaleType, String> localeTypes,
-            @Nullable Map<IValType, List<Pair<String, String>>> defThreshold,
-            @Nullable Map<IValType, List<String>> defUseList,
-            @Nullable Map<IValType, List<Triple<String, String, String>>> defStandard,
-            @Nullable Map<IValType, String> localizedValTypes,
-            @Nullable Map<IValType, String> rulesValTypes
+            ConfigLang activeLanguage,
+            ConfigLang fallbackLanguage,
+            Map<ConfigLang, Map<ILocaleType, String>> localeTypes,
+            Map<ConfigLang, Map<IValType, List<Pair<String, String>>>> defThreshold,
+            Map<ConfigLang, Map<IValType, List<String>>> defUseList,
+            Map<ConfigLang, Map<IValType, List<Triple<String, String, String>>>> defStandard,
+            Map<ConfigLang, Map<IValType, String>> localizedValTypes,
+            Map<ConfigLang, Map<IValType, String>> rulesValTypes
     ) {
-        this.currentLanguage = Objects.requireNonNull(currentLanguage);
-        if (localeTypes != null) {
-            localeTypes.forEach((val, displayName) -> {
-                String tempName = MouseStrings.trimWith(displayName, true, '\t');
-                if (tempName != null) {
-                    if (tempName.isEmpty()) throw new IllegalArgumentException("localeForValName cannot be empty");
-                    if (tempName.contains("\t")) throw new IllegalArgumentException("localeForValName cannot contains tabs");
-                }
-            });
-        }
+        this.activeLanguage = Objects.requireNonNull(activeLanguage);
+        this.fallbackLanguage = Objects.requireNonNull(fallbackLanguage);
         this.localeTypes = localeTypes;
-
-        if (defUseList != null) {
-            defUseList.forEach((val, list) -> list.forEach(s -> {
-                String tempName = MouseStrings.trimWith(s, true, '\t');
-                if (Objects.requireNonNull(tempName).isEmpty())
-                    throw new IllegalArgumentException("defUseList value cannot be empty");
-                if (tempName.contains("\t")) throw new IllegalArgumentException("defUseList value cannot contains tabs");
-            }));
-        }
-        this.defUseList = defUseList;
-
-        if (defThreshold != null) {
-            defThreshold.forEach((val, list) -> list.forEach(pair -> {
-                String tempName = MouseStrings.trimWith(pair.getLeft(), true, '\t');
-                if (Objects.requireNonNull(tempName).isEmpty())
-                    throw new IllegalArgumentException("defThreshold value cannot be empty");
-                if (tempName.contains("\t")) throw new IllegalArgumentException("defThreshold value cannot contains tabs");
-                tempName = MouseStrings.trimWith(pair.getRight(), true, '\t');
-                if (Objects.requireNonNull(tempName).isEmpty())
-                    throw new IllegalArgumentException("defThreshold value cannot be empty");
-                if (tempName.contains("\t")) throw new IllegalArgumentException("defThreshold value cannot contains tabs");
-            }));
-        }
         this.defThreshold = defThreshold;
-
-        if (defStandard != null) {
-            defStandard.forEach((val, list) -> list.forEach(triple -> {
-                String tempName = MouseStrings.trimWith(triple.getLeft(), true, '\t');
-                if (Objects.requireNonNull(tempName).isEmpty())
-                    throw new IllegalArgumentException("defConfigure value cannot be empty");
-                if (tempName.contains("\t")) throw new IllegalArgumentException("defConfigure value cannot contains tabs");
-                tempName = MouseStrings.trimWith(triple.getMiddle(), true, '\t');
-                if (Objects.requireNonNull(tempName).isEmpty())
-                    throw new IllegalArgumentException("defConfigure value cannot be empty");
-                if (tempName.contains("\t")) throw new IllegalArgumentException("defConfigure value cannot contains tabs");
-                tempName = MouseStrings.trimWith(triple.getRight(), true, '\t');
-                if (Objects.requireNonNull(tempName).isEmpty())
-                    throw new IllegalArgumentException("defConfigure value cannot be empty");
-                if (tempName.contains("\t")) throw new IllegalArgumentException("defConfigure value cannot contains tabs");
-            }));
-        }
+        this.defUseList = defUseList;
         this.defStandard = defStandard;
-
-        if (localizedValTypes != null) {
-            localizedValTypes.forEach((val, displayName) -> {
-                String tempName = MouseStrings.trimWith(displayName, true, '\t');
-                if (tempName != null) {
-                    if (tempName.isEmpty()) throw new IllegalArgumentException("localeForValName cannot be empty");
-                    if (tempName.contains("\t")) throw new IllegalArgumentException("localeForValName cannot contains tabs");
-                }
-            });
-        }
         this.localizedValTypes = localizedValTypes;
-
-        if (rulesValTypes != null) {
-            rulesValTypes.forEach((val, text) -> {
-                String tempName = MouseStrings.trimWith(text, true, '\t');
-                if (tempName != null) {
-                    if (tempName.isEmpty()) throw new IllegalArgumentException("rulesForVal cannot be empty");
-                    if (tempName.contains("\t")) throw new IllegalArgumentException("rulesForVal cannot contains tabs");
-                }
-            });
-        }
         this.rulesValTypes = rulesValTypes;
     }
 
-    @Nonnull @Override public String getLocaleForType(IValType type) {
-        Objects.requireNonNull(type);
-        if (localizedValTypes == null) return type.getDisplayName();
-        else {
-            String s = localizedValTypes.get(type);
-            if (s == null) s = type.getDisplayName();
-            return s;
+    @Override public ConfigLang getActiveLanguage()          { return activeLanguage; }
+    @Override public void setActiveLanguage(ConfigLang lang) { activeLanguage = Objects.requireNonNull(lang); }
+    @Override public ConfigLang getFallbackLanguage()        { return fallbackLanguage; }
+
+    @Nullable
+    private <K, V> V lookup(Map<ConfigLang, Map<K, V>> table, K key) {
+        Map<K, V> activeMap = table.get(activeLanguage);
+        if (activeMap != null) {
+            V val = activeMap.get(key);
+            if (val != null) return val;
         }
+
+        Map<K, V> fallbackMap = table.get(fallbackLanguage);
+        if (fallbackMap != null) {
+            V val = fallbackMap.get(key);
+            if (val != null) return val;
+        }
+
+        if (fallbackLanguage != ConfigLang.EN_US) {
+            Map<K, V> enMap = table.get(ConfigLang.EN_US);
+            if (enMap != null) return enMap.get(key);
+        }
+
+        return null;
     }
 
-    @Nullable @Override public String getRulesForType(IValType type) {
+    @Override
+    public String getLocaleForType(IValType type) {
         Objects.requireNonNull(type);
-        return rulesValTypes == null ? null : rulesValTypes.get(type);
+        String result = lookup(localizedValTypes, type);
+        return result != null ? result : type.getDisplayName();
     }
 
-    @Nullable @Override public ImmutableList<Pair<String, String>> getDefThresholdForType(IValType type) {
+    @Nullable @Override
+    public String getRulesForType(IValType type) {
         Objects.requireNonNull(type);
-        if (defThreshold == null) { return null; } else {
-            List<Pair<String, String>> res = defThreshold.get(type);
-            return res == null ? null : ImmutableList.copyOf(res);
-        }
+        return lookup(rulesValTypes, type);
     }
 
-    @Nullable @Override public ImmutableList<String> getDefUseListForType(IValType type) {
+    @Nullable @Override
+    public ImmutableList<Pair<String, String>> getDefThresholdForType(IValType type) {
         Objects.requireNonNull(type);
-        if (defUseList == null) { return null; } else {
-            List<String> res = defUseList.get(type);
-            return res == null ? null : ImmutableList.copyOf(res);
-        }
+        List<Pair<String, String>> list = lookup(defThreshold, type);
+        return list != null ? ImmutableList.copyOf(list) : null;
     }
 
-    @Nullable @Override public ImmutableList<Triple<String, String, String>> getDefStandardForType(IValType type) {
+    @Nullable @Override
+    public ImmutableList<String> getDefUseListForType(IValType type) {
         Objects.requireNonNull(type);
-        if (defStandard == null) { return null; } else {
-            List<Triple<String, String, String>> res = defStandard.get(type);
-            return res == null ? null : ImmutableList.copyOf(res);
-        }
+        List<String> list = lookup(defUseList, type);
+        return list != null ? ImmutableList.copyOf(list) : null;
     }
 
-    @Nonnull @Override public String getLocaleForLocale(ILocaleType type) {
+    @Nullable @Override
+    public ImmutableList<Triple<String, String, String>> getDefStandardForType(IValType type) {
         Objects.requireNonNull(type);
-        if (localeTypes == null) return type.getDisplayName();
-        else {
-            String s = localeTypes.get(type);
-            if (s == null) s = type.getDisplayName();
-            return s;
-        }
+        List<Triple<String, String, String>> list = lookup(defStandard, type);
+        return list != null ? ImmutableList.copyOf(list) : null;
+    }
+
+    @Override
+    public String getLocaleForLocale(ILocaleType type) {
+        Objects.requireNonNull(type);
+        String result = lookup(localeTypes, type);
+        return result != null ? result : type.getDisplayName();
     }
 }

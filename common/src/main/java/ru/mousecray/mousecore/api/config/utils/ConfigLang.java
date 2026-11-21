@@ -8,6 +8,8 @@
 package ru.mousecray.mousecore.api.config.utils;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Locale;
 
 public enum ConfigLang {
     EN_US("English"), RU_RU("Русский"), UK_UA("Українська"),
@@ -128,6 +130,28 @@ public enum ConfigLang {
     ;
 
     private final String displayName;
-    ConfigLang(String displayName)          { this.displayName = displayName; }
-    @Nonnull public String getDisplayName() { return displayName; }
+    ConfigLang(String displayName)            { this.displayName = displayName; }
+    @Nonnull public String getDisplayName()   { return displayName; }
+
+    @Nonnull public String getMinecraftCode() { return name().toLowerCase(Locale.ROOT); }
+
+    @Nonnull
+    public static ConfigLang fromMinecraftCode(@Nullable String code) {
+        if (code == null || code.isEmpty()) return EN_US;
+        String normalized = code.toLowerCase(java.util.Locale.ROOT).replace('-', '_');
+
+        for (ConfigLang lang : values()) if (lang.getMinecraftCode().equals(normalized)) return lang;
+
+        int    underscore = normalized.indexOf('_');
+        String prefix     = underscore > 0 ? normalized.substring(0, underscore) : normalized;
+        for (ConfigLang lang : values()) if (lang.getMinecraftCode().startsWith(prefix + "_")) return lang;
+
+        return EN_US;
+    }
+
+    @Nonnull
+    public static ConfigLang fromLocale(@Nullable java.util.Locale locale) {
+        if (locale == null) return EN_US;
+        return fromMinecraftCode(locale.toString());
+    }
 }

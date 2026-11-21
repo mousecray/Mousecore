@@ -9,6 +9,7 @@ package ru.mousecray.mousecore.api.config.sect;
 
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.config.MouseConfig;
+import ru.mousecray.mousecore.api.config.utils.ConfigLang;
 import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.config.utils.ConfigState;
 import ru.mousecray.mousecore.api.container.ImmutableDisplayNameMap;
@@ -40,13 +41,16 @@ public interface ConfigSectBase {
     boolean isSupportChildren();
     boolean hasChild(String name);
     boolean hasChildByDisplayName(String name);
+    boolean matchesName(String inputName);
     boolean isLoaded();
 
     void reset();
 
     @Nonnull DisplayName getName();
+    @Nonnull DisplayName getName(ConfigLang lang);
     @Nullable ConfigSectBase getParent();
     @Nullable String getComment();
+    @Nullable String getComment(ConfigLang lang);
     int getDeep();
 
     @Nullable MouseConfig getConfig();

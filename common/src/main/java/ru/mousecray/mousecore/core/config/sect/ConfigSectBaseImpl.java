@@ -10,6 +10,7 @@ package ru.mousecray.mousecore.core.config.sect;
 import ru.mousecray.mousecore.api.DisplayName;
 import ru.mousecray.mousecore.api.config.par.ConfigParBase;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
+import ru.mousecray.mousecore.api.config.utils.ConfigLang;
 import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.config.utils.ConfigState;
 import ru.mousecray.mousecore.api.container.ImmutableDisplayNameMap;
@@ -46,6 +47,9 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
     protected final     EnumSet<ConfigState> manualStates = EnumSet.noneOf(ConfigState.class);
     protected volatile  boolean              isNewState;
 
+    protected final Map<ConfigLang, String> localizedComments     = new EnumMap<>(ConfigLang.class);
+    protected final Map<ConfigLang, String> localizedDisplayNames = new EnumMap<>(ConfigLang.class);
+
     protected volatile boolean setByConfig;
     protected volatile boolean isDisabled;
     protected volatile boolean isStructurallyDisabled;
@@ -62,6 +66,16 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         comment = MouseStrings.trimWith(comment, true, '\t');
         if (comment != null && comment.isEmpty()) comment = null;
         this.comment = comment;
+    }
+
+    public void setLocalizedComments(@Nullable Map<ConfigLang, String> comments) {
+        localizedComments.clear();
+        if (comments != null) localizedComments.putAll(comments);
+    }
+
+    public void setLocalizedDisplayNames(@Nullable Map<ConfigLang, String> displayNames) {
+        localizedDisplayNames.clear();
+        if (displayNames != null) localizedDisplayNames.putAll(displayNames);
     }
 
     public void addManualStates(@Nullable Collection<ConfigState> states) {
@@ -106,7 +120,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         refreshThreadSafeFlag();
     }
 
-    public void setThreadSafeByParent(boolean value) {
+    protected void setThreadSafeByParent(boolean value) {
         threadSafeByParent = value;
         refreshThreadSafeFlag();
     }
@@ -163,14 +177,29 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
     public boolean hasChildByDisplayName(String name) {
         Objects.requireNonNull(name);
         if (checkChildren()) return false;
-        else return children.containsByDisplayName(name);
+        for (ConfigSectBaseImpl child : children.values()) {
+            if (child.matchesName(name)) return true;
+        }
+        return false;
     }
 
     @Nullable @Override
     public ConfigSectBaseImpl getChildByDisplayName(String name) {
         Objects.requireNonNull(name);
         if (checkChildren()) return null;
-        else return children.getByDisplayName(name);
+        for (ConfigSectBaseImpl child : children.values()) {
+            if (child.matchesName(name)) return child;
+        }
+        return null;
+    }
+
+    @SuppressWarnings("ConstantValue") @Override
+    public boolean matchesName(String inputName) {
+        if (inputName == null) return false;
+        if (name.getInternalName().equalsIgnoreCase(inputName)) return true;
+        if (name.getDisplayName().equalsIgnoreCase(inputName)) return true;
+        for (String loc : localizedDisplayNames.values()) if (loc != null && loc.equalsIgnoreCase(inputName)) return true;
+        return false;
     }
 
     @Override
@@ -290,9 +319,7 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
                 onReset();
                 config.reloadCacheDirect();
                 batch = config.collectChangesIfListening();
-            } finally {
-                if (lock != null) lock.writeLock().unlock();
-            }
+            } finally { if (lock != null) lock.writeLock().unlock(); }
             config.dispatchChanges(batch);
             config.broadcastSyncedIfNeeded();
         } else {
@@ -336,11 +363,39 @@ public abstract class ConfigSectBaseImpl implements ConfigSectBase {
         if (hasChildren()) children.forEach((key, value) -> value.onCollectSyncedValues(out));
     }
 
-    @Nonnull @Override public DisplayName getName()                             { return name; }
-    @Nullable @Override public ConfigSectBase getParent()                       { return parent; }
-    @Nullable @Override public String getComment()                              { return comment; }
-    @Override public int getDeep()                                              { return deep; }
+    @Nonnull @Override
+    public DisplayName getName() {
+        ConfigLang lang = config != null ? config.getLanguage() : ConfigLang.EN_US;
+        return getName(lang);
+    }
 
+    @Nonnull @Override
+    public DisplayName getName(ConfigLang lang) {
+        String localized = localizedDisplayNames.get(lang);
+        if (localized != null) return new DisplayName(name.getInternalName(), localized);
+        localized = localizedDisplayNames.get(ConfigLang.EN_US);
+        if (localized != null) return new DisplayName(name.getInternalName(), localized);
+        return name;
+    }
+
+    @Nullable @Override public ConfigSectBase getParent() { return parent; }
+
+    @Nullable @Override
+    public String getComment() {
+        ConfigLang lang = config != null ? config.getLanguage() : ConfigLang.EN_US;
+        return getComment(lang);
+    }
+
+    @Nullable @Override
+    public String getComment(ConfigLang lang) {
+        String c = localizedComments.get(lang);
+        if (c != null) return c;
+        c = localizedComments.get(ConfigLang.EN_US);
+        if (c != null) return c;
+        return comment;
+    }
+
+    @Override public int getDeep()                                              { return deep; }
     @Nullable @Override public MouseConfigImpl getConfig()                      { return config; }
     @Override public boolean hasConfig()                                        { return config != null; }
 

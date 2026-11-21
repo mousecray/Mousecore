@@ -7,6 +7,9 @@
 
 package ru.mousecray.mousecore.api.platform;
 
+import ru.mousecray.mousecore.api.config.utils.ConfigLang;
+
+import javax.annotation.Nonnull;
 import java.util.ServiceLoader;
 
 /**
@@ -123,4 +126,25 @@ public abstract class PlatformHelper {
      * {@code false} if no server is currently running and the task could not be submitted
      */
     public abstract boolean executeOnServer(Runnable task);
+
+    /**
+     * Returns the current game locale code (for example, {@code "ru_ru"} or {@code "en_us"}).
+     *
+     * <p>On a client, this returns the language selected in the game settings.
+     * On a server, this returns the system locale.</p>
+     *
+     * @return the current game locale code; never {@code null}
+     */
+    @Nonnull public abstract String getGameLocale();
+
+    /**
+     * Returns the current game language as a {@link ConfigLang} value.
+     *
+     * <p>Resolves the result of {@link #getGameLocale()} into the corresponding
+     * {@code ConfigLang} constant via {@link ConfigLang#fromMinecraftCode(String)}.</p>
+     *
+     * @return the current game language; never {@code null}
+     * @see #getGameLocale()
+     */
+    @Nonnull public ConfigLang getGameLanguage() { return ConfigLang.fromMinecraftCode(getGameLocale()); }
 }

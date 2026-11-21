@@ -16,6 +16,7 @@ import ru.mousecray.mousecore.api.config.par.group.*;
 import ru.mousecray.mousecore.api.config.sect.ConfigSect;
 import ru.mousecray.mousecore.api.config.sect.ConfigSectBase;
 import ru.mousecray.mousecore.api.config.utils.ConfigDictionary;
+import ru.mousecray.mousecore.api.config.utils.ConfigLang;
 import ru.mousecray.mousecore.api.config.utils.ConfigSide;
 import ru.mousecray.mousecore.api.config.utils.ConfigThreadPolicy;
 import ru.mousecray.mousecore.api.config.val.ConfigVal;
@@ -29,6 +30,7 @@ import ru.mousecray.mousecore.api.config.val.other.ConfigValString;
 import ru.mousecray.mousecore.api.container.ImmutableDisplayNameMap;
 import ru.mousecray.mousecore.api.customtype.*;
 import ru.mousecray.mousecore.api.log.MouseLogger;
+import ru.mousecray.mousecore.api.platform.PlatformHelper;
 import ru.mousecray.mousecore.api.utils.MouseStrings;
 import ru.mousecray.mousecore.core.config.io.ConfigIOThread;
 import ru.mousecray.mousecore.core.config.io.IOResultImpl;
@@ -75,8 +77,9 @@ public class MouseConfigImpl implements MouseConfig {
     protected final          File                                            path;
     protected final          ImmutableDisplayNameMap.Mutable<ConfigSectImpl> sections      = new ImmutableDisplayNameMap.Mutable<>();
     public final             ConfigParser                                    parser;
-    public @Nullable         MouseLogger                                     logger;
-    protected final @Nonnull ConfigDictionary                                dictionary;
+    @Nullable public         MouseLogger                                     logger;
+    @Nonnull protected final ConfigDictionary                                dictionary;
+    protected final          boolean                                         dynamicLanguage;
     protected final          int                                             syncSecInterval;
     protected final          int                                             saveSecInterval;
     protected                LocalTime                                       lastSaveTime;
@@ -110,12 +113,13 @@ public class MouseConfigImpl implements MouseConfig {
             String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
             int autoSyncSecInterval, int autoSaveSecInterval, ConfigSide defaultSide
     ) {
-        this(folderName, name, logger, dictionary, autoSyncSecInterval, autoSaveSecInterval, defaultSide, false);
+        this(folderName, name, logger, dictionary, autoSyncSecInterval, autoSaveSecInterval, defaultSide, false, false);
     }
 
     public MouseConfigImpl(
             String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
-            int autoSyncSecInterval, int autoSaveSecInterval, ConfigSide defaultSide, boolean threadSafe
+            int autoSyncSecInterval, int autoSaveSecInterval, ConfigSide defaultSide, boolean threadSafe,
+            boolean dynamicLanguage
     ) {
         this.name = name;
         path = new File(".", folderName);
@@ -124,6 +128,7 @@ public class MouseConfigImpl implements MouseConfig {
         this.dictionary = Objects.requireNonNull(dictionary);
         this.defaultSide = Objects.requireNonNull(defaultSide);
         this.threadSafe = threadSafe;
+        this.dynamicLanguage = dynamicLanguage;
         if (threadSafe) syncLock = new ReentrantReadWriteLock();
         syncSecInterval = Math.max(autoSyncSecInterval, 0);
         saveSecInterval = Math.max(autoSaveSecInterval, 0);
@@ -167,14 +172,10 @@ public class MouseConfigImpl implements MouseConfig {
                 putSectionDirect(section);
                 reloadCacheDirect();
                 batch = collectChangesIfListening();
-            } finally {
-                if (lock != null) lock.writeLock().unlock();
-            }
+            } finally { if (lock != null) lock.writeLock().unlock(); }
             dispatchChanges(batch);
             broadcastSyncedIfNeeded();
-        } else {
-            putSectionDirect(section);
-        }
+        } else putSectionDirect(section);
     }
 
     private void putSectionDirect(ConfigSectImpl section) {
@@ -223,14 +224,10 @@ public class MouseConfigImpl implements MouseConfig {
                     reloadCacheDirect();
                     batch = collectChangesIfListening();
                 }
-            } finally {
-                if (lock != null) lock.writeLock().unlock();
-            }
+            } finally { if (lock != null) lock.writeLock().unlock(); }
             dispatchChanges(batch);
             broadcastSyncedIfNeeded();
-        } else {
-            removeSectionDirect(name);
-        }
+        } else removeSectionDirect(name);
     }
 
     private boolean removeSectionDirect(DisplayName name) {
@@ -267,7 +264,7 @@ public class MouseConfigImpl implements MouseConfig {
         return section;
     }
 
-    @SuppressWarnings({ "DataFlowIssue", "SpellCheckingInspection" }) @Nullable
+    @SuppressWarnings({ "DataFlowIssue" }) @Nullable
     protected ConfigVal<? extends CustomType<?>> getVal(@Nullable String fullName) {
         if (fullName == null) return null;
         fullName = MouseStrings.trimWith(fullName, true, '.');
@@ -451,8 +448,6 @@ public class MouseConfigImpl implements MouseConfig {
         return output;
     }
 
-    // ==================== Единый жизненный цикл и быстрые хелперы ====================
-
     public void reloadCacheDirect() {
         sections.forEach((key, value) -> value.setDisabledStructurally(false));
         sections.forEach((key, value) -> value.onReloadCache());
@@ -466,9 +461,7 @@ public class MouseConfigImpl implements MouseConfig {
         try {
             reloadCacheDirect();
             batch = collectChangesIfListening();
-        } finally {
-            if (lock != null) lock.writeLock().unlock();
-        }
+        } finally { if (lock != null) lock.writeLock().unlock(); }
         dispatchChanges(batch);
     }
 
@@ -485,9 +478,7 @@ public class MouseConfigImpl implements MouseConfig {
     }
 
     public void dispatchChanges(@Nullable List<ConfigListenerDispatcher.PendingValueNotification<?>> batch) {
-        if (batch != null && !batch.isEmpty()) {
-            ConfigListenerDispatcher.dispatch(this, batch, List.copyOf(globalListeners), logger);
-        }
+        if (batch != null && !batch.isEmpty()) ConfigListenerDispatcher.dispatch(this, batch, List.copyOf(globalListeners), logger);
     }
 
     @Override
@@ -499,17 +490,12 @@ public class MouseConfigImpl implements MouseConfig {
             sections.forEach((key, value) -> value.onReset());
             reloadCacheDirect();
             batch = collectChangesIfListening();
-        } finally {
-            if (lock != null) lock.writeLock().unlock();
-        }
+        } finally { if (lock != null) lock.writeLock().unlock(); }
         dispatchChanges(batch);
         broadcastSyncedIfNeeded();
     }
 
-    @Override
-    public IOFuture load() {
-        return ConfigIOThread.getInstance().loadIntermediately(this);
-    }
+    @Override public IOFuture load() { return ConfigIOThread.getInstance().loadIntermediately(this); }
 
     public IOResultImpl loadInternal() {
         ReentrantReadWriteLock                                     lock  = getSyncLock();
@@ -552,8 +538,6 @@ public class MouseConfigImpl implements MouseConfig {
             if (lock != null) lock.readLock().unlock();
         }
     }
-
-    // ==================== Сетевая синхронизация ====================
 
     public ConfigSyncSnapshot collectNetworkSnapshot() {
         Map<String, ConfigSyncSnapshot.SyncEntry> map  = new java.util.LinkedHashMap<>();
@@ -623,9 +607,7 @@ public class MouseConfigImpl implements MouseConfig {
 
     public void markDirty(ConfigParBase par) {
         if (par.getConfig() == this && built) {
-            synchronized (dirtySections) {
-                if (!dirtySections.contains(par)) dirtySections.add(par);
-            }
+            synchronized (dirtySections) { if (!dirtySections.contains(par)) dirtySections.add(par); }
         }
     }
 
@@ -635,6 +617,7 @@ public class MouseConfigImpl implements MouseConfig {
     }
 
     public void update(long sec) {
+        if (dynamicLanguage && sec % 10 == 0) refreshLanguage();
         if (isEnableAutoSync() && (sec - lastSyncSec) % syncSecInterval == 0) ConfigIOThread.getInstance().addLoadAction(this);
         if (isEnableAutoSave() && (sec - lastSaveSec) % saveSecInterval == 0) ConfigIOThread.getInstance().addSaveAction(this);
     }
@@ -695,6 +678,37 @@ public class MouseConfigImpl implements MouseConfig {
             return true;
         } else return false;
     }
+
+    @Nonnull @Override public ConfigLang getLanguage() { return dictionary.getActiveLanguage(); }
+    @Override public boolean isDynamicLanguage()       { return dynamicLanguage; }
+
+    @Override
+    public void setLanguage(ConfigLang language) {
+        Objects.requireNonNull(language);
+        if (dictionary.getActiveLanguage() == language) return;
+
+        ReentrantReadWriteLock lock = getSyncLock();
+        if (lock != null) lock.writeLock().lock();
+        try {
+            dictionary.setActiveLanguage(language);
+            reloadCacheDirect();
+        } finally { if (lock != null) lock.writeLock().unlock(); }
+
+        if (built && fileExists()) save(false);
+    }
+
+    @Override
+    public boolean refreshLanguage() {
+        if (!dynamicLanguage) return false;
+        ConfigLang gameLang = PlatformHelper.getInstance().getGameLanguage();
+        if (gameLang != getLanguage()) {
+            setLanguage(gameLang);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean fileExists() { return new File(path, name + ".moc").exists(); }
 
     @Override
     public boolean equals(Object o) {
