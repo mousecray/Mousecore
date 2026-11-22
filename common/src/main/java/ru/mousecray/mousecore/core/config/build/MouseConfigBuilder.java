@@ -30,11 +30,13 @@ import ru.mousecray.mousecore.core.config.build.struct.ConfigSectionBuilder;
 import ru.mousecray.mousecore.core.config.migration.ConfigMigrator;
 import ru.mousecray.mousecore.core.config.sync.ConfigSyncManager;
 import ru.mousecray.mousecore.core.config.utils.ConfigDictionaryImpl;
+import ru.mousecray.mousecore.core.config.utils.ConfigLangLoader;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
+import java.util.function.Consumer;
 
 @MethodReturnsNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -42,6 +44,7 @@ public final class MouseConfigBuilder {
     private final          String                                  name;
     private final          String                                  folderName;
     @Nullable public final MouseLogger                             logger;
+    private final          String                                  modId;
     public                 SortedMap<String, List<ConfigSectBase>> sections        = new TreeMap<>(
             Comparator
                     .<String, Integer>comparing(k -> StringUtils.countMatches(k, "."))
@@ -61,15 +64,20 @@ public final class MouseConfigBuilder {
     private       int            schemaVersion = 1;
     private final ConfigMigrator migrator      = new ConfigMigrator();
 
-    private MouseConfigBuilder(String name, String folderName, @Nullable MouseLogger logger) {
+    private final Map<String, List<Consumer<Map<ConfigLang, String>>>> pendingTranslations = new HashMap<>();
+
+    private MouseConfigBuilder(String modId, String name, String folderName, @Nullable MouseLogger logger) {
+        this.modId = modId;
         this.name = name;
         this.folderName = folderName;
         this.logger = logger;
     }
 
-    public static MouseConfigBuilder create(String name, String folderName) { return create(name, folderName, null); }
-    public static MouseConfigBuilder create(String name, String folderName, @Nullable MouseLogger logger) {
-        return new MouseConfigBuilder(Objects.requireNonNull(name), Objects.requireNonNull(folderName), logger);
+    public static MouseConfigBuilder create(String modId, String name, String folderName) { return create(modId, name, folderName, null); }
+    public static MouseConfigBuilder create(String modId, String name, String folderName, @Nullable MouseLogger logger) {
+        return new MouseConfigBuilder(
+                Objects.requireNonNull(modId), Objects.requireNonNull(name), Objects.requireNonNull(folderName), logger
+        );
     }
 
     public ConfigDictionaryBuilder createDictionary() {
@@ -184,12 +192,26 @@ public final class MouseConfigBuilder {
         sections.computeIfAbsent(path, k -> new ArrayList<>()).add(par);
     }
 
+    public String getModId() { return modId; }
+
+    public void requestTranslation(String key, Consumer<Map<ConfigLang, String>> callback) {
+        pendingTranslations.computeIfAbsent(key, k -> new ArrayList<>()).add(callback);
+    }
+
     public MouseConfigImpl buildConfig() {
+        if (!pendingTranslations.isEmpty()) {
+            Map<String, Map<ConfigLang, String>> loaded = ConfigLangLoader.loadRequestedKeys(modId, pendingTranslations.keySet());
+            for (Map.Entry<String, List<Consumer<Map<ConfigLang, String>>>> entry : pendingTranslations.entrySet()) {
+                Map<ConfigLang, String> translations = loaded.getOrDefault(entry.getKey(), Collections.emptyMap());
+                for (Consumer<Map<ConfigLang, String>> callback : entry.getValue()) callback.accept(translations);
+            }
+            pendingTranslations.clear();
+        }
+
         ConfigDictionaryImpl finalDict;
         if (dictionary instanceof ConfigDictionaryImpl impl) finalDict = impl;
-        else finalDict = (ConfigDictionaryImpl) Objects.requireNonNullElseGet(
-                dictionaryBuilder, () -> ConfigDictionaryBuilder.create(this).setDefaults().setFallbackLanguage(fallbackLanguage)
-        ).buildDictionary();
+        else finalDict = (ConfigDictionaryImpl) Objects.requireNonNullElseGet(dictionaryBuilder, () -> ConfigDictionaryBuilder.create(this)
+                .setDefaults().setFallbackLanguage(fallbackLanguage)).buildDictionary();
 
         boolean    isDynamic   = (fixedLanguage == null);
         ConfigLang initialLang = isDynamic ? PlatformHelper.getInstance().getGameLanguage() : fixedLanguage;
@@ -197,15 +219,13 @@ public final class MouseConfigBuilder {
         dictionary = finalDict;
 
         MouseConfigImpl config = new MouseConfigImpl(
-                folderName, name, logger, finalDict,
+                modId, folderName, name, logger, finalDict,
                 syncSecInterval, saveSecInterval, defaultSide, threadSafe, isDynamic,
                 schemaVersion, migrator
         );
 
-        sections.forEach((path, list) -> list.stream().filter(base ->
-                !config.putForPath(path, base)).forEach(base -> {
-            throw new IllegalStateException("MouseConfigBuilder got value with non-existent path (Value: \"" +
-                    base.getName().getInternalName() + "\", Path: \"" + path + "\"");
+        sections.forEach((p, list) -> list.stream().filter(base -> !config.putForPath(p, base)).forEach(base -> {
+            throw new IllegalStateException("MouseConfigBuilder got value with non-existent path (Value: \"" + base.getName().getInternalName() + "\", Path: \"" + p + "\"");
         }));
 
         config.markBuilt(true);

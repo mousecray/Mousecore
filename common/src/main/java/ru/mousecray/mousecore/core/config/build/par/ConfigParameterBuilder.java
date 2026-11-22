@@ -59,6 +59,18 @@ public final class ConfigParameterBuilder extends AbstractConfigChildBuilder {
     }
 
     @Override
+    public ConfigParameterBuilder setCommentKey(String key) {
+        super.setCommentKey(key);
+        return this;
+    }
+
+    @Override
+    public ConfigParameterBuilder setDisplayNameKey(String key) {
+        super.setDisplayNameKey(key);
+        return this;
+    }
+
+    @Override
     public ConfigParameterBuilder setComment(@Nullable String comment) {
         super.setComment(comment);
         return this;

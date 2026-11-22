@@ -245,6 +245,51 @@ public final class ConfigDictionaryBuilder {
         return this;
     }
 
+    public ConfigDictionaryBuilder setLocaleForLocaleKey(ILocaleType type, String translationKey) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(translationKey);
+        owner.requestTranslation(translationKey, translations -> {
+            if (translations.isEmpty()) setLocaleForLocale(fallbackLanguage, type, translationKey);
+            else translations.forEach((lang, text) -> setLocaleForLocale(lang, type, text));
+        });
+        return this;
+    }
+
+    public ConfigDictionaryBuilder setLocaleForValTypeKey(IValType type, String translationKey) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(translationKey);
+        owner.requestTranslation(translationKey, translations -> {
+            if (translations.isEmpty()) setLocaleForValType(fallbackLanguage, type, translationKey);
+            else translations.forEach((lang, text) -> setLocaleForValType(lang, type, text));
+        });
+        return this;
+    }
+
+    public ConfigDictionaryBuilder setLocaleForValTypeKey(IValType type, String nameTranslationKey, String ruleTranslationKey) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(nameTranslationKey);
+        Objects.requireNonNull(ruleTranslationKey);
+
+        owner.requestTranslation(nameTranslationKey, nameTranslations -> {
+            owner.requestTranslation(ruleTranslationKey, ruleTranslations -> {
+                Set<ConfigLang> allLangs = new HashSet<>();
+                allLangs.addAll(nameTranslations.keySet());
+                allLangs.addAll(ruleTranslations.keySet());
+
+                if (!allLangs.isEmpty()) {
+                    for (ConfigLang lang : allLangs) {
+                        String nameStr = nameTranslations.getOrDefault(lang, nameTranslationKey);
+                        String ruleStr = ruleTranslations.getOrDefault(lang, ruleTranslationKey);
+                        setLocaleForValType(lang, type, nameStr, ruleStr);
+                    }
+                } else {
+                    setLocaleForValType(fallbackLanguage, type, nameTranslationKey, ruleTranslationKey);
+                }
+            });
+        });
+        return this;
+    }
+
     public ConfigDictionaryBuilder setLocaleForLocale(ConfigLang lang, ILocaleType type, @Nullable String displayName) {
         Objects.requireNonNull(lang);
         Objects.requireNonNull(type);

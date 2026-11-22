@@ -101,33 +101,36 @@ public class MouseConfigImpl implements MouseConfig {
     protected final            ConfigMigrator      migrator;
     @Nullable private volatile ConfigStructureMeta structureMeta;
 
-    public MouseConfigImpl(String folderName, String name, ConfigDictionary dictionary) {
-        this(folderName, name, null, dictionary, 0, 0);
+    protected final String modId;
+
+    public MouseConfigImpl(String modId, String folderName, String name, ConfigDictionary dictionary) {
+        this(modId, folderName, name, null, dictionary, 0, 0);
     }
 
     public MouseConfigImpl(
-            String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
+            String modId, String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
             int autoSyncSecInterval, int autoSaveSecInterval
     ) {
-        this(folderName, name, logger, dictionary, autoSyncSecInterval, autoSaveSecInterval, ConfigSide.COMMON);
+        this(modId, folderName, name, logger, dictionary, autoSyncSecInterval, autoSaveSecInterval, ConfigSide.COMMON);
     }
 
     public MouseConfigImpl(
-            String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
+            String modId, String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
             int autoSyncSecInterval, int autoSaveSecInterval, ConfigSide defaultSide
     ) {
         this(
-                folderName, name, logger, dictionary, autoSyncSecInterval, autoSaveSecInterval, defaultSide,
+                modId, folderName, name, logger, dictionary, autoSyncSecInterval, autoSaveSecInterval, defaultSide,
                 false, false, 1, new ConfigMigrator()
         );
     }
 
     public MouseConfigImpl(
-            String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
+            String modId, String folderName, String name, @Nullable MouseLogger logger, ConfigDictionary dictionary,
             int autoSyncSecInterval, int autoSaveSecInterval, ConfigSide defaultSide, boolean threadSafe,
             boolean dynamicLanguage,
             int schemaVersion, ConfigMigrator migrator
     ) {
+        this.modId = modId;
         this.name = name;
         path = new File(".", folderName);
         parser = new ConfigParser(this, logger);
@@ -144,6 +147,7 @@ public class MouseConfigImpl implements MouseConfig {
         if (isEnableAutoSync() || isEnableAutoSave()) ConfigIOThread.getInstance().registerConfig(this);
     }
 
+    @Override public String getModId()                    { return modId; }
     @Nonnull @Override public ConfigSide getDefaultSide() { return defaultSide; }
     @Override public boolean isThreadSafe()               { return threadSafe; }
     @Nullable public ReentrantReadWriteLock getSyncLock() { return syncLock; }

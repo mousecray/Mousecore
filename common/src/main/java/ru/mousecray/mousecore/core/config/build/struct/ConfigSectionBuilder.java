@@ -34,6 +34,18 @@ public final class ConfigSectionBuilder extends AbstractConfigChildBuilder {
     }
 
     @Override
+    public ConfigSectionBuilder setCommentKey(String key) {
+        super.setCommentKey(key);
+        return this;
+    }
+    
+    @Override
+    public ConfigSectionBuilder setDisplayNameKey(String key) {
+        super.setDisplayNameKey(key);
+        return this;
+    }
+
+    @Override
     public ConfigSectionBuilder setComment(@Nullable String comment) {
         super.setComment(comment);
         return this;
@@ -50,7 +62,7 @@ public final class ConfigSectionBuilder extends AbstractConfigChildBuilder {
         super.setDisplayName(displayName);
         return this;
     }
-    
+
     @Override
     public ConfigSectionBuilder setDisplayName(ConfigLang lang, String name) {
         super.setDisplayName(lang, name);

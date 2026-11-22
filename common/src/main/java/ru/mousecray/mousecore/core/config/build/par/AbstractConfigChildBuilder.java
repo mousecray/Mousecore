@@ -34,7 +34,8 @@ public abstract class AbstractConfigChildBuilder {
     protected final Map<ConfigLang, String> localizedComments     = new EnumMap<>(ConfigLang.class);
     protected final Map<ConfigLang, String> localizedDisplayNames = new EnumMap<>(ConfigLang.class);
 
-    protected boolean threadSafe;
+    protected boolean            threadSafe;
+    private   ConfigSectBaseImpl builtTarget;
 
     protected AbstractConfigChildBuilder(MouseConfigBuilder configBuilder, String path, DisplayName name) {
         this.configBuilder = configBuilder;
@@ -60,6 +61,17 @@ public abstract class AbstractConfigChildBuilder {
         return this;
     }
 
+    public AbstractConfigChildBuilder setCommentKey(String translationKey) {
+        Objects.requireNonNull(translationKey);
+        configBuilder.requestTranslation(translationKey, translations -> {
+            if (translations.isEmpty()) setComment(ConfigLang.EN_US, translationKey);
+            else translations.forEach(this::setComment);
+
+            if (builtTarget != null) builtTarget.setLocalizedComments(localizedComments);
+        });
+        return this;
+    }
+
     public AbstractConfigChildBuilder setDisplayName(String displayName) {
         Objects.requireNonNull(displayName);
         localizedDisplayNames.put(ConfigLang.EN_US, displayName);
@@ -71,6 +83,17 @@ public abstract class AbstractConfigChildBuilder {
         Objects.requireNonNull(lang);
         Objects.requireNonNull(displayName);
         localizedDisplayNames.put(lang, displayName);
+        return this;
+    }
+
+    public AbstractConfigChildBuilder setDisplayNameKey(String translationKey) {
+        Objects.requireNonNull(translationKey);
+        configBuilder.requestTranslation(translationKey, translations -> {
+            if (translations.isEmpty()) setDisplayName(ConfigLang.EN_US, translationKey);
+            else translations.forEach(this::setDisplayName);
+
+            if (builtTarget != null) builtTarget.setLocalizedDisplayNames(localizedDisplayNames);
+        });
         return this;
     }
 
@@ -108,6 +131,7 @@ public abstract class AbstractConfigChildBuilder {
     }
 
     protected void applyMetadata(ConfigSectBaseImpl target) {
+        builtTarget = target;
         if (side != null) target.setExplicitSide(side);
         if (!manualStates.isEmpty()) target.addManualStates(manualStates);
         if (threadSafe) target.setThreadSafe(true);

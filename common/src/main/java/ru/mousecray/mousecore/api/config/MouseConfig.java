@@ -134,4 +134,5 @@ public interface MouseConfig {
     @SuppressWarnings("UnusedReturnValue") boolean refreshLanguage();
 
     int getSchemaVersion();
+    String getModId();
 }

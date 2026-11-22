@@ -59,6 +59,18 @@ public final class ConfigParameterGroupBuilder<T extends CustomType<?>> extends 
     }
 
     @Override
+    public ConfigParameterGroupBuilder<T> setCommentKey(String key) {
+        super.setCommentKey(key);
+        return this;
+    }
+
+    @Override
+    public ConfigParameterGroupBuilder<T> setDisplayNameKey(String key) {
+        super.setDisplayNameKey(key);
+        return this;
+    }
+
+    @Override
     public ConfigParameterGroupBuilder<T> setComment(@Nullable String comment) {
         super.setComment(comment);
         return this;
